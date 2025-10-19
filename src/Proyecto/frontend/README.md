@@ -1,70 +1,157 @@
-# Getting Started with Create React App
+# Forca & Fitness - Sitio Web del Gimnasio
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Sitio web moderno y responsivo para el gimnasio Forca & Fitness, un gimnasio peruano especializado en fitness y nutrición.
 
-## Available Scripts
+## 🏋️‍♂️ Características
 
-In the project directory, you can run:
+### Páginas Principales
+- **Inicio**: Página principal con información del gimnasio, características y estadísticas
+- **Servicios**: Catálogo completo de servicios (entrenamiento personal, CrossFit, clases grupales, etc.)
+- **Nutrición**: Sección especializada con planes nutricionales, consejos y recetas saludables
+- **Membresías**: Planes de membresía con precios y beneficios
+- **Contacto**: Información de contacto, formulario y ubicación
 
-### `npm start`
+### Funcionalidades
+- ✅ Diseño responsivo para móviles, tablets y desktop
+- ✅ Navegación fluida con React Router
+- ✅ Formularios interactivos
+- ✅ Diseño moderno con gradientes y animaciones
+- ✅ Sección de nutrición especializada
+- ✅ Planes de membresía detallados
+- ✅ Información de contacto completa
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🚀 Tecnologías Utilizadas
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **React 19.1.1** - Framework principal
+- **React Router DOM 7.9.1** - Navegación
+- **CSS3** - Estilos modernos con gradientes y animaciones
+- **Responsive Design** - Adaptable a todos los dispositivos
 
-### `npm test`
+## 📁 Estructura del Proyecto
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+frontend/src/
+├── components/
+│   ├── Header.js          # Navegación principal
+│   ├── Header.css
+│   ├── Footer.js          # Pie de página
+│   └── Footer.css
+├── pages/
+│   ├── Home.js            # Página principal
+│   ├── Home.css
+│   ├── Servicios.js       # Servicios del gimnasio
+│   ├── Servicios.css
+│   ├── Nutricion.js       # Sección de nutrición
+│   ├── Nutricion.css
+│   ├── Membresias.js      # Planes de membresía
+│   ├── Membresias.css
+│   ├── Contacto.js        # Información de contacto
+│   └── Contacto.css
+├── App.js                 # Componente principal con routing
+├── App.css               # Estilos globales
+└── index.js              # Punto de entrada
+```
 
-### `npm run build`
+## 🎨 Diseño
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Paleta de Colores
+- **Primario**: Gradiente naranja (#ff6b35, #f7931e)
+- **Secundario**: Grises oscuros (#1a1a1a, #2d2d2d)
+- **Fondo**: Gris claro (#f8f9fa)
+- **Texto**: Negro (#1a1a1a) y grises (#666, #888)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Características de Diseño
+- Gradientes modernos
+- Animaciones suaves
+- Cards con sombras
+- Botones con efectos hover
+- Diseño mobile-first
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🏃‍♀️ Servicios Incluidos
 
-### `npm run eject`
+### Entrenamiento
+- Entrenamiento Personal
+- CrossFit
+- Clases Grupales (Zumba, Spinning, Yoga, Pilates, Body Combat)
+- Sala de Musculación
+- Rehabilitación Física
+- Entrenamiento Funcional
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Nutrición
+- Plan Básico (S/ 150/mes)
+- Plan Avanzado (S/ 250/mes)
+- Plan Premium (S/ 400/mes)
+- Consejos nutricionales
+- Recetas saludables
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Membresías
+- **Básica**: S/ 80/mes
+- **Premium**: S/ 120/mes (Más popular)
+- **VIP**: S/ 200/mes
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📱 Responsive Design
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+El sitio está optimizado para:
+- 📱 Móviles (320px+)
+- 📱 Tablets (768px+)
+- 💻 Desktop (1024px+)
 
-## Learn More
+## 🚀 Instalación y Uso
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. **Instalar dependencias**:
+   ```bash
+   cd frontend
+   npm install
+   ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+2. **Ejecutar en desarrollo**:
+   ```bash
+   npm start
+   ```
 
-### Code Splitting
+3. **Construir para producción**:
+   ```bash
+   npm run build
+   ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 🌟 Características Especiales
 
-### Analyzing the Bundle Size
+### Sección de Nutrición
+- Pestañas interactivas (Planes, Consejos, Recetas)
+- Planes nutricionales detallados
+- Consejos por categorías
+- Recetas saludables con ingredientes y preparación
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Membresías
+- Comparación de planes
+- Modal de confirmación
+- Testimonios de miembros
+- FAQ integrado
 
-### Making a Progressive Web App
+### Contacto
+- Formulario funcional
+- Información completa del gimnasio
+- Horarios de atención
+- Redes sociales
+- Mapa de ubicación
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 📞 Información del Gimnasio
 
-### Advanced Configuration
+- **Nombre**: Forca & Fitness
+- **Ubicación**: Av. Principal 123, Miraflores, Lima, Perú
+- **Teléfono**: +51 1 234 5678
+- **WhatsApp**: +51 999 888 777
+- **Email**: info@forcafitness.com
+- **Horarios**: Lunes-Viernes: 5:00 AM - 10:00 PM
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## 🎯 Objetivos del Sitio
 
-### Deployment
+1. **Atraer nuevos miembros** con información clara sobre servicios
+2. **Mostrar especialización en nutrición** con planes detallados
+3. **Facilitar el contacto** con formularios y información completa
+4. **Presentar membresías** de forma atractiva y comprensible
+5. **Crear confianza** con testimonios y información profesional
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+**Desarrollado con ❤️ para Forca & Fitness - Gimnasio Peruano**
