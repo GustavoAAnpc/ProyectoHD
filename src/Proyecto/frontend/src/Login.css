@@ -1,0 +1,113 @@
+.login-container {
+    display: flex; /* Convierte el contenedor en un flex container */
+    justify-content: center; /* Centra horizontalmente los elementos hijos */
+    align-items: center; /* Centra verticalmente los elementos hijos */
+    min-height: calc(100vh - 80px); /* Ajusta a la altura de la ventana menos la altura de la barra de navegación */
+    margin: 0;
+    padding: 20px;
+    gap: 40px; /* Espacio entre el formulario y la imagen */
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+}
+
+/* Estilos para la caja del formulario */
+.login-box {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px; /* Tamaño máximo para el formulario */
+    text-align: center;
+
+    height: 450px; 
+    /* Permite centrar el contenido (el formulario) dentro de esta caja */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.login-image-container {
+    width: 100%;
+    max-width: 400px; /* Tamaño máximo para el contenedor de la imagen */
+    text-align: center;
+    border-radius: 8px; /* Bordes redondeados para que coincida con la caja del formulario */
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra similar a la del formulario */
+    padding: 20px;
+    box-sizing: border-box;
+    align-items: center; /* Centra la imagen verticalmente */
+    justify-content: center;
+    height: 450px; 
+    display: flex; /* Para ayudar a la imagen a llenar el espacio */
+}
+
+.login-image-container img {
+
+    width: 100%; /* La imagen ocupará el 100% del ancho de su contenedor */
+    height: auto; /* Mantiene la proporción de la imagen */
+    display: block; /* Elimina espacio extra debajo de la imagen */
+   /* max-height: 450px;  Altura máxima para la imagen, evita que sea demasiado grande */
+    object-fit: contain; /* Asegura que la imagen cubra el área sin distorsionarse */
+}
+/* --- Fin de nuevos estilos para la imagen --- */
+
+
+/* Estilos para el título H2 */
+.login-box h2 {
+    font-size: 28px;
+    color: #333333;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+/* Estilos para los campos de entrada (inputs) */
+.login-box input[type="text"],
+.login-box input[type="password"] {
+    width: calc(100% - 20px);
+    padding: 12px 10px;
+    margin-bottom: 20px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box; /* Incluye padding y borde en el ancho total */
+}
+
+/* Estilos para el botón "Entrar" */
+.login-box button[type="submit"] {
+    background: linear-gradient(to right, #ff8c00, #ff6347); /* Degradado naranja/rojo */
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px; /* Bordes redondeados */
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.3s ease, transform 0.2s ease;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.login-box button[type="submit"]:hover {
+    background: linear-gradient(to right, #ff6347, #ff8c00);
+    transform: translateY(-2px);
+}
+
+/* Estilos para el mensaje de estado */
+.login-box p {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666666;
+}
+
+/* Media Query para pantallas pequeñas (opcional pero recomendado) */
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column; /* Apila el formulario y la imagen en pantallas pequeñas */
+        gap: 20px;
+    }
+    .login-box, .login-image-container {
+        max-width: 350px; /* Reduce un poco el ancho en pantallas pequeñas */
+    }
+}

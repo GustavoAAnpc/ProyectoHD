@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "./Login.css";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -34,26 +35,29 @@ function Login() {
   };
 
   return (
-    <div style={{ maxWidth: "300px", margin: "50px auto" }}>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Usuario"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <br />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <br />
-        <button type="submit">Entrar</button>
-      </form>
-      <p>{message}</p>
+    <div className="login-container">
+      <div className="login-box">
+        <h2>Login</h2>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Usuario"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button type="submit">Entrar</button>
+        </form>
+        <p>{message}</p>
+      </div>
+      <div className="login-image-container">
+        <img src="/logoacademy.jpg" alt="Ilustración de Login Forca & Fitness" />
+      </div>
     </div>
   );
 }
