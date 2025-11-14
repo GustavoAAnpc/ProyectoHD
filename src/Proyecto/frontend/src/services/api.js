@@ -169,5 +169,15 @@ export const foodDataService = {
   getDetail: (fdcId) => api.get(`/food/${fdcId}`),
 };
 
+export const usuarioService = {
+  getAll: () => api.get('/usuarios'),
+  getById: (id) => api.get(`/usuarios/${id}`),
+  create: (usuario) => api.post('/usuarios', usuario),
+  update: (id, usuario) => api.put(`/usuarios/${id}`, usuario),
+  delete: (id) => api.delete(`/usuarios/${id}`),
+  cambiarEstado: (id, estado) => api.put(`/usuarios/${id}/estado`, estado),
+  resetPassword: (id, password) => api.put(`/usuarios/${id}/reset-password`, { password }),
+};
+
 export default api;
 

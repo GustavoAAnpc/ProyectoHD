@@ -10,7 +10,7 @@ const Home = () => {
     <div className="home-page">
       <header className="home-header">
         <nav className="home-nav">
-          <div className="logo">💪 FitGym</div>
+          <div className="logo">💪 FORCA & FITNESS</div>
           <div className="nav-links">
             <a href="#inicio">Inicio</a>
             <a href="#servicios">Servicios</a>
@@ -133,7 +133,7 @@ const Home = () => {
 
       <footer className="home-footer">
         <div className="container">
-          <p>&copy; 2024 FitGym. Todos los derechos reservados.</p>
+          <p>&copy; 2024 FORCA & FITNESS. Todos los derechos reservados.</p>
         </div>
       </footer>
     </div>
