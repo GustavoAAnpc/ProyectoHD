@@ -35,5 +35,14 @@ public class AlumnoController {
         Optional<Alumno> alumno = alumnoRepository.findByUsuarioIdUsuario(idUsuario);
         return alumno.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<Alumno> updateAlumno(@PathVariable Long id, @RequestBody Alumno alumno) {
+        if (!alumnoRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        alumno.setIdAlumno(id);
+        return ResponseEntity.ok(alumnoRepository.save(alumno));
+    }
 }
 

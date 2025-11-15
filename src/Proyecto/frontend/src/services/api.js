@@ -33,6 +33,7 @@ export const alumnoService = {
   getAll: () => api.get('/alumnos'),
   getById: (id) => api.get(`/alumnos/${id}`),
   getByUsuario: (idUsuario) => api.get(`/alumnos/usuario/${idUsuario}`),
+  update: (id, alumno) => api.put(`/alumnos/${id}`, alumno),
 };
 
 export const instructorService = {
