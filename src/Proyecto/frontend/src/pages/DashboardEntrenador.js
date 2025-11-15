@@ -1,79 +1,283 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useSearchParams } from 'react-router-dom';
+import ThemeToggle from '../components/ThemeToggle';
 import { 
   instructorService, claseService, planNutricionalService, 
-  incidenciaService, alumnoService, rutinaService,
-  ejercicioService, seguimientoFisicoService
+  alumnoService, rutinaService, ejercicioService, 
+  seguimientoFisicoService, alumnoInstructorService,
+  rutinaEjercicioService, mensajeService, foodDataService
 } from '../services/api';
+import ClientesTab from '../components/dashboard/entrenador/ClientesTab';
+import RutinasTab from '../components/dashboard/entrenador/RutinasTab';
+import EjerciciosTab from '../components/dashboard/entrenador/EjerciciosTab';
+import NutricionTab from '../components/dashboard/entrenador/NutricionTab';
+import SeguimientoTab from '../components/dashboard/entrenador/SeguimientoTab';
+import ComunicacionTab from '../components/dashboard/entrenador/ComunicacionTab';
+import ModalWrapper from '../components/modals/ModalWrapper';
+import SeguimientoModal from '../components/modals/entrenador/SeguimientoModal';
+import RutinaModal from '../components/modals/entrenador/RutinaModal';
+import EjercicioModal from '../components/modals/entrenador/EjercicioModal';
+import PlanNutricionalModal from '../components/modals/entrenador/PlanNutricionalModal';
+import VerRutinaModal from '../components/modals/entrenador/VerRutinaModal';
 import './Dashboard.css';
 
 const DashboardEntrenador = () => {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
   const [instructorId, setInstructorId] = useState(null);
   const [stats, setStats] = useState({
-    clases: 0,
-    planes: 0,
-    incidencias: 0,
-    alumnos: 0,
-    rutinas: 0
+    clases: 0, planes: 0, alumnos: 0, rutinas: 0, seguimientos: 0
   });
   const [clases, setClases] = useState([]);
   const [planes, setPlanes] = useState([]);
-  const [alumnos, setAlumnos] = useState([]);
+  const [clientesAsignados, setClientesAsignados] = useState([]);
   const [rutinas, setRutinas] = useState([]);
   const [ejercicios, setEjercicios] = useState([]);
+  const [ejerciciosRutina, setEjerciciosRutina] = useState([]);
   const [seguimientos, setSeguimientos] = useState([]);
+  const [mensajes, setMensajes] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
+  const [editingItem, setEditingItem] = useState(null);
+  const [formData, setFormData] = useState({});
+  const [selectedRutina, setSelectedRutina] = useState(null);
+  const [selectedDia, setSelectedDia] = useState('');
+  const [foodSearch, setFoodSearch] = useState('');
+  const [foodResults, setFoodResults] = useState([]);
+  const [filterGrupoMuscular, setFilterGrupoMuscular] = useState('');
+  const [filterNivel, setFilterNivel] = useState('');
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const instructorRes = await instructorService.getByUsuario(user.idUsuario);
       const instructor = instructorRes.data;
       if (instructor?.idInstructor) {
         setInstructorId(instructor.idInstructor);
         
-        const [clasesRes, planesRes, incidenciasRes, rutinasRes, ejerciciosRes] = await Promise.all([
+        const [
+          clasesRes, planesRes, clientesRes, rutinasRes, 
+          ejerciciosRes, seguimientosRes, mensajesRes
+        ] = await Promise.all([
           claseService.getByInstructor(instructor.idInstructor),
           planNutricionalService.getByInstructor(instructor.idInstructor),
-          incidenciaService.getByInstructor(instructor.idInstructor),
+          alumnoInstructorService.getByInstructor(instructor.idInstructor),
           rutinaService.getByInstructor(instructor.idInstructor),
-          ejercicioService.getAll()
+          ejercicioService.getAll(),
+          seguimientoFisicoService.getByInstructor(instructor.idInstructor),
+          mensajeService.getByDestinatario(user.idUsuario)
         ]);
 
         setClases(clasesRes.data);
         setPlanes(planesRes.data);
+        setClientesAsignados(clientesRes.data);
         setRutinas(rutinasRes.data);
         setEjercicios(ejerciciosRes.data);
+        setSeguimientos(seguimientosRes.data);
+        setMensajes(mensajesRes.data);
         
         setStats({
           clases: clasesRes.data.length,
           planes: planesRes.data.length,
-          incidencias: incidenciasRes.data.length,
-          alumnos: 0,
-          rutinas: rutinasRes.data.length
+          alumnos: clientesRes.data.length,
+          rutinas: rutinasRes.data.length,
+          seguimientos: seguimientosRes.data.length
         });
       }
     } catch (error) {
       console.error('Error cargando datos:', error);
     }
+  }, [user.idUsuario]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (activeTab) {
+      setSearchParams({ tab: activeTab }, { replace: true });
+    }
+  }, [activeTab, setSearchParams]);
+
+  const handleCreate = (type, clienteId = null) => {
+    setModalType(type);
+    setEditingItem(null);
+    const initialData = {};
+    if (clienteId) initialData.alumno = { idAlumno: clienteId };
+    if (instructorId) initialData.instructor = { idInstructor: instructorId };
+    setFormData(initialData);
+    setShowModal(true);
   };
 
-  const handleCreate = (type) => {
+  const handleEdit = (type, item) => {
     setModalType(type);
+    setEditingItem(item);
+    setFormData(item);
     setShowModal(true);
+  };
+
+  const handleDelete = async (type, id) => {
+    if (!window.confirm('¿Está seguro de eliminar este elemento?')) return;
+    try {
+      if (type === 'rutina') await rutinaService.delete(id);
+      else if (type === 'ejercicio') await ejercicioService.delete(id);
+      loadData();
+    } catch (error) {
+      console.error('Error eliminando:', error);
+      alert('Error al eliminar el elemento');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      switch(modalType) {
+        case 'seguimiento':
+          if (editingItem) {
+            await seguimientoFisicoService.update(editingItem.idSeguimiento, formData);
+          } else {
+            await seguimientoFisicoService.create(formData);
+          }
+          break;
+        case 'rutina':
+          if (editingItem) {
+            await rutinaService.update(editingItem.idRutina, formData);
+          } else {
+            const rutinaRes = await rutinaService.create(formData);
+            if (formData.ejercicios?.length > 0) {
+              await Promise.all(
+                formData.ejercicios.map(ej => 
+                  rutinaEjercicioService.create({
+                    ...ej,
+                    rutina: { idRutina: rutinaRes.data.idRutina }
+                  })
+                )
+              );
+            }
+          }
+          break;
+        case 'ejercicio':
+          if (editingItem) {
+            await ejercicioService.update(editingItem.idEjercicio, formData);
+          } else {
+            await ejercicioService.create(formData);
+          }
+          break;
+        case 'planNutricional':
+          if (editingItem) {
+            await planNutricionalService.update(editingItem.idPlan, formData);
+          } else {
+            await planNutricionalService.create(formData);
+          }
+          break;
+      }
+      setShowModal(false);
+      loadData();
+    } catch (error) {
+      console.error('Error guardando:', error);
+      alert('Error al guardar los datos');
+    }
+  };
+
+  const handleViewRutina = async (rutina) => {
+    setSelectedRutina(rutina);
+    try {
+      const ejerciciosRes = await rutinaEjercicioService.getByRutina(rutina.idRutina);
+      setEjerciciosRutina(ejerciciosRes.data);
+      setShowModal(true);
+      setModalType('verRutina');
+    } catch (error) {
+      console.error('Error cargando ejercicios:', error);
+    }
+  };
+
+  const handleFoodSearch = async () => {
+    try {
+      const response = await foodDataService.search(foodSearch);
+      setFoodResults(response.data.foods || []);
+    } catch (error) {
+      console.error('Error buscando alimentos:', error);
+      alert('Error al buscar alimentos');
+    }
+  };
+
+  const gruposMusculares = [...new Set(ejercicios.map(e => e.grupoMuscular).filter(Boolean))];
+  const niveles = [...new Set(ejercicios.map(e => e.nivel).filter(Boolean))];
+
+  const getModalTitle = () => {
+    const titles = {
+      'seguimiento': editingItem ? 'Editar Registro de Seguimiento' : 'Nuevo Registro de Seguimiento',
+      'rutina': editingItem ? 'Editar Rutina' : 'Nueva Rutina',
+      'ejercicio': editingItem ? 'Editar Ejercicio' : 'Nuevo Ejercicio',
+      'planNutricional': editingItem ? 'Editar Plan Nutricional' : 'Nuevo Plan Nutricional',
+      'verRutina': 'Ejercicios de la Rutina'
+    };
+    return titles[modalType] || '';
+  };
+
+  const renderModalContent = () => {
+    switch(modalType) {
+      case 'seguimiento':
+        return (
+          <SeguimientoModal
+            formData={formData}
+            setFormData={setFormData}
+            clientesAsignados={clientesAsignados}
+            editingItem={editingItem}
+          />
+        );
+      case 'rutina':
+        return (
+          <RutinaModal
+            formData={formData}
+            setFormData={setFormData}
+            clientesAsignados={clientesAsignados}
+          />
+        );
+      case 'ejercicio':
+        return (
+          <EjercicioModal
+            formData={formData}
+            setFormData={setFormData}
+          />
+        );
+      case 'planNutricional':
+        return (
+          <PlanNutricionalModal
+            formData={formData}
+            setFormData={setFormData}
+            clientesAsignados={clientesAsignados}
+          />
+        );
+      case 'verRutina':
+        return (
+          <VerRutinaModal
+            rutina={selectedRutina}
+            ejerciciosRutina={ejerciciosRutina}
+            selectedDia={selectedDia}
+            setSelectedDia={setSelectedDia}
+            onClose={() => setShowModal(false)}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>💪 Dashboard - Entrenador</h1>
+        <h1>💪 FORCA & FITNESS - Dashboard Entrenador</h1>
         <div className="user-info">
+          <ThemeToggle />
           <span>Bienvenido, {user?.nombreCompleto || user?.username}</span>
           <button onClick={logout} className="logout-button">Cerrar Sesión</button>
         </div>
@@ -93,20 +297,28 @@ const DashboardEntrenador = () => {
           <button className={`tab ${activeTab === 'ejercicios' ? 'active' : ''}`} onClick={() => setActiveTab('ejercicios')}>
             Ejercicios
           </button>
-          <button className={`tab ${activeTab === 'clases' ? 'active' : ''}`} onClick={() => setActiveTab('clases')}>
-            Clases
-          </button>
           <button className={`tab ${activeTab === 'nutricion' ? 'active' : ''}`} onClick={() => setActiveTab('nutricion')}>
             Nutrición
           </button>
           <button className={`tab ${activeTab === 'seguimiento' ? 'active' : ''}`} onClick={() => setActiveTab('seguimiento')}>
             Seguimiento
           </button>
+          <button className={`tab ${activeTab === 'comunicacion' ? 'active' : ''}`} onClick={() => setActiveTab('comunicacion')}>
+            Comunicación
+          </button>
         </div>
 
         {activeTab === 'overview' && (
           <>
             <div className="stats-grid">
+              <div className="stat-card">
+                <h3>Mis Clientes</h3>
+                <p className="stat-number">{stats.alumnos}</p>
+              </div>
+              <div className="stat-card">
+                <h3>Rutinas Activas</h3>
+                <p className="stat-number">{stats.rutinas}</p>
+              </div>
               <div className="stat-card">
                 <h3>Mis Clases</h3>
                 <p className="stat-number">{stats.clases}</p>
@@ -116,12 +328,12 @@ const DashboardEntrenador = () => {
                 <p className="stat-number">{stats.planes}</p>
               </div>
               <div className="stat-card">
-                <h3>Rutinas Creadas</h3>
-                <p className="stat-number">{stats.rutinas}</p>
+                <h3>Registros de Seguimiento</h3>
+                <p className="stat-number">{stats.seguimientos}</p>
               </div>
               <div className="stat-card">
-                <h3>Incidencias</h3>
-                <p className="stat-number">{stats.incidencias}</p>
+                <h3>Mensajes</h3>
+                <p className="stat-number">{mensajes.filter(m => !m.leido).length}</p>
               </div>
             </div>
 
@@ -152,128 +364,84 @@ const DashboardEntrenador = () => {
         )}
 
         {activeTab === 'clientes' && (
-          <div className="dashboard-section">
-            <h2>Mis Clientes</h2>
-            <div className="data-list">
-              {alumnos.length > 0 ? (
-                alumnos.map(alumno => (
-                  <div key={alumno.idAlumno} className="data-item">
-                    <h4>{alumno.nameAlumno} {alumno.apellidosAlumno}</h4>
-                    <p><strong>DNI:</strong> {alumno.dni}</p>
-                    <p><strong>Teléfono:</strong> {alumno.telefono}</p>
-                    <p><strong>Peso:</strong> {alumno.pesoActual} kg | <strong>Altura:</strong> {alumno.altura} cm</p>
-                    <button className="btn-secondary" style={{marginTop: '10px'}}>Ver Historial</button>
-                  </div>
-                ))
-              ) : (
-                <p>No tienes clientes asignados</p>
-              )}
-            </div>
-          </div>
+          <ClientesTab
+            clientesAsignados={clientesAsignados}
+            onNuevoRegistro={(id) => handleCreate('seguimiento', id)}
+            onViewCliente={() => {}}
+          />
         )}
 
         {activeTab === 'rutinas' && (
-          <div className="dashboard-section">
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
-              <h2>Rutinas de Entrenamiento</h2>
-              <button className="btn-primary" onClick={() => handleCreate('rutina')}>Nueva Rutina</button>
-            </div>
-            <div className="data-list">
-              {rutinas.map(rutina => (
-                <div key={rutina.idRutina} className="data-item">
-                  <h4>{rutina.nombre}</h4>
-                  <p><strong>Objetivo:</strong> {rutina.objetivo}</p>
-                  <p>{rutina.descripcion}</p>
-                  <span>Fecha inicio: {new Date(rutina.fechaInicio).toLocaleDateString()}</span>
-                  <span>Estado: {rutina.activa ? 'Activa' : 'Inactiva'}</span>
-                  <div style={{marginTop: '10px'}}>
-                    <button className="btn-secondary" style={{marginRight: '10px'}}>Editar</button>
-                    <button className="btn-secondary">Ver Ejercicios</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <RutinasTab
+            rutinas={rutinas}
+            onViewRutina={handleViewRutina}
+            onEdit={(r) => handleEdit('rutina', r)}
+            onDelete={(id) => handleDelete('rutina', id)}
+            onCreate={() => handleCreate('rutina')}
+          />
         )}
 
         {activeTab === 'ejercicios' && (
-          <div className="dashboard-section">
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
-              <h2>Base de Datos de Ejercicios</h2>
-              <button className="btn-primary" onClick={() => handleCreate('ejercicio')}>Nuevo Ejercicio</button>
-            </div>
-            <div className="table-container">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Grupo Muscular</th>
-                    <th>Nivel</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ejercicios.map(ejercicio => (
-                    <tr key={ejercicio.idEjercicio}>
-                      <td>{ejercicio.nombre}</td>
-                      <td>{ejercicio.grupoMuscular}</td>
-                      <td>{ejercicio.nivel}</td>
-                      <td>
-                        <button className="btn-secondary">Ver Detalles</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'clases' && (
-          <div className="dashboard-section">
-            <h2>Mis Clases</h2>
-            <div className="data-list">
-              {clases.map(clase => (
-                <div key={clase.idClase} className="data-item">
-                  <h4>{clase.nameClase}</h4>
-                  <p>{clase.descripcion}</p>
-                  <span>{clase.diaSemana} - {clase.horaInicio} a {clase.horaFin}</span>
-                  <span>Duración: {clase.duracionMinutos} min</span>
-                  <button className="btn-secondary" style={{marginTop: '10px'}}>Ver Inscritos</button>
-                </div>
-              ))}
-            </div>
-          </div>
+          <EjerciciosTab
+            ejercicios={ejercicios}
+            filterGrupoMuscular={filterGrupoMuscular}
+            setFilterGrupoMuscular={setFilterGrupoMuscular}
+            filterNivel={filterNivel}
+            setFilterNivel={setFilterNivel}
+            gruposMusculares={gruposMusculares}
+            niveles={niveles}
+            onEdit={(e) => handleEdit('ejercicio', e)}
+            onDelete={(id) => handleDelete('ejercicio', id)}
+            onCreate={() => handleCreate('ejercicio')}
+          />
         )}
 
         {activeTab === 'nutricion' && (
-          <div className="dashboard-section">
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
-              <h2>Planes Nutricionales</h2>
-              <button className="btn-primary" onClick={() => handleCreate('planNutricional')}>Nuevo Plan</button>
-            </div>
-            <div className="data-list">
-              {planes.map(plan => (
-                <div key={plan.idPlan} className="data-item">
-                  <h4>{plan.namePlan}</h4>
-                  <p><strong>Objetivo:</strong> {plan.objetivo}</p>
-                  <p><strong>Calorías diarias:</strong> {plan.caloriasDiarias}</p>
-                  <p>{plan.descripcion}</p>
-                  <button className="btn-secondary" style={{marginTop: '10px'}}>Editar</button>
-                </div>
-              ))}
-            </div>
-          </div>
+          <NutricionTab
+            planes={planes}
+            foodSearch={foodSearch}
+            setFoodSearch={setFoodSearch}
+            foodResults={foodResults}
+            onSearch={handleFoodSearch}
+            onEdit={(p) => handleEdit('planNutricional', p)}
+            onCreate={() => handleCreate('planNutricional')}
+          />
         )}
 
         {activeTab === 'seguimiento' && (
-          <div className="dashboard-section">
-            <h2>Seguimiento Físico de Clientes</h2>
-            <p>Registra peso, medidas, grasa corporal y rendimiento de tus clientes.</p>
-            <button className="btn-primary" onClick={() => handleCreate('seguimiento')} style={{marginTop: '15px'}}>
-              Nuevo Registro
-            </button>
-          </div>
+          <SeguimientoTab
+            seguimientos={seguimientos}
+            onEdit={(s) => handleEdit('seguimiento', s)}
+            onCreate={() => handleCreate('seguimiento')}
+          />
+        )}
+
+        {activeTab === 'comunicacion' && (
+          <ComunicacionTab mensajes={mensajes} onMarcarLeido={() => {}} />
+        )}
+
+        {showModal && (
+          <ModalWrapper
+            title={getModalTitle()}
+            onClose={() => setShowModal(false)}
+            showFooter={modalType !== 'verRutina'}
+            footer={
+              modalType !== 'verRutina' ? (
+                <div style={{display: 'flex', gap: '10px', marginTop: '25px'}}>
+                  <button type="button" className="btn-primary" onClick={handleSubmit}>Guardar</button>
+                  <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
+                </div>
+              ) : null
+            }
+          >
+            {modalType !== 'verRutina' ? (
+              <form onSubmit={handleSubmit}>
+                {renderModalContent()}
+              </form>
+            ) : (
+              renderModalContent()
+            )}
+          </ModalWrapper>
         )}
       </div>
     </div>

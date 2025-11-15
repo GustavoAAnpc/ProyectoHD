@@ -33,6 +33,7 @@ export const alumnoService = {
   getAll: () => api.get('/alumnos'),
   getById: (id) => api.get(`/alumnos/${id}`),
   getByUsuario: (idUsuario) => api.get(`/alumnos/usuario/${idUsuario}`),
+  update: (id, alumno) => api.put(`/alumnos/${id}`, alumno),
 };
 
 export const instructorService = {
@@ -139,10 +140,28 @@ export const rutinaService = {
   delete: (id) => api.delete(`/rutinas/${id}`),
 };
 
+export const rutinaEjercicioService = {
+  getAll: () => api.get('/rutina-ejercicios'),
+  getById: (id) => api.get(`/rutina-ejercicios/${id}`),
+  getByRutina: (idRutina) => api.get(`/rutina-ejercicios/rutina/${idRutina}`),
+  create: (rutinaEjercicio) => api.post('/rutina-ejercicios', rutinaEjercicio),
+  update: (id, rutinaEjercicio) => api.put(`/rutina-ejercicios/${id}`, rutinaEjercicio),
+  delete: (id) => api.delete(`/rutina-ejercicios/${id}`),
+};
+
+export const alumnoInstructorService = {
+  getAll: () => api.get('/alumno-instructores'),
+  getByInstructor: (idInstructor) => api.get(`/alumno-instructores/instructor/${idInstructor}`),
+  getByAlumno: (idAlumno) => api.get(`/alumno-instructores/alumno/${idAlumno}`),
+  create: (alumnoInstructor) => api.post('/alumno-instructores', alumnoInstructor),
+  delete: (id) => api.delete(`/alumno-instructores/${id}`),
+};
+
 export const seguimientoFisicoService = {
   getAll: () => api.get('/seguimientos'),
   getById: (id) => api.get(`/seguimientos/${id}`),
   getByAlumno: (idAlumno) => api.get(`/seguimientos/alumno/${idAlumno}`),
+  getByInstructor: (idInstructor) => api.get(`/seguimientos/instructor/${idInstructor}`),
   create: (seguimiento) => api.post('/seguimientos', seguimiento),
   update: (id, seguimiento) => api.put(`/seguimientos/${id}`, seguimiento),
 };

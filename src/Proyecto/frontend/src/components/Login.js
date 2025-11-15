@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
+import ThemeToggle from './ThemeToggle';
 import './Login.css';
 
 const Login = () => {
@@ -26,20 +27,8 @@ const Login = () => {
         token
       );
 
-      // Redirigir según el rol
-      switch (rol) {
-        case 'Administrador':
-          navigate('/dashboard/administrador');
-          break;
-        case 'Entrenador':
-          navigate('/dashboard/entrenador');
-          break;
-        case 'Usuario':
-          navigate('/dashboard/usuario');
-          break;
-        default:
-          navigate('/dashboard');
-      }
+      // Redirigir al inicio después del login
+      navigate('/');
     } catch (err) {
       setError('Usuario o contraseña incorrectos');
     } finally {
@@ -49,6 +38,9 @@ const Login = () => {
 
   return (
     <div className="login-container">
+      <div className="theme-toggle-login">
+        <ThemeToggle />
+      </div>
       <div className="login-box">
         <h2>Sistema de Gestión de Gimnasio</h2>
         <form onSubmit={handleSubmit}>

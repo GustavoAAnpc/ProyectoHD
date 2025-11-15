@@ -35,6 +35,11 @@ public class SeguimientoFisicoController {
         return ResponseEntity.ok(seguimientoFisicoRepository.findByAlumnoIdAlumno(idAlumno));
     }
     
+    @GetMapping("/instructor/{idInstructor}")
+    public ResponseEntity<List<SeguimientoFisico>> getSeguimientosByInstructor(@PathVariable Long idInstructor) {
+        return ResponseEntity.ok(seguimientoFisicoRepository.findByInstructorIdInstructor(idInstructor));
+    }
+    
     @PostMapping
     public ResponseEntity<SeguimientoFisico> createSeguimiento(@RequestBody SeguimientoFisico seguimiento) {
         return ResponseEntity.ok(seguimientoFisicoRepository.save(seguimiento));

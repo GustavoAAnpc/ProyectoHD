@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Home from './pages/Home';
 import Login from './components/Login';
 import DashboardAdmin from './pages/DashboardAdmin';
@@ -15,7 +16,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={!user ? <Login /> : <Navigate to={`/dashboard/${user.rol.toLowerCase()}`} replace />} />
+      <Route path="/login" element={!user ? <Login /> : <Navigate to="/" replace />} />
       <Route
         path="/dashboard/administrador"
         element={
@@ -47,11 +48,13 @@ const AppRoutes = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
