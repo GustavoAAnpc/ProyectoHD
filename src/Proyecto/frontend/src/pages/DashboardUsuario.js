@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useSearchParams } from 'react-router-dom';
+import ThemeToggle from '../components/ThemeToggle';
 import { 
   alumnoService, planNutricionalService, reservaClaseService, 
   incidenciaService, rutinaService, membresiaService,
@@ -21,7 +23,8 @@ import './Dashboard.css';
 
 const DashboardUsuario = () => {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
   const [alumno, setAlumno] = useState(null);
   const [planes, setPlanes] = useState([]);
   const [reservas, setReservas] = useState([]);
@@ -85,6 +88,19 @@ const DashboardUsuario = () => {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (activeTab) {
+      setSearchParams({ tab: activeTab }, { replace: true });
+    }
+  }, [activeTab, setSearchParams]);
 
   // Handlers
   const handleEditPerfil = () => {
@@ -312,8 +328,9 @@ const DashboardUsuario = () => {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>💪 FORCA & FITNESS - Mi Dashboard</h1>
+        <h1>💪 FORCA & FITNESS - Dashboard Usuario</h1>
         <div className="user-info">
+          <ThemeToggle />
           <span>Bienvenido, {user?.nombreCompleto || user?.username}</span>
           <button onClick={logout} className="logout-button">Cerrar Sesión</button>
         </div>

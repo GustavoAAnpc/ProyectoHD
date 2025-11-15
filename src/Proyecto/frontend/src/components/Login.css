@@ -8,6 +8,13 @@
   overflow: hidden;
 }
 
+.theme-toggle-login {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+}
+
 .login-container::before {
   content: '';
   position: absolute;

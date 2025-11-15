@@ -33,6 +33,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     setUser(null);
+    // Redirigir a la página principal después de cerrar sesión
+    window.location.href = '/';
   };
 
   return (
