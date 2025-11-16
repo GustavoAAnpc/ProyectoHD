@@ -13,7 +13,14 @@ export const useTheme = () => {
 export const ThemeProvider = ({ children }) => {
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : false;
+    const isDark = saved ? JSON.parse(saved) : false;
+    // Aplicar inmediatamente al cargar
+    if (isDark) {
+      document.documentElement.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+    }
+    return isDark;
   });
 
   useEffect(() => {
@@ -35,4 +42,6 @@ export const ThemeProvider = ({ children }) => {
     </ThemeContext.Provider>
   );
 };
+
+
 

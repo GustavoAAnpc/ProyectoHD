@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import ThemeToggle from '../components/ThemeToggle';
 import { 
   alumnoService, instructorService, claseService, 
@@ -24,6 +24,7 @@ import './Dashboard.css';
 
 const DashboardAdmin = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
   const [stats, setStats] = useState({
@@ -170,8 +171,26 @@ const DashboardAdmin = () => {
           await pagoService.create(formData);
           break;
         case 'usuario':
+          // Validar antes de crear/actualizar
+          if (!editingItem) {
+            // Validaciones para creación
+            if (!formData.nameUsuario || formData.nameUsuario.length < 3) {
+              alert('El nombre de usuario debe tener al menos 3 caracteres');
+              return;
+            }
+            if (!formData.passwordUsuario || formData.passwordUsuario.length < 6) {
+              alert('La contraseña debe tener al menos 6 caracteres');
+              return;
+            }
+          }
+          
           if (editingItem) {
-            await usuarioService.update(editingItem.idUsuario, formData);
+            // Al actualizar, no enviar password si está vacío
+            const updateData = { ...formData };
+            if (!updateData.passwordUsuario) {
+              delete updateData.passwordUsuario;
+            }
+            await usuarioService.update(editingItem.idUsuario, updateData);
           } else {
             await usuarioService.create(formData);
           }
@@ -181,7 +200,8 @@ const DashboardAdmin = () => {
       loadData();
     } catch (error) {
       console.error('Error guardando:', error);
-      alert('Error al guardar los datos');
+      const errorMessage = error.response?.data?.message || error.response?.data || error.message || 'Error al guardar los datos';
+      alert(errorMessage);
     }
   };
 
@@ -256,7 +276,7 @@ const DashboardAdmin = () => {
         <div className="user-info">
           <ThemeToggle />
           <span>Bienvenido, {user?.nombreCompleto || user?.username}</span>
-          <button onClick={logout} className="logout-button">Cerrar Sesión</button>
+          <button onClick={() => logout(navigate)} className="logout-button">Cerrar Sesión</button>
         </div>
       </header>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import ThemeToggle from '../components/ThemeToggle';
 import { 
   instructorService, claseService, planNutricionalService, 
@@ -24,6 +24,7 @@ import './Dashboard.css';
 
 const DashboardEntrenador = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
   const [instructorId, setInstructorId] = useState(null);
@@ -279,7 +280,7 @@ const DashboardEntrenador = () => {
         <div className="user-info">
           <ThemeToggle />
           <span>Bienvenido, {user?.nombreCompleto || user?.username}</span>
-          <button onClick={logout} className="logout-button">Cerrar Sesión</button>
+          <button onClick={() => logout(navigate)} className="logout-button">Cerrar Sesión</button>
         </div>
       </header>
 

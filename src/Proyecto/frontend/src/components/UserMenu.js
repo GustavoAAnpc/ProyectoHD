@@ -27,7 +27,7 @@ const UserMenu = () => {
 
   const handleLogout = () => {
     setIsOpen(false);
-    logout();
+    logout(navigate);
   };
 
   const getDashboardPath = () => {

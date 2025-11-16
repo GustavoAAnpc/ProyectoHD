@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { alumnoService, claseService, inscripcionClaseService } from '../services/api';
 import './Dashboard.css';
 
 const DashboardRecepcionista = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     alumnos: 0,
     clases: 0,
@@ -43,7 +45,7 @@ const DashboardRecepcionista = () => {
         <h1>Dashboard - Recepcionista</h1>
         <div className="user-info">
           <span>Bienvenido, {user?.nombreCompleto || user?.username}</span>
-          <button onClick={logout} className="logout-button">Cerrar Sesión</button>
+          <button onClick={() => logout(navigate)} className="logout-button">Cerrar Sesión</button>
         </div>
       </header>
 

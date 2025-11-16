@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Home from './pages/Home';
-import Login from './components/Login';
 import DashboardAdmin from './pages/DashboardAdmin';
 import DashboardEntrenador from './pages/DashboardEntrenador';
 import DashboardUsuario from './pages/DashboardUsuario';
@@ -16,7 +15,6 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/login" element={!user ? <Login /> : <Navigate to="/" replace />} />
       <Route
         path="/dashboard/administrador"
         element={
