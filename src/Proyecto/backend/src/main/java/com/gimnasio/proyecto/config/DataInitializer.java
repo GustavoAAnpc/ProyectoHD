@@ -71,6 +71,9 @@ public class DataInitializer implements CommandLineRunner {
             administradorRepository.save(admin);
         }
         
+        // Datos de prueba deshabilitados - solo se crean si no hay usuarios en la base de datos
+        // Descomentar las siguientes líneas solo para desarrollo inicial
+        /*
         // Crear usuario entrenador de prueba
         if (!usuarioRepository.existsByNameUsuario("entrenador")) {
             Rol entrenadorRol = rolRepository.findByNombreRol(Rol.NombreRol.Entrenador).orElseThrow();
@@ -122,6 +125,7 @@ public class DataInitializer implements CommandLineRunner {
             alumno.setEstadoMembresia("Activo");
             alumnoRepository.save(alumno);
         }
+        */
     }
 }
 

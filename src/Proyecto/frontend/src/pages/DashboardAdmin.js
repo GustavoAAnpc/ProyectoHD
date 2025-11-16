@@ -4,13 +4,17 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   alumnoService, instructorService, claseService, 
   sedeService, equipoService, tipoMembresiaService,
-  membresiaService, pagoService, usuarioService
+  membresiaService, pagoService, usuarioService,
+  promocionService, noticiaService, reservaClaseService
 } from '../services/api';
 import SedesTab from '../components/dashboard/admin/SedesTab';
 import EquiposTab from '../components/dashboard/admin/EquiposTab';
 import UsuariosTab from '../components/dashboard/admin/UsuariosTab';
 import MembresiasTab from '../components/dashboard/admin/MembresiasTab';
 import PagosTab from '../components/dashboard/admin/PagosTab';
+import PromocionesTab from '../components/dashboard/admin/PromocionesTab';
+import EntrenadoresTab from '../components/dashboard/admin/EntrenadoresTab';
+import GimnasioTab from '../components/dashboard/admin/GimnasioTab';
 import ReportesTab from '../components/dashboard/admin/ReportesTab';
 import ModalWrapper from '../components/modals/ModalWrapper';
 import SedeModal from '../components/modals/admin/SedeModal';
@@ -19,6 +23,9 @@ import TipoMembresiaModal from '../components/modals/admin/TipoMembresiaModal';
 import MembresiaModal from '../components/modals/admin/MembresiaModal';
 import PagoModal from '../components/modals/admin/PagoModal';
 import UsuarioModal from '../components/modals/admin/UsuarioModal';
+import PromocionModal from '../components/modals/admin/PromocionModal';
+import NoticiaModal from '../components/modals/admin/NoticiaModal';
+import ClaseModal from '../components/modals/admin/ClaseModal';
 import './Dashboard.css';
 
 const DashboardAdmin = () => {
@@ -38,52 +45,115 @@ const DashboardAdmin = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [alumnos, setAlumnos] = useState([]);
   const [instructores, setInstructores] = useState([]);
+  const [clases, setClases] = useState([]);
+  const [promociones, setPromociones] = useState([]);
+  const [noticias, setNoticias] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
 
   const loadData = useCallback(async () => {
+    // Cargar cada servicio de forma independiente para evitar que un error bloquee todo
+    const loadService = async (serviceCall, defaultValue = []) => {
+      try {
+        const response = await serviceCall();
+        return response.data || defaultValue;
+      } catch (error) {
+        console.warn('Error cargando servicio:', error);
+        return defaultValue;
+      }
+    };
+
     try {
+      // Cargar todos los servicios en paralelo pero con manejo individual de errores
       const [
-        alumnosRes, entrenadoresRes, clasesRes, sedesRes, 
-        equiposRes, tiposRes, membresiasRes, pagosRes, usuariosRes
-      ] = await Promise.all([
-        alumnoService.getAll(),
-        instructorService.getAll(),
-        claseService.getAll(),
-        sedeService.getAll(),
-        equipoService.getAll(),
-        tipoMembresiaService.getAll(),
-        membresiaService.getAll(),
-        pagoService.getAll(),
-        usuarioService.getAll()
+        alumnosData,
+        entrenadoresData,
+        clasesData,
+        sedesData,
+        equiposData,
+        tiposData,
+        membresiasData,
+        pagosData,
+        usuariosData
+      ] = await Promise.allSettled([
+        loadService(() => alumnoService.getAll(), []),
+        loadService(() => instructorService.getAll(), []),
+        loadService(() => claseService.getAll(), []),
+        loadService(() => sedeService.getAll(), []),
+        loadService(() => equipoService.getAll(), []),
+        loadService(() => tipoMembresiaService.getAll(), []),
+        loadService(() => membresiaService.getAll(), []),
+        loadService(() => pagoService.getAll(), []),
+        loadService(() => usuarioService.getAll(), [])
       ]);
+
+      // Extraer datos de las promesas resueltas
+      setAlumnos(alumnosData.status === 'fulfilled' ? alumnosData.value : []);
+      setInstructores(entrenadoresData.status === 'fulfilled' ? entrenadoresData.value : []);
+      setClases(clasesData.status === 'fulfilled' ? clasesData.value : []);
+      setSedes(sedesData.status === 'fulfilled' ? sedesData.value : []);
+      setEquipos(equiposData.status === 'fulfilled' ? equiposData.value : []);
+      setTiposMembresia(tiposData.status === 'fulfilled' ? tiposData.value : []);
+      setMembresias(membresiasData.status === 'fulfilled' ? membresiasData.value : []);
+      setPagos(pagosData.status === 'fulfilled' ? pagosData.value : []);
+      setUsuarios(usuariosData.status === 'fulfilled' ? usuariosData.value : []);
       
-      setSedes(sedesRes.data);
-      setEquipos(equiposRes.data);
-      setTiposMembresia(tiposRes.data);
-      setMembresias(membresiasRes.data);
-      setPagos(pagosRes.data);
-      setUsuarios(usuariosRes.data);
-      setAlumnos(alumnosRes.data);
-      setInstructores(entrenadoresRes.data);
+      // Cargar promociones y noticias de forma opcional
+      try {
+        const promocionesRes = await promocionService.getAll();
+        setPromociones(promocionesRes.data || []);
+      } catch (error) {
+        console.warn('Error cargando promociones:', error);
+        setPromociones([]);
+      }
       
-      const totalIngresos = pagosRes.data.reduce((sum, pago) => sum + parseFloat(pago.monto || 0), 0);
-      const usuariosActivos = usuariosRes.data.filter(u => u.estado).length;
+      try {
+        const noticiasRes = await noticiaService.getAll();
+        setNoticias(noticiasRes.data || []);
+      } catch (error) {
+        console.warn('Error cargando noticias:', error);
+        setNoticias([]);
+      }
+      
+      // Calcular estadísticas con datos disponibles
+      const pagosDataArray = pagosData.status === 'fulfilled' ? pagosData.value : [];
+      const usuariosDataArray = usuariosData.status === 'fulfilled' ? usuariosData.value : [];
+      const alumnosDataArray = alumnosData.status === 'fulfilled' ? alumnosData.value : [];
+      const entrenadoresDataArray = entrenadoresData.status === 'fulfilled' ? entrenadoresData.value : [];
+      const clasesDataArray = clasesData.status === 'fulfilled' ? clasesData.value : [];
+      const sedesDataArray = sedesData.status === 'fulfilled' ? sedesData.value : [];
+      const equiposDataArray = equiposData.status === 'fulfilled' ? equiposData.value : [];
+      const membresiasDataArray = membresiasData.status === 'fulfilled' ? membresiasData.value : [];
+      
+      const totalIngresos = pagosDataArray.reduce((sum, pago) => sum + parseFloat(pago?.monto || 0), 0);
+      const usuariosActivos = usuariosDataArray.filter(u => u?.estado).length;
       
       setStats({
-        alumnos: alumnosRes.data.length,
-        entrenadores: entrenadoresRes.data.length,
-        clases: clasesRes.data.length,
-        sedes: sedesRes.data.length,
-        equipos: equiposRes.data.length,
-        membresias: membresiasRes.data.length,
+        alumnos: alumnosDataArray.length,
+        entrenadores: entrenadoresDataArray.length,
+        clases: clasesDataArray.length,
+        sedes: sedesDataArray.length,
+        equipos: equiposDataArray.length,
+        membresias: membresiasDataArray.length,
         ingresos: totalIngresos,
         usuariosActivos: usuariosActivos
       });
     } catch (error) {
-      console.error('Error cargando datos:', error);
+      console.error('Error general cargando datos:', error);
+      // Asegurar que al menos tenemos arrays vacíos
+      setSedes([]);
+      setEquipos([]);
+      setTiposMembresia([]);
+      setMembresias([]);
+      setPagos([]);
+      setUsuarios([]);
+      setAlumnos([]);
+      setInstructores([]);
+      setClases([]);
+      setPromociones([]);
+      setNoticias([]);
     }
   }, []);
 
@@ -126,6 +196,8 @@ const DashboardAdmin = () => {
         case 'equipo': await equipoService.delete(id); break;
         case 'tipoMembresia': await tipoMembresiaService.delete(id); break;
         case 'usuario': await usuarioService.delete(id); break;
+        case 'promocion': await promocionService.delete(id); break;
+        case 'noticia': await noticiaService.delete(id); break;
       }
       loadData();
     } catch (error) {
@@ -194,6 +266,32 @@ const DashboardAdmin = () => {
             await usuarioService.create(formData);
           }
           break;
+        case 'promocion':
+          if (editingItem) {
+            await promocionService.update(editingItem.idPromocion, formData);
+          } else {
+            await promocionService.create(formData);
+          }
+          break;
+        case 'noticia':
+          if (editingItem) {
+            await noticiaService.update(editingItem.idNoticia, formData);
+          } else {
+            // Fecha automática al crear
+            const noticiaData = {
+              ...formData,
+              fechaPublicacion: formData.fechaPublicacion || new Date().toISOString().split('T')[0]
+            };
+            await noticiaService.create(noticiaData);
+          }
+          break;
+        case 'clase':
+          if (editingItem) {
+            await claseService.update(editingItem.idClase, formData);
+          } else {
+            await claseService.create(formData);
+          }
+          break;
       }
       setShowModal(false);
       loadData();
@@ -233,6 +331,45 @@ const DashboardAdmin = () => {
     }
   };
 
+  const handleRenovarMembresia = async (id) => {
+    const dias = prompt('Ingrese los días adicionales para renovar:');
+    if (!dias || isNaN(dias)) {
+      alert('Ingrese un número válido de días');
+      return;
+    }
+    try {
+      await membresiaService.renovar(id, parseInt(dias));
+      alert('Membresía renovada correctamente');
+      loadData();
+    } catch (error) {
+      console.error('Error renovando membresía:', error);
+      alert('Error al renovar membresía');
+    }
+  };
+
+  const handleSuspenderMembresia = async (id) => {
+    if (!window.confirm('¿Está seguro de suspender esta membresía?')) return;
+    try {
+      await membresiaService.suspender(id);
+      alert('Membresía suspendida correctamente');
+      loadData();
+    } catch (error) {
+      console.error('Error suspendiendo membresía:', error);
+      alert('Error al suspender membresía');
+    }
+  };
+
+  const handleActivarMembresia = async (id) => {
+    try {
+      await membresiaService.activar(id);
+      alert('Membresía activada correctamente');
+      loadData();
+    } catch (error) {
+      console.error('Error activando membresía:', error);
+      alert('Error al activar membresía');
+    }
+  };
+
   const handleExportReport = (type) => {
     alert(`Exportando reporte de ${type}...`);
   };
@@ -244,7 +381,10 @@ const DashboardAdmin = () => {
       'tipoMembresia': editingItem ? 'Editar Tipo de Membresía' : 'Nuevo Tipo de Membresía',
       'membresia': editingItem ? 'Editar Membresía' : 'Nueva Membresía',
       'pago': 'Registrar Pago',
-      'usuario': editingItem ? 'Editar Usuario' : 'Nuevo Usuario'
+      'usuario': editingItem ? 'Editar Usuario' : 'Nuevo Usuario',
+      'promocion': editingItem ? 'Editar Promoción' : 'Nueva Promoción',
+      'noticia': editingItem ? 'Editar Noticia' : 'Nueva Noticia',
+      'clase': editingItem ? 'Editar Clase' : 'Nueva Clase'
     };
     return titles[modalType] || '';
   };
@@ -260,9 +400,15 @@ const DashboardAdmin = () => {
       case 'membresia':
         return <MembresiaModal formData={formData} setFormData={setFormData} alumnos={alumnos} tiposMembresia={tiposMembresia} />;
       case 'pago':
-        return <PagoModal formData={formData} setFormData={setFormData} membresias={membresias} />;
+        return <PagoModal formData={formData} setFormData={setFormData} membresias={membresias} promociones={promociones} />;
       case 'usuario':
         return <UsuarioModal formData={formData} setFormData={setFormData} editingItem={editingItem} />;
+      case 'promocion':
+        return <PromocionModal formData={formData} setFormData={setFormData} />;
+      case 'noticia':
+        return <NoticiaModal formData={formData} setFormData={setFormData} instructores={instructores} />;
+      case 'clase':
+        return <ClaseModal formData={formData} setFormData={setFormData} instructores={instructores} />;
       default:
         return null;
     }
@@ -289,6 +435,15 @@ const DashboardAdmin = () => {
           </button>
           <button className={`tab ${activeTab === 'pagos' ? 'active' : ''}`} onClick={() => setActiveTab('pagos')}>
             Pagos
+          </button>
+          <button className={`tab ${activeTab === 'promociones' ? 'active' : ''}`} onClick={() => setActiveTab('promociones')}>
+            Promociones
+          </button>
+          <button className={`tab ${activeTab === 'entrenadores' ? 'active' : ''}`} onClick={() => setActiveTab('entrenadores')}>
+            Entrenadores
+          </button>
+          <button className={`tab ${activeTab === 'gimnasio' ? 'active' : ''}`} onClick={() => setActiveTab('gimnasio')}>
+            Gimnasio
           </button>
           <button className={`tab ${activeTab === 'reportes' ? 'active' : ''}`} onClick={() => setActiveTab('reportes')}>
             Reportes
@@ -395,6 +550,8 @@ const DashboardAdmin = () => {
         {activeTab === 'usuarios' && (
           <UsuariosTab
             usuarios={usuarios}
+            alumnos={alumnos}
+            instructores={instructores}
             onEdit={(u) => handleEdit('usuario', u)}
             onToggleEstado={(id, estado) => handleToggleEstado('usuario', id, estado)}
             onResetPassword={handleResetPassword}
@@ -412,6 +569,9 @@ const DashboardAdmin = () => {
             onDelete={handleDelete}
             onCreateTipo={() => handleCreate('tipoMembresia')}
             onCreate={() => handleCreate('membresia')}
+            onRenovar={handleRenovarMembresia}
+            onSuspender={handleSuspenderMembresia}
+            onActivar={handleActivarMembresia}
           />
         )}
 
@@ -423,6 +583,35 @@ const DashboardAdmin = () => {
           />
         )}
 
+        {activeTab === 'promociones' && (
+          <PromocionesTab
+            promociones={promociones}
+            onCreate={() => handleCreate('promocion')}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
+
+        {activeTab === 'entrenadores' && (
+          <EntrenadoresTab
+            instructores={instructores}
+            alumnos={alumnos}
+            onCreate={() => handleCreate('usuario')}
+          />
+        )}
+
+        {activeTab === 'gimnasio' && (
+          <GimnasioTab
+            clases={clases}
+            sedes={sedes}
+            onCreateClase={() => handleCreate('clase')}
+            onEditClase={(c) => handleEdit('clase', c)}
+            onCreateNoticia={() => handleCreate('noticia')}
+            onEditNoticia={(n) => handleEdit('noticia', n)}
+            onDeleteNoticia={(id) => handleDelete('noticia', id)}
+          />
+        )}
+
         {activeTab === 'reportes' && (
           <ReportesTab
             stats={stats}
@@ -430,7 +619,7 @@ const DashboardAdmin = () => {
             membresias={membresias}
             alumnos={alumnos}
             entrenadores={instructores}
-            clases={[]}
+            clases={clases}
             onExport={handleExportReport}
           />
         )}

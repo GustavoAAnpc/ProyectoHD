@@ -1,13 +1,12 @@
 package com.gimnasio.proyecto.controller;
 
-import com.gimnasio.proyecto.entity.Usuario;
-import com.gimnasio.proyecto.entity.Rol;
-import com.gimnasio.proyecto.repository.UsuarioRepository;
-import com.gimnasio.proyecto.repository.RolRepository;
+import com.gimnasio.proyecto.entity.*;
+import com.gimnasio.proyecto.repository.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,13 +19,19 @@ public class UsuarioController {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final RolRepository rolRepository;
+    private final AlumnoRepository alumnoRepository;
+    private final InstructorRepository instructorRepository;
     
     public UsuarioController(UsuarioRepository usuarioRepository,
                             PasswordEncoder passwordEncoder,
-                            RolRepository rolRepository) {
+                            RolRepository rolRepository,
+                            AlumnoRepository alumnoRepository,
+                            InstructorRepository instructorRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.rolRepository = rolRepository;
+        this.alumnoRepository = alumnoRepository;
+        this.instructorRepository = instructorRepository;
     }
     
     @GetMapping
@@ -82,8 +87,61 @@ public class UsuarioController {
             
             usuario.setEstado(request.get("estado") != null ? (Boolean) request.get("estado") : true);
             
-            // Guardar solo el usuario básico - las entidades relacionadas se crearán cuando el usuario complete su perfil
+            // Guardar el usuario
             usuario = usuarioRepository.save(usuario);
+            
+            // Crear entidad relacionada según el rol
+            String nombreRol = usuario.getRol().getNombreRol().name();
+            String nombreCompleto = (String) request.get("nombreCompleto");
+            
+            if ("Usuario".equals(nombreRol)) {
+                // Crear Alumno automáticamente
+                if (alumnoRepository.findByUsuarioIdUsuario(usuario.getIdUsuario()).isEmpty()) {
+                    Alumno alumno = new Alumno();
+                    alumno.setUsuario(usuario);
+                    
+                    // Dividir nombre completo en nombre y apellidos
+                    if (nombreCompleto != null && !nombreCompleto.trim().isEmpty()) {
+                        String[] partes = nombreCompleto.trim().split("\\s+", 2);
+                        alumno.setNameAlumno(partes[0]);
+                        alumno.setApellidosAlumno(partes.length > 1 ? partes[1] : "");
+                    } else {
+                        // Si no hay nombre completo, usar el nombre de usuario
+                        alumno.setNameAlumno(usuario.getNameUsuario());
+                        alumno.setApellidosAlumno("");
+                    }
+                    
+                    // DNI temporal único (el usuario deberá actualizarlo después)
+                    String dniTemporal = "TEMP-" + System.currentTimeMillis() + "-" + usuario.getIdUsuario();
+                    alumno.setDni(dniTemporal);
+                    alumno.setFechaInscripcion(LocalDate.now());
+                    alumno.setEstadoMembresia("Inactivo");
+                    alumnoRepository.save(alumno);
+                }
+            } else if ("Entrenador".equals(nombreRol)) {
+                // Crear Instructor automáticamente
+                if (instructorRepository.findByUsuarioIdUsuario(usuario.getIdUsuario()).isEmpty()) {
+                    Instructor instructor = new Instructor();
+                    instructor.setUsuario(usuario);
+                    
+                    // Dividir nombre completo en nombre y apellidos
+                    if (nombreCompleto != null && !nombreCompleto.trim().isEmpty()) {
+                        String[] partes = nombreCompleto.trim().split("\\s+", 2);
+                        instructor.setNamaInstructor(partes[0]);
+                        instructor.setApellidosInstructor(partes.length > 1 ? partes[1] : "");
+                    } else {
+                        // Si no hay nombre completo, usar el nombre de usuario
+                        instructor.setNamaInstructor(usuario.getNameUsuario());
+                        instructor.setApellidosInstructor("");
+                    }
+                    
+                    // DNI temporal único (el usuario deberá actualizarlo después)
+                    String dniTemporal = "TEMP-" + System.currentTimeMillis() + "-" + usuario.getIdUsuario();
+                    instructor.setDni(dniTemporal);
+                    instructor.setFechaContratacion(LocalDate.now());
+                    instructorRepository.save(instructor);
+                }
+            }
             
             return ResponseEntity.ok(usuario);
         } catch (Exception e) {

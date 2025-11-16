@@ -1,5 +1,6 @@
 package com.gimnasio.proyecto.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,6 +51,7 @@ public class Rutina {
     private LocalDate fechaCreacion;
     
     @OneToMany(mappedBy = "rutina", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<RutinaEjercicio> ejercicios;
     
     @PrePersist

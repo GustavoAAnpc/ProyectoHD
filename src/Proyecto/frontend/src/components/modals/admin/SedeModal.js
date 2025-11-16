@@ -20,15 +20,25 @@ const SedeModal = ({ formData, setFormData }) => {
       </div>
       <div className="form-group">
         <label>Horario Apertura</label>
-        <input type="text" value={formData.horarioApertura || ''} 
-          onChange={(e) => setFormData({...formData, horarioApertura: e.target.value})} 
-          placeholder="Ej: 06:00" />
+        <input type="time" value={formData.horarioApertura || ''} 
+          onChange={(e) => {
+            const time = e.target.value;
+            if (time) {
+              setFormData({...formData, horarioApertura: time});
+            }
+          }} 
+          required />
       </div>
       <div className="form-group">
         <label>Horario Cierre</label>
-        <input type="text" value={formData.horarioCierre || ''} 
-          onChange={(e) => setFormData({...formData, horarioCierre: e.target.value})} 
-          placeholder="Ej: 22:00" />
+        <input type="time" value={formData.horarioCierre || ''} 
+          onChange={(e) => {
+            const time = e.target.value;
+            if (time) {
+              setFormData({...formData, horarioCierre: time});
+            }
+          }} 
+          required />
       </div>
       <div className="form-group">
         <label>

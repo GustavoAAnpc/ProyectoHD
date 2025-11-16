@@ -1,5 +1,6 @@
 package com.gimnasio.proyecto.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,6 +37,7 @@ public class TipoMembresia {
     private Boolean activa = true;
     
     @OneToMany(mappedBy = "tipoMembresia", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Membresia> membresias;
 }
 

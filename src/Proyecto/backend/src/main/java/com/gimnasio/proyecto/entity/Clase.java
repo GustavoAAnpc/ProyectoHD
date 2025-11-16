@@ -1,5 +1,6 @@
 package com.gimnasio.proyecto.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,6 +48,7 @@ public class Clase {
     private LocalDate fechaCreacion;
     
     @OneToMany(mappedBy = "clase", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<InscripcionClase> inscripciones;
     
     @PrePersist

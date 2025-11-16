@@ -1,16 +1,62 @@
 import React from 'react';
 
-const PagoModal = ({ formData, setFormData, membresias }) => {
+const PagoModal = ({ formData, setFormData, membresias, promociones }) => {
+  const handleMembresiaChange = (e) => {
+    const membresiaId = parseInt(e.target.value);
+    const membresiaSeleccionada = membresias.find(m => m.idMembresia === membresiaId);
+    
+    setFormData({
+      ...formData, 
+      membresia: {idMembresia: membresiaId},
+      monto: membresiaSeleccionada?.tipoMembresia?.precio || formData.monto || ''
+    });
+  };
+
+  const handlePromocionChange = (e) => {
+    const promocionId = parseInt(e.target.value);
+    const promocionSeleccionada = promociones.find(p => p.idPromocion === promocionId);
+    
+    if (promocionSeleccionada && formData.membresia?.idMembresia) {
+      const membresiaSeleccionada = membresias.find(m => m.idMembresia === formData.membresia.idMembresia);
+      const precioBase = parseFloat(membresiaSeleccionada?.tipoMembresia?.precio || 0);
+      const descuento = promocionSeleccionada.descuentoPorcentaje || 0;
+      const precioConDescuento = precioBase * (1 - descuento / 100);
+      
+      setFormData({
+        ...formData,
+        promocion: {idPromocion: promocionId},
+        monto: precioConDescuento
+      });
+    } else {
+      setFormData({
+        ...formData,
+        promocion: promocionId ? {idPromocion: promocionId} : null
+      });
+    }
+  };
+
   return (
     <>
       <div className="form-group">
         <label>Membresía</label>
         <select value={formData.membresia?.idMembresia || ''} 
-          onChange={(e) => setFormData({...formData, membresia: {idMembresia: parseInt(e.target.value)}})} required>
+          onChange={handleMembresiaChange} required>
           <option value="">Seleccionar membresía</option>
           {membresias.map(m => (
             <option key={m.idMembresia} value={m.idMembresia}>
-              {m.alumno?.nameAlumno} - {m.tipoMembresia?.nombre}
+              {m.alumno?.nameAlumno} {m.alumno?.apellidosAlumno} - {m.tipoMembresia?.nombre} (S/ {parseFloat(m.tipoMembresia?.precio || 0).toFixed(2)})
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="form-group">
+        <label>Promoción (Opcional)</label>
+        <select value={formData.promocion?.idPromocion || ''} 
+          onChange={handlePromocionChange}>
+          <option value="">Sin promoción</option>
+          {promociones.filter(p => p.activa && new Date(p.fechaFin) >= new Date()).map(p => (
+            <option key={p.idPromocion} value={p.idPromocion}>
+              {p.nombre} - {p.descuentoPorcentaje}% descuento
             </option>
           ))}
         </select>

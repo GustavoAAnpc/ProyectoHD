@@ -112,6 +112,9 @@ export const membresiaService = {
   getByAlumno: (idAlumno) => api.get(`/membresias/alumno/${idAlumno}`),
   create: (membresia) => api.post('/membresias', membresia),
   update: (id, membresia) => api.put(`/membresias/${id}`, membresia),
+  renovar: (id, diasAdicionales) => api.put(`/membresias/${id}/renovar`, { diasAdicionales }),
+  suspender: (id) => api.put(`/membresias/${id}/suspender`),
+  activar: (id) => api.put(`/membresias/${id}/activar`),
 };
 
 export const pagoService = {
@@ -119,6 +122,7 @@ export const pagoService = {
   getById: (id) => api.get(`/pagos/${id}`),
   getByMembresia: (idMembresia) => api.get(`/pagos/membresia/${idMembresia}`),
   create: (pago) => api.post('/pagos', pago),
+  generarComprobante: (id) => api.get(`/pagos/${id}/comprobante`),
 };
 
 export const ejercicioService = {
@@ -196,6 +200,28 @@ export const usuarioService = {
   delete: (id) => api.delete(`/usuarios/${id}`),
   cambiarEstado: (id, estado) => api.put(`/usuarios/${id}/estado`, estado),
   resetPassword: (id, password) => api.put(`/usuarios/${id}/reset-password`, { password }),
+};
+
+export const promocionService = {
+  getAll: () => api.get('/promociones'),
+  getActivas: () => api.get('/promociones/activas'),
+  getWeb: () => api.get('/promociones/web'),
+  getDashboardUsuario: () => api.get('/promociones/dashboard-usuario'),
+  getDashboardEntrenador: () => api.get('/promociones/dashboard-entrenador'),
+  getById: (id) => api.get(`/promociones/${id}`),
+  create: (promocion) => api.post('/promociones', promocion),
+  update: (id, promocion) => api.put(`/promociones/${id}`, promocion),
+  delete: (id) => api.delete(`/promociones/${id}`),
+};
+
+export const noticiaService = {
+  getAll: () => api.get('/noticias'),
+  getActivas: () => api.get('/noticias/activas'),
+  getByTipo: (tipo) => api.get(`/noticias/tipo/${tipo}`),
+  getById: (id) => api.get(`/noticias/${id}`),
+  create: (noticia) => api.post('/noticias', noticia),
+  update: (id, noticia) => api.put(`/noticias/${id}`, noticia),
+  delete: (id) => api.delete(`/noticias/${id}`),
 };
 
 export default api;

@@ -15,8 +15,15 @@ const TipoMembresiaModal = ({ formData, setFormData }) => {
       </div>
       <div className="form-group">
         <label>Precio</label>
-        <input type="number" step="0.01" value={formData.precio || ''} 
-          onChange={(e) => setFormData({...formData, precio: parseFloat(e.target.value)})} required />
+        <input type="number" step="0.01" min="0" value={formData.precio || ''} 
+          onChange={(e) => {
+            const value = parseFloat(e.target.value);
+            if (value >= 0 || e.target.value === '') {
+              setFormData({...formData, precio: value || ''});
+            } else {
+              alert('El precio no puede ser negativo');
+            }
+          }} required />
       </div>
       <div className="form-group">
         <label>Duración (días)</label>
