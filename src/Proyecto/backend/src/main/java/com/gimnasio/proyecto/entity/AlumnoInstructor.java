@@ -44,6 +44,9 @@ public class AlumnoInstructor {
         if (fechaCreacion == null) {
             fechaCreacion = LocalDateTime.now();
         }
+        if (estado == null) {
+            estado = "Activo";
+        }
     }
 }
 

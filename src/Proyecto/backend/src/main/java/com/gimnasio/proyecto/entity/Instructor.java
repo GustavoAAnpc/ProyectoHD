@@ -1,5 +1,6 @@
 package com.gimnasio.proyecto.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,15 +47,19 @@ public class Instructor {
     private LocalDate fechaContratacion;
     
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<AlumnoInstructor> alumnoInstructores;
     
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Clase> clases;
     
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<PlanNutricional> planesNutricionales;
     
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Incidencia> incidencias;
     
     @PrePersist
