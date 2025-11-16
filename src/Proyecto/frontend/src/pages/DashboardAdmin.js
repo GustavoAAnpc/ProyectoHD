@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import ThemeToggle from '../components/ThemeToggle';
 import { 
   alumnoService, instructorService, claseService, 
   sedeService, equipoService, tipoMembresiaService,
@@ -271,16 +270,7 @@ const DashboardAdmin = () => {
 
   return (
     <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>💪 FORCA & FITNESS - Dashboard Administrador</h1>
-        <div className="user-info">
-          <ThemeToggle />
-          <span>Bienvenido, {user?.nombreCompleto || user?.username}</span>
-          <button onClick={() => logout(navigate)} className="logout-button">Cerrar Sesión</button>
-        </div>
-      </header>
-
-      <div className="dashboard-content">
+      <div className="dashboard-content" style={{paddingTop: '20px'}}>
         <div className="tabs">
           <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
             Resumen
