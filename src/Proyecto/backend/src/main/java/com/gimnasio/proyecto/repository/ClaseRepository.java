@@ -1,0 +1,13 @@
+package com.gimnasio.proyecto.repository;
+
+import com.gimnasio.proyecto.entity.Clase;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface ClaseRepository extends JpaRepository<Clase, Long> {
+    List<Clase> findByInstructorIdInstructor(Long idInstructor);
+}
+
