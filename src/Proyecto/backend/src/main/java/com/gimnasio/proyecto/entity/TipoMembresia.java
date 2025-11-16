@@ -30,8 +30,8 @@ public class TipoMembresia {
     @Column(name = "precio", nullable = false, precision = 10, scale = 2)
     private BigDecimal precio;
     
-    @Column(name = "duracion_dias")
-    private Integer duracionDias;
+    @Column(name = "duracion_meses")
+    private Integer duracionMeses;
     
     @Column(name = "activa", nullable = false)
     private Boolean activa = true;

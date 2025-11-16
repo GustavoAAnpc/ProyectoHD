@@ -26,9 +26,9 @@ const TipoMembresiaModal = ({ formData, setFormData }) => {
           }} required />
       </div>
       <div className="form-group">
-        <label>Duración (días)</label>
-        <input type="number" value={formData.duracionDias || ''} 
-          onChange={(e) => setFormData({...formData, duracionDias: parseInt(e.target.value)})} required />
+        <label>Duración (meses)</label>
+        <input type="number" min="1" value={formData.duracionMeses || ''} 
+          onChange={(e) => setFormData({...formData, duracionMeses: parseInt(e.target.value)})} required />
       </div>
       <div className="form-group">
         <label>
