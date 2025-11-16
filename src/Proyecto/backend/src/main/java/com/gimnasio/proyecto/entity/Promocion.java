@@ -20,20 +20,14 @@ public class Promocion {
     @Column(name = "id_promocion")
     private Long idPromocion;
     
-    @Column(name = "titulo", nullable = false, length = 200)
-    private String titulo;
+    @Column(name = "nombre", nullable = false, length = 200)
+    private String nombre;
     
     @Column(name = "descripcion", length = 1000)
     private String descripcion;
     
-    @Column(name = "tipo_promocion", length = 50)
-    private String tipoPromocion; // 2x1, Descuento, Inscripción Gratuita, etc.
-    
-    @Column(name = "descuento_porcentaje", precision = 5, scale = 2)
+    @Column(name = "descuento_porcentaje", nullable = false, precision = 5, scale = 2)
     private BigDecimal descuentoPorcentaje;
-    
-    @Column(name = "descuento_monto", precision = 10, scale = 2)
-    private BigDecimal descuentoMonto;
     
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;

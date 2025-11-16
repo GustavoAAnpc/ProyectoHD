@@ -40,9 +40,8 @@ const PromocionesTab = ({ promociones, onCreate, onEdit, onDelete }) => {
         <table className="table">
           <thead>
             <tr>
-              <th>Título</th>
-              <th>Tipo</th>
-              <th>Descuento</th>
+              <th>Nombre</th>
+              <th>Descuento (%)</th>
               <th>Fecha Inicio</th>
               <th>Fecha Fin</th>
               <th>Estado</th>
@@ -54,13 +53,10 @@ const PromocionesTab = ({ promociones, onCreate, onEdit, onDelete }) => {
             {promocionesList.length > 0 ? (
               promocionesList.map(promocion => (
                 <tr key={promocion.idPromocion}>
-                  <td>{promocion.titulo}</td>
-                  <td>{promocion.tipoPromocion}</td>
+                  <td>{promocion.nombre || promocion.titulo}</td>
                   <td>
                     {promocion.descuentoPorcentaje ? 
                       `${promocion.descuentoPorcentaje}%` : 
-                      promocion.descuentoMonto ? 
-                      `S/ ${parseFloat(promocion.descuentoMonto).toFixed(2)}` : 
                       'N/A'}
                   </td>
                   <td>{new Date(promocion.fechaInicio).toLocaleDateString()}</td>
@@ -100,7 +96,7 @@ const PromocionesTab = ({ promociones, onCreate, onEdit, onDelete }) => {
               ))
             ) : (
               <tr>
-                <td colSpan="8" style={{textAlign: 'center', padding: '30px'}}>No hay promociones registradas</td>
+                <td colSpan="7" style={{textAlign: 'center', padding: '30px'}}>No hay promociones registradas</td>
               </tr>
             )}
           </tbody>

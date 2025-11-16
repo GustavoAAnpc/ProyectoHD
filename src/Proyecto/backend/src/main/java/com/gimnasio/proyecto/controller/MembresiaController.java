@@ -58,11 +58,11 @@ public class MembresiaController {
         }
         
         Membresia membresia = membresiaOpt.get();
-        Integer diasAdicionales = request.get("diasAdicionales") != null ? 
-            ((Number) request.get("diasAdicionales")).intValue() : 
-            membresia.getTipoMembresia().getDuracionDias();
+        Integer mesesAdicionales = request.get("mesesAdicionales") != null ? 
+            ((Number) request.get("mesesAdicionales")).intValue() : 
+            (membresia.getTipoMembresia().getDuracionMeses() != null ? membresia.getTipoMembresia().getDuracionMeses() : 1);
         
-        membresia.setFechaFin(membresia.getFechaFin().plusDays(diasAdicionales));
+        membresia.setFechaFin(membresia.getFechaFin().plusMonths(mesesAdicionales));
         membresia.setEstado("Activa");
         
         return ResponseEntity.ok(membresiaRepository.save(membresia));

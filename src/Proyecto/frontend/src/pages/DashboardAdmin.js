@@ -400,7 +400,7 @@ const DashboardAdmin = () => {
       case 'membresia':
         return <MembresiaModal formData={formData} setFormData={setFormData} alumnos={alumnos} tiposMembresia={tiposMembresia} />;
       case 'pago':
-        return <PagoModal formData={formData} setFormData={setFormData} membresias={membresias} promociones={promociones} />;
+        return <PagoModal formData={formData} setFormData={setFormData} alumnos={alumnos} tiposMembresia={tiposMembresia} promociones={promociones} />;
       case 'usuario':
         return <UsuarioModal formData={formData} setFormData={setFormData} editingItem={editingItem} />;
       case 'promocion':
