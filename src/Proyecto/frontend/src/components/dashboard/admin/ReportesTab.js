@@ -145,9 +145,18 @@ const ReportesTab = ({ stats, pagos, membresias, alumnos, entrenadores, clases, 
         <section className="dashboard-section">
           <h3>Progreso Promedio de Usuarios</h3>
           <div style={{marginTop: '15px'}}>
-            <p><strong>Peso promedio:</strong> {reportesData.progresoPromedio.peso?.toFixed(2) || '0'} kg</p>
-            <p><strong>Grasa corporal promedio:</strong> {reportesData.progresoPromedio.grasa?.toFixed(2) || '0'}%</p>
-            <p><strong>Músculo promedio:</strong> {reportesData.progresoPromedio.musculo?.toFixed(2) || '0'} kg</p>
+            <p><strong>Peso promedio:</strong> 
+  {Number(reportesData.progresoPromedio.peso || 0).toFixed(2)} kg
+</p>
+
+<p><strong>Grasa corporal promedio:</strong> 
+  {Number(reportesData.progresoPromedio.grasa || 0).toFixed(2)}%
+</p>
+
+<p><strong>Músculo promedio:</strong> 
+  {Number(reportesData.progresoPromedio.musculo || 0).toFixed(2)} kg
+</p>
+
           </div>
         </section>
 
