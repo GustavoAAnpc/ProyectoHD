@@ -445,9 +445,6 @@ const DashboardAdmin = () => {
           <button className={`tab ${activeTab === 'gimnasio' ? 'active' : ''}`} onClick={() => setActiveTab('gimnasio')}>
             Gimnasio
           </button>
-          <button className={`tab ${activeTab === 'reportes' ? 'active' : ''}`} onClick={() => setActiveTab('reportes')}>
-            Reportes
-          </button>
         </div>
 
         {activeTab === 'overview' && (
