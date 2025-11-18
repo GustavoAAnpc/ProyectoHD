@@ -59,7 +59,6 @@ const MembresiasTab = ({ tiposMembresia, membresias, alumnos, tiposActivos, onEd
       <h3 style={{marginTop: '40px', marginBottom: '20px'}}>Membresías Asignadas</h3>
       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
         <span></span>
-        <button className="btn-primary" onClick={() => onCreate()}>Asignar Membresía</button>
       </div>
       <div className="table-container">
         <table className="table">
