@@ -19,6 +19,7 @@ import RutinaModal from '../components/modals/RutinaModal';
 import MensajeModal from '../components/modals/MensajeModal';
 import FeedbackModal from '../components/modals/FeedbackModal';
 import './Dashboard.css';
+import { detectarConLogMeal } from "../services/logmealService";
 
 const DashboardUsuario = () => {
   const { user, logout } = useAuth();
@@ -166,16 +167,63 @@ const DashboardUsuario = () => {
     }
   };
 
-  const handleFoodSearch = async () => {
-    if (!foodSearch.trim()) return;
-    try {
-      const response = await foodDataService.search(foodSearch);
+  const handleFoodSearch = async (input) => {
+  try {
+
+    // Si es foto
+    if (input instanceof File) {
+      const detectados = await detectarConLogMeal(input);
+
+      if (detectados.length === 0) {
+        alert("No se detectaron alimentos en la imagen");
+        return;
+      }
+
+      const alimentoDetectado = detectados[0];
+      setFoodSearch(alimentoDetectado);
+
+      const response = await foodDataService.search(alimentoDetectado);
       setFoodResults(response.data?.foods || []);
-    } catch (error) {
-      console.error('Error buscando alimento:', error);
-      alert('Error al buscar alimentos');
+      return;
     }
-  };
+
+    // Si es búsqueda por texto
+    if (!foodSearch.trim()) return;
+
+    const response = await foodDataService.search(foodSearch);
+    setFoodResults(response.data?.foods || []);
+
+  } catch (error) {
+    console.error("Error en handleFoodSearch:", error);
+    alert("Error al procesar la búsqueda");
+  }
+};
+
+const handleDetectarImagen = async (imageFile) => {
+  try {
+    const alimentos = await detectarConLogMeal(imageFile);
+
+    if (!alimentos || alimentos.length === 0) {
+      alert("No se detectaron alimentos en la imagen");
+      return;
+    }
+
+    // Tomamos el primer alimento detectado
+    const alimento = alimentos[0];
+
+    // Actualiza el input
+    setFoodSearch(alimento);
+
+    // Ejecuta búsqueda USDA
+    handleFoodSearch(alimento);
+    
+
+  } catch (err) {
+    
+    console.error("Error al detectar:", err);
+  }
+};
+
 
   const handleRegistrarAlimento = (food) => {
     const alimento = {
@@ -413,7 +461,9 @@ const DashboardUsuario = () => {
             alimentosConsumidos={alimentosConsumidos}
             onSearch={handleFoodSearch}
             onRegistrarAlimento={handleRegistrarAlimento}
+            onDetectarImagen={handleDetectarImagen}
           />
+
         )}
 
         {activeTab === 'clases' && (
