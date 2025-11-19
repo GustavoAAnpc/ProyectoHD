@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { 
-  alumnoService, planNutricionalService, reservaClaseService, 
+import {
+  alumnoService, planNutricionalService, reservaClaseService,
   incidenciaService, rutinaService, membresiaService,
   pagoService, claseService, foodDataService, mensajeService,
   rutinaEjercicioService, seguimientoFisicoService, alumnoInstructorService
@@ -54,7 +54,7 @@ const DashboardUsuario = () => {
 
       if (alumnoData?.idAlumno) {
         const [
-          planesRes, reservasRes, rutinasRes, membresiasRes, 
+          planesRes, reservasRes, rutinasRes, membresiasRes,
           pagosRes, clasesRes, mensajesRes, seguimientosRes
         ] = await Promise.all([
           planNutricionalService.getByAlumno(alumnoData.idAlumno),
@@ -168,71 +168,75 @@ const DashboardUsuario = () => {
   };
 
   const handleFoodSearch = async (input) => {
-  try {
+    try {
 
-    // Si es foto
-    if (input instanceof File) {
-      const detectados = await detectarConLogMeal(input);
+      // Si es foto
+      if (input instanceof File) {
+        const detectados = await detectarConLogMeal(input);
 
-      if (detectados.length === 0) {
+        if (detectados.length === 0) {
+          alert("No se detectaron alimentos en la imagen");
+          return;
+        }
+
+        const alimentoDetectado = detectados[0];
+        setFoodSearch(alimentoDetectado);
+
+        const response = await foodDataService.search(alimentoDetectado);
+        setFoodResults(response.data?.foods || []);
+        return;
+      }
+
+      // Si es búsqueda por texto
+      if (!foodSearch.trim()) return;
+
+      const response = await foodDataService.search(foodSearch);
+      setFoodResults(response.data?.foods || []);
+
+    } catch (error) {
+      console.error("Error en handleFoodSearch:", error);
+      alert("Error al procesar la búsqueda");
+    }
+  };
+
+  const handleDetectarImagen = async (imageFile) => {
+    try {
+      const alimentos = await detectarConLogMeal(imageFile);
+
+      if (!alimentos || alimentos.length === 0) {
         alert("No se detectaron alimentos en la imagen");
         return;
       }
 
-      const alimentoDetectado = detectados[0];
-      setFoodSearch(alimentoDetectado);
+      // Tomamos el primer alimento detectado
+      const alimento = alimentos[0];
 
-      const response = await foodDataService.search(alimentoDetectado);
-      setFoodResults(response.data?.foods || []);
-      return;
+      // Actualiza el input
+      setFoodSearch(alimento);
+
+      // Ejecuta búsqueda USDA
+      handleFoodSearch(alimento);
+
+
+    } catch (err) {
+
+      console.error("Error al detectar:", err);
     }
-
-    // Si es búsqueda por texto
-    if (!foodSearch.trim()) return;
-
-    const response = await foodDataService.search(foodSearch);
-    setFoodResults(response.data?.foods || []);
-
-  } catch (error) {
-    console.error("Error en handleFoodSearch:", error);
-    alert("Error al procesar la búsqueda");
-  }
-};
-
-const handleDetectarImagen = async (imageFile) => {
-  try {
-    const alimentos = await detectarConLogMeal(imageFile);
-
-    if (!alimentos || alimentos.length === 0) {
-      alert("No se detectaron alimentos en la imagen");
-      return;
-    }
-
-    // Tomamos el primer alimento detectado
-    const alimento = alimentos[0];
-
-    // Actualiza el input
-    setFoodSearch(alimento);
-
-    // Ejecuta búsqueda USDA
-    handleFoodSearch(alimento);
-    
-
-  } catch (err) {
-    
-    console.error("Error al detectar:", err);
-  }
-};
+  };
 
 
-  const handleRegistrarAlimento = (food) => {
+  const handleRegistrarAlimento = (food, cantidad = 100) => {
+    // Los valores de USDA son por 100g, calculamos proporcionalmente
+    const factor = cantidad / 100;
+
     const alimento = {
       id: Date.now(),
       nombre: food.description,
-      calorias: food.foodNutrients?.find(n => n.nutrientId === 1008)?.value || 0,
-      proteinas: food.foodNutrients?.find(n => n.nutrientId === 1003)?.value || 0,
-      carbohidratos: food.foodNutrients?.find(n => n.nutrientId === 1005)?.value || 0,
-      grasas: food.foodNutrients?.find(n => n.nutrientId === 1004)?.value || 0,
+      cantidad: cantidad,
+      calorias: (food.foodNutrients?.find(n => n.nutrientId === 1008)?.value || 0) * factor,
+      proteinas: (food.foodNutrients?.find(n => n.nutrientId === 1003)?.value || 0) * factor,
+      carbohidratos: (food.foodNutrients?.find(n => n.nutrientId === 1005)?.value || 0) * factor,
+      grasas: (food.foodNutrients?.find(n => n.nutrientId === 1004)?.value || 0) * factor,
       fecha: new Date().toISOString().split('T')[0]
     };
     setAlimentosConsumidos([...alimentosConsumidos, alimento]);
@@ -318,7 +322,7 @@ const handleDetectarImagen = async (imageFile) => {
 
   const renderModal = () => {
     if (!showModal) return null;
-    
+
     const modalTitle = {
       'verRutina': 'Mi Rutina - ' + selectedDia,
       'perfil': 'Editar Perfil',
@@ -375,7 +379,7 @@ const handleDetectarImagen = async (imageFile) => {
 
   return (
     <div className="dashboard">
-      <div className="dashboard-content" style={{paddingTop: '20px'}}>
+      <div className="dashboard-content" style={{ paddingTop: '20px' }}>
         <div className="tabs">
           <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
             Resumen
@@ -410,8 +414,8 @@ const handleDetectarImagen = async (imageFile) => {
                 <h2>Mi Resumen</h2>
                 <div className="profile-info">
                   <p><strong>Nombre:</strong> {alumno.nameAlumno} {alumno.apellidosAlumno}</p>
-                  <p><strong>Membresía:</strong> {membresiaActiva ? 
-                    `Activa hasta ${new Date(membresiaActiva.fechaFin).toLocaleDateString()}` : 
+                  <p><strong>Membresía:</strong> {membresiaActiva ?
+                    `Activa hasta ${new Date(membresiaActiva.fechaFin).toLocaleDateString()}` :
                     'Sin membresía activa'}</p>
                   {miEntrenador && (
                     <p><strong>Mi Entrenador:</strong> {miEntrenador.namaInstructor} {miEntrenador.apellidosInstructor}</p>
