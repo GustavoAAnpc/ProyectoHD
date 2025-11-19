@@ -1,12 +1,12 @@
 import React, { useRef, useState } from 'react';
 
-const NutricionTab = ({ 
-  planActivo, 
-  foodSearch, 
-  setFoodSearch, 
-  foodResults, 
-  alimentosConsumidos, 
-  onSearch, 
+const NutricionTab = ({
+  planActivo,
+  foodSearch,
+  setFoodSearch,
+  foodResults,
+  alimentosConsumidos,
+  onSearch,
   onRegistrarAlimento,
   onDetectarImagen
 }) => {
@@ -26,6 +26,9 @@ const NutricionTab = ({
   const canvasRef = useRef(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+
+  // ---- CANTIDAD ----
+  const [cantidades, setCantidades] = useState({});
 
   const openCamera = async () => {
     setCameraOpen(true);
@@ -66,6 +69,24 @@ const NutricionTab = ({
     }
   };
 
+  const handleCantidadChange = (idx, value) => {
+    setCantidades(prev => ({
+      ...prev,
+      [idx]: value
+    }));
+  };
+
+  const handleAgregarConCantidad = (food, idx) => {
+    const cantidad = parseFloat(cantidades[idx]) || 100;
+    onRegistrarAlimento(food, cantidad);
+    // Limpiar la cantidad después de agregar
+    setCantidades(prev => {
+      const newCantidades = { ...prev };
+      delete newCantidades[idx];
+      return newCantidades;
+    });
+  };
+
   return (
     <div className="dashboard-section">
 
@@ -104,7 +125,7 @@ const NutricionTab = ({
           <button className="btn-secondary" onClick={openCamera}>📷</button>
         </div>
 
-        <input 
+        <input
           type="file"
           accept="image/*"
           onChange={(e) => {
@@ -141,15 +162,19 @@ const NutricionTab = ({
 
         {/* --- RESULTADOS USDA --- */}
         {foodResults.length > 0 && (
-          <div className="table-container" style={{ marginTop: '20px', maxHeight: '300px', overflowY: 'auto' }}>
+          <div className="table-container" style={{ marginTop: '20px', maxHeight: '400px', overflowY: 'auto' }}>
+            <p style={{ marginBottom: '10px', fontSize: '14px', color: '#666' }}>
+              <strong>Nota:</strong> Los valores nutricionales son por 100g. Especifica la cantidad consumida en gramos.
+            </p>
             <table className="table">
               <thead>
                 <tr>
                   <th>Alimento</th>
-                  <th>Calorías</th>
-                  <th>Proteínas</th>
-                  <th>Carbohidratos</th>
-                  <th>Grasas</th>
+                  <th>Calorías (100g)</th>
+                  <th>Proteínas (100g)</th>
+                  <th>Carbohidratos (100g)</th>
+                  <th>Grasas (100g)</th>
+                  <th>Cantidad (g)</th>
                   <th>Acción</th>
                 </tr>
               </thead>
@@ -159,6 +184,9 @@ const NutricionTab = ({
                   const proteinas = food.foodNutrients?.find(n => n.nutrientId === 1003)?.value || 0;
                   const carbohidratos = food.foodNutrients?.find(n => n.nutrientId === 1005)?.value || 0;
                   const grasas = food.foodNutrients?.find(n => n.nutrientId === 1004)?.value || 0;
+                  const cantidad = parseFloat(cantidades[idx]) || 100;
+                  const factor = cantidad / 100;
+
                   return (
                     <tr key={idx}>
                       <td>{food.description}</td>
@@ -167,8 +195,29 @@ const NutricionTab = ({
                       <td>{carbohidratos.toFixed(1)}g</td>
                       <td>{grasas.toFixed(1)}g</td>
                       <td>
-                        <button className="btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }}
-                          onClick={() => onRegistrarAlimento(food)}>Agregar</button>
+                        <input
+                          type="number"
+                          min="1"
+                          value={cantidades[idx] || 100}
+                          onChange={(e) => handleCantidadChange(idx, e.target.value)}
+                          style={{
+                            width: '80px',
+                            padding: '6px',
+                            borderRadius: '4px',
+                            border: '1px solid #ddd',
+                            textAlign: 'center'
+                          }}
+                        />
+                      </td>
+                      <td>
+                        <button
+                          className="btn-secondary"
+                          style={{ fontSize: '12px', padding: '6px 12px' }}
+                          onClick={() => handleAgregarConCantidad(food, idx)}
+                          title={`Agregar ${cantidad}g: ${(calorias * factor).toFixed(1)} kcal`}
+                        >
+                          Agregar
+                        </button>
                       </td>
                     </tr>
                   );
@@ -180,13 +229,14 @@ const NutricionTab = ({
 
         {/* --- ALIMENTOS REGISTRADOS HOY --- */}
         {alimentosHoy.length > 0 && (
-          <div style={{marginTop: '30px'}}>
+          <div style={{ marginTop: '30px' }}>
             <h4>Alimentos Registrados Hoy</h4>
-            <div className="table-container" style={{marginTop: '15px'}}>
+            <div className="table-container" style={{ marginTop: '15px' }}>
               <table className="table">
                 <thead>
                   <tr>
                     <th>Alimento</th>
+                    <th>Cantidad</th>
                     <th>Calorías</th>
                     <th>Proteínas</th>
                     <th>Carbohidratos</th>
@@ -197,6 +247,7 @@ const NutricionTab = ({
                   {alimentosHoy.map((alimento, idx) => (
                     <tr key={idx}>
                       <td>{alimento.nombre}</td>
+                      <td>{alimento.cantidad}g</td>
                       <td>{alimento.calorias.toFixed(1)} kcal</td>
                       <td>{alimento.proteinas.toFixed(1)}g</td>
                       <td>{alimento.carbohidratos.toFixed(1)}g</td>
@@ -205,8 +256,9 @@ const NutricionTab = ({
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr style={{fontWeight: 'bold', background: '#f0f0f0'}}>
+                  <tr style={{ fontWeight: 'bold', background: '#f0f0f0' }}>
                     <td>Total</td>
+                    <td>-</td>
                     <td>{totales.calorias.toFixed(1)} kcal</td>
                     <td>{totales.proteinas.toFixed(1)}g</td>
                     <td>{totales.carbohidratos.toFixed(1)}g</td>
@@ -217,7 +269,7 @@ const NutricionTab = ({
             </div>
 
             {/* BARRA DE CALORÍAS */}
-            <div style={{marginTop: '20px', padding: '20px', background: '#e8f5e9', borderRadius: '8px'}}>
+            <div style={{ marginTop: '20px', padding: '20px', background: '#e8f5e9', borderRadius: '8px' }}>
               <h4>Comparación con Recomendación</h4>
               <p><strong>Calorías recomendadas:</strong> {caloriasRecomendadas} kcal</p>
               <p><strong>Calorías consumidas:</strong> {totales.calorias.toFixed(1)} kcal</p>
