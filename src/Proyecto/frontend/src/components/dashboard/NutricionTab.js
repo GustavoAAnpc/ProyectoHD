@@ -6,9 +6,11 @@ const NutricionTab = ({
   setFoodSearch,
   foodResults,
   alimentosConsumidos,
+  alimentosDetectados,
   onSearch,
   onRegistrarAlimento,
-  onDetectarImagen
+  onDetectarImagen,
+  onSeleccionarAlimento
 }) => {
   const hoy = new Date().toISOString().split('T')[0];
   const alimentosHoy = alimentosConsumidos.filter(a => a.fecha === hoy);
@@ -156,6 +158,77 @@ const NutricionTab = ({
             <div style={{ marginTop: "20px", display: "flex", gap: "20px", flexWrap: "wrap", justifyContent: "center" }}>
               <button className="btn-primary" onClick={takePhoto}>Capturar</button>
               <button className="btn-secondary" onClick={closeCamera}>Cerrar</button>
+            </div>
+          </div>
+        )}
+
+        {/* --- ALIMENTOS DETECTADOS --- */}
+        {alimentosDetectados && alimentosDetectados.length > 0 && (
+          <div style={{
+            marginTop: '20px',
+            padding: '25px',
+            background: 'linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%)',
+            borderRadius: '12px',
+            boxShadow: '0 4px 15px rgba(255, 107, 53, 0.3)',
+            border: '2px solid #FF8C42'
+          }}>
+            <h4 style={{
+              color: 'white',
+              marginBottom: '15px',
+              fontSize: '18px',
+              fontWeight: '700',
+              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)'
+            }}>
+              🍽️ Alimentos Detectados en la Imagen
+            </h4>
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.95)',
+              fontSize: '14px',
+              marginBottom: '20px',
+              fontWeight: '500'
+            }}>
+              Haz clic en un alimento para buscar su información nutricional:
+            </p>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '12px'
+            }}>
+              {alimentosDetectados.map((alimento, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => onSeleccionarAlimento(alimento)}
+                  style={{
+                    padding: '12px 24px',
+                    background: 'white',
+                    color: '#FF6B35',
+                    border: '2px solid white',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                    textTransform: 'capitalize'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.25)';
+                    e.target.style.background = '#E85A2A';
+                    e.target.style.color = 'white';
+                    e.target.style.borderColor = '#E85A2A';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
+                    e.target.style.background = 'white';
+                    e.target.style.color = '#FF6B35';
+                    e.target.style.borderColor = 'white';
+                  }}
+                >
+                  {alimento}
+                </button>
+              ))}
             </div>
           </div>
         )}
