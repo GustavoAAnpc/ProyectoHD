@@ -41,6 +41,7 @@ const DashboardUsuario = () => {
   const [foodSearch, setFoodSearch] = useState('');
   const [foodResults, setFoodResults] = useState([]);
   const [alimentosConsumidos, setAlimentosConsumidos] = useState([]);
+  const [alimentosDetectados, setAlimentosDetectados] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
   const [formData, setFormData] = useState({});
@@ -199,28 +200,50 @@ const DashboardUsuario = () => {
     }
   };
 
+
   const handleDetectarImagen = async (imageFile) => {
     try {
       const alimentos = await detectarConLogMeal(imageFile);
 
       if (!alimentos || alimentos.length === 0) {
         alert("No se detectaron alimentos en la imagen");
+        setAlimentosDetectados([]);
         return;
       }
 
-      // Tomamos el primer alimento detectado
-      const alimento = alimentos[0];
+      // Guardar todos los alimentos detectados para mostrarlos como botones
+      setAlimentosDetectados(alimentos);
 
+      // Limpiar búsqueda anterior
+      setFoodResults([]);
+      setFoodSearch('');
+
+
+    } catch (err) {
+      console.error("Error al detectar:", err);
+      setAlimentosDetectados([]);
+    }
+  };
+
+  const handleSeleccionarAlimento = async (alimento) => {
+    try {
       // Actualiza el input
       setFoodSearch(alimento);
 
       // Ejecuta búsqueda USDA
-      handleFoodSearch(alimento);
+      const response = await foodDataService.search(alimento);
+      setFoodResults(response.data?.foods || []);
+    } catch (error) {
+      console.error("Error al buscar alimento:", error);
 
-
-    } catch (err) {
-
-      console.error("Error al detectar:", err);
+      if (error.response?.status === 403) {
+        alert("Error de autenticación. Por favor, inicia sesión nuevamente.");
+      } else if (error.response?.status === 404) {
+        alert("No se encontró información para este alimento.");
+        setFoodResults([]);
+      } else {
+        alert("Error al buscar el alimento. Por favor, intenta nuevamente.");
+      }
     }
   };
 
@@ -463,9 +486,11 @@ const DashboardUsuario = () => {
             setFoodSearch={setFoodSearch}
             foodResults={foodResults}
             alimentosConsumidos={alimentosConsumidos}
+            alimentosDetectados={alimentosDetectados}
             onSearch={handleFoodSearch}
             onRegistrarAlimento={handleRegistrarAlimento}
             onDetectarImagen={handleDetectarImagen}
+            onSeleccionarAlimento={handleSeleccionarAlimento}
           />
 
         )}

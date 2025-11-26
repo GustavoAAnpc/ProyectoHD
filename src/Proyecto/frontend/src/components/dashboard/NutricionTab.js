@@ -6,9 +6,11 @@ const NutricionTab = ({
   setFoodSearch,
   foodResults,
   alimentosConsumidos,
+  alimentosDetectados,
   onSearch,
   onRegistrarAlimento,
-  onDetectarImagen
+  onDetectarImagen,
+  onSeleccionarAlimento
 }) => {
   const hoy = new Date().toISOString().split('T')[0];
   const alimentosHoy = alimentosConsumidos.filter(a => a.fecha === hoy);
@@ -159,6 +161,30 @@ const NutricionTab = ({
             </div>
           </div>
         )}
+
+        {/* --- ALIMENTOS DETECTADOS --- */}
+        {alimentosDetectados && alimentosDetectados.length > 0 && (
+          <div className="food-detected-container">
+            <h4>
+              🍽️ Alimentos Detectados en la Imagen
+            </h4>
+            <p>
+              Haz clic en un alimento para buscar su información nutricional:
+            </p>
+            <div className="food-buttons-container">
+              {alimentosDetectados.map((alimento, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => onSeleccionarAlimento(alimento)}
+                  className="btn-food-detected"
+                >
+                  {alimento}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
 
         {/* --- RESULTADOS USDA --- */}
         {foodResults.length > 0 && (
