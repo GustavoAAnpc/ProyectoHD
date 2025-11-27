@@ -54,35 +54,31 @@ const UsuariosTab = ({ usuarios, alumnos, instructores, onEdit, onToggleEstado, 
     }
   };
 
-  return (
-    <div className="dashboard-section">
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px'}}>
-        <h2>Gestión de Usuarios</h2>
-        <div style={{display: 'flex', gap: '10px'}}>
-          <button className="btn-secondary" onClick={() => setShowAsignarModal(true)}>Asignar Alumno a Entrenador</button>
-          <button className="btn-primary" onClick={() => onCreate()}>Nuevo Usuario</button>
-        </div>
-      </div>
+  // Separar usuarios por rol
+  const administradores = usuarios.filter(u => u.rol?.nombreRol === 'Administrador');
+  const entrenadores = usuarios.filter(u => u.rol?.nombreRol === 'Entrenador');
+  const usuariosRegulares = usuarios.filter(u => u.rol?.nombreRol === 'Usuario');
 
+  const renderUsuariosTable = (usuariosList, titulo, emptyMessage) => (
+    <>
+      <h3 style={{ marginTop: '30px', marginBottom: '20px', color: 'var(--primary-color)' }}>{titulo}</h3>
       <div className="table-container">
         <table className="table">
           <thead>
             <tr>
               <th>Usuario</th>
               <th>Email</th>
-              <th>Rol</th>
               <th>Estado</th>
               <th>Fecha Registro</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {usuarios.length > 0 ? (
-              usuarios.map(usuario => (
+            {usuariosList.length > 0 ? (
+              usuariosList.map(usuario => (
                 <tr key={usuario.idUsuario}>
                   <td>{usuario.nameUsuario}</td>
                   <td>{usuario.email}</td>
-                  <td>{usuario.rol?.nombreRol || 'N/A'}</td>
                   <td>
                     <span style={{
                       padding: '4px 10px',
@@ -97,27 +93,43 @@ const UsuariosTab = ({ usuarios, alumnos, instructores, onEdit, onToggleEstado, 
                   </td>
                   <td>{new Date(usuario.fechaRegistro).toLocaleDateString()}</td>
                   <td>
-                    <button className="btn-secondary" style={{marginRight: '8px', fontSize: '12px', padding: '6px 12px'}}
+                    <button className="btn-secondary" style={{ marginRight: '8px', fontSize: '12px', padding: '6px 12px' }}
                       onClick={() => onEdit(usuario)}>Editar</button>
-                    <button className="btn-secondary" style={{marginRight: '8px', fontSize: '12px', padding: '6px 12px'}}
+                    <button className="btn-secondary" style={{ marginRight: '8px', fontSize: '12px', padding: '6px 12px' }}
                       onClick={() => onToggleEstado(usuario.idUsuario, usuario.estado)}>
                       {usuario.estado ? 'Suspender' : 'Activar'}
                     </button>
-                    <button className="btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}}
+                    <button className="btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }}
                       onClick={() => onResetPassword(usuario.idUsuario)}>Reset Password</button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="6" style={{textAlign: 'center', padding: '30px'}}>No hay usuarios registrados</td>
+                <td colSpan="5" style={{ textAlign: 'center', padding: '30px' }}>{emptyMessage}</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+    </>
+  );
 
-      <h3 style={{marginTop: '40px', marginBottom: '20px'}}>Asignaciones Alumno-Entrenador</h3>
+  return (
+    <div className="dashboard-section">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+        <h2>Gestión de Usuarios</h2>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn-secondary" onClick={() => setShowAsignarModal(true)}>Asignar Alumno a Entrenador</button>
+          <button className="btn-primary" onClick={() => onCreate()}>Nuevo Usuario</button>
+        </div>
+      </div>
+
+      {renderUsuariosTable(administradores, 'Administradores', 'No hay administradores registrados')}
+      {renderUsuariosTable(entrenadores, 'Entrenadores', 'No hay entrenadores registrados')}
+      {renderUsuariosTable(usuariosRegulares, 'Usuarios', 'No hay usuarios regulares registrados')}
+
+      <h3 style={{ marginTop: '40px', marginBottom: '20px' }}>Asignaciones Alumno-Entrenador</h3>
       <div className="table-container">
         <table className="table">
           <thead>
@@ -149,14 +161,14 @@ const UsuariosTab = ({ usuarios, alumnos, instructores, onEdit, onToggleEstado, 
                     </span>
                   </td>
                   <td>
-                    <button className="btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}}
+                    <button className="btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }}
                       onClick={() => handleEliminarAsignacion(asignacion.idAlumnoInstructor)}>Eliminar</button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="5" style={{textAlign: 'center', padding: '30px'}}>No hay asignaciones registradas</td>
+                <td colSpan="5" style={{ textAlign: 'center', padding: '30px' }}>No hay asignaciones registradas</td>
               </tr>
             )}
           </tbody>
@@ -184,7 +196,7 @@ const UsuariosTab = ({ usuarios, alumnos, instructores, onEdit, onToggleEstado, 
             width: '90%',
             border: '2px solid var(--border-color)'
           }}>
-            <h3 style={{marginBottom: '20px'}}>Asignar Alumno a Entrenador</h3>
+            <h3 style={{ marginBottom: '20px' }}>Asignar Alumno a Entrenador</h3>
             <div className="form-group">
               <label>Alumno *</label>
               <select value={selectedAlumno || ''} onChange={(e) => setSelectedAlumno(parseInt(e.target.value))} required>
@@ -207,9 +219,9 @@ const UsuariosTab = ({ usuarios, alumnos, instructores, onEdit, onToggleEstado, 
                 ))}
               </select>
             </div>
-            <div style={{display: 'flex', gap: '10px', marginTop: '25px'}}>
-              <button className="btn-primary" onClick={handleAsignarAlumno} style={{flex: 1}}>Asignar</button>
-              <button className="btn-secondary" onClick={() => setShowAsignarModal(false)} style={{flex: 1}}>Cancelar</button>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
+              <button className="btn-primary" onClick={handleAsignarAlumno} style={{ flex: 1 }}>Asignar</button>
+              <button className="btn-secondary" onClick={() => setShowAsignarModal(false)} style={{ flex: 1 }}>Cancelar</button>
             </div>
           </div>
         </div>
