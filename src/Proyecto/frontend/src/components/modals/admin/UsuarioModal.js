@@ -18,7 +18,7 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
       setErrors(prev => ({ ...prev, nameUsuario: 'El nombre de usuario debe tener al menos 3 caracteres' }));
       return false;
     }
-    
+
     if (editingItem && editingItem.nameUsuario === username) {
       setErrors(prev => ({ ...prev, nameUsuario: null }));
       return true;
@@ -96,7 +96,7 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
 
   const handleUsernameChange = async (e) => {
     const value = e.target.value;
-    setFormData({...formData, nameUsuario: value});
+    setFormData({ ...formData, nameUsuario: value });
     if (value) {
       await validateUsername(value);
     } else {
@@ -106,7 +106,7 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
 
   const handleEmailChange = async (e) => {
     const value = e.target.value;
-    setFormData({...formData, email: value});
+    setFormData({ ...formData, email: value });
     if (value) {
       await validateEmail(value);
     } else {
@@ -116,7 +116,7 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
 
   const handlePasswordChange = (e) => {
     const value = e.target.value;
-    setFormData({...formData, passwordUsuario: value});
+    setFormData({ ...formData, passwordUsuario: value });
     if (confirmPassword) {
       validatePassword();
     }
@@ -130,67 +130,139 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
     }
   };
 
+  // Generar nombre de usuario automáticamente
+  const generateUsername = (nombres, apellidos, celular) => {
+    if (!nombres || !apellidos || !celular) return '';
+
+    const primeraLetraNombre = nombres.trim().charAt(0).toLowerCase();
+    const primerApellido = apellidos.trim().split(' ')[0].toLowerCase();
+    const ultimosDosCelular = celular.toString().slice(-2);
+
+    return `${primeraLetraNombre}${primerApellido}${ultimosDosCelular}`;
+  };
+
+  // Generar contraseña automáticamente
+  const generatePassword = (nombres) => {
+    if (!nombres) return '';
+    const primerNombre = nombres.trim().split(' ')[0].toLowerCase();
+    return `${primerNombre}123`;
+  };
+
+  const handleNombresChange = (e) => {
+    const value = e.target.value;
+
+    if (value && formData.apellidos && formData.celular) {
+      const username = generateUsername(value, formData.apellidos, formData.celular);
+      const password = generatePassword(value);
+      setFormData(prev => ({ ...prev, nombres: value, nameUsuario: username, passwordUsuario: password }));
+      setConfirmPassword(password);
+      validateUsername(username);
+    } else {
+      setFormData({ ...formData, nombres: value });
+    }
+  };
+
+  const handleApellidosChange = (e) => {
+    const value = e.target.value;
+
+    if (formData.nombres && value && formData.celular) {
+      const username = generateUsername(formData.nombres, value, formData.celular);
+      const password = generatePassword(formData.nombres);
+      setFormData(prev => ({ ...prev, apellidos: value, nameUsuario: username, passwordUsuario: password }));
+      setConfirmPassword(password);
+      validateUsername(username);
+    } else {
+      setFormData({ ...formData, apellidos: value });
+    }
+  };
+
+  const handleCelularChange = (e) => {
+    const value = e.target.value;
+
+    if (formData.nombres && formData.apellidos && value) {
+      const username = generateUsername(formData.nombres, formData.apellidos, value);
+      const password = generatePassword(formData.nombres);
+      setFormData(prev => ({ ...prev, celular: value, nameUsuario: username, passwordUsuario: password }));
+      setConfirmPassword(password);
+      validateUsername(username);
+    } else {
+      setFormData({ ...formData, celular: value });
+    }
+  };
+
   return (
     <>
       <div className="form-group">
-        <label>Nombre Completo *</label>
-        <input 
-          type="text" 
-          value={formData.nombreCompleto || ''} 
-          onChange={(e) => setFormData({...formData, nombreCompleto: e.target.value})} 
-          required 
+        <label>Nombres *</label>
+        <input
+          type="text"
+          value={formData.nombres || ''}
+          onChange={handleNombresChange}
+          required
+          disabled={!!editingItem}
         />
       </div>
       <div className="form-group">
-        <label>Nombre de Usuario *</label>
-        <input 
-          type="text" 
-          value={formData.nameUsuario || ''} 
-          onChange={handleUsernameChange}
-          required 
+        <label>Apellidos *</label>
+        <input
+          type="text"
+          value={formData.apellidos || ''}
+          onChange={handleApellidosChange}
+          required
           disabled={!!editingItem}
         />
-        {checkingUsername && <small style={{color: '#666'}}>Verificando...</small>}
-        {errors.nameUsuario && <small style={{color: '#dc2626', display: 'block', marginTop: '5px'}}>{errors.nameUsuario}</small>}
+      </div>
+      <div className="form-group">
+        <label>Celular *</label>
+        <input
+          type="number"
+          value={formData.celular || ''}
+          onChange={handleCelularChange}
+          required
+          disabled={!!editingItem}
+        />
+      </div>
+      <div className="form-group">
+        <label>Nombre de Usuario (Generado automáticamente)</label>
+        <input
+          type="text"
+          value={formData.nameUsuario || ''}
+          onChange={handleUsernameChange}
+          required
+          disabled={!!editingItem}
+          style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed', color: '#111' }}
+        />
+        {checkingUsername && <small style={{ color: '#666' }}>Verificando...</small>}
+        {errors.nameUsuario && <small style={{ color: '#dc2626', display: 'block', marginTop: '5px' }}>{errors.nameUsuario}</small>}
       </div>
       <div className="form-group">
         <label>Email *</label>
-        <input 
-          type="email" 
-          value={formData.email || ''} 
+        <input
+          type="email"
+          value={formData.email || ''}
           onChange={handleEmailChange}
-          required 
+          required
         />
-        {checkingEmail && <small style={{color: '#666'}}>Verificando...</small>}
-        {errors.email && <small style={{color: '#dc2626', display: 'block', marginTop: '5px'}}>{errors.email}</small>}
+        {checkingEmail && <small style={{ color: '#666' }}>Verificando...</small>}
+        {errors.email && <small style={{ color: '#dc2626', display: 'block', marginTop: '5px' }}>{errors.email}</small>}
       </div>
       <div className="form-group">
-        <label>Contraseña {!editingItem && '*'}</label>
-        <input 
-          type="password" 
-          value={formData.passwordUsuario || ''} 
+        <label>Contraseña {!editingItem && '(Generada automáticamente) *'}</label>
+        <input
+          type="text"
+          value={formData.passwordUsuario || ''}
           onChange={handlePasswordChange}
           required={!editingItem}
+          disabled={!editingItem}
+          style={!editingItem ? { backgroundColor: '#f5f5f5', cursor: 'not-allowed', color: '#111' } : {}}
         />
-        {errors.passwordUsuario && <small style={{color: '#dc2626', display: 'block', marginTop: '5px'}}>{errors.passwordUsuario}</small>}
+        {errors.passwordUsuario && <small style={{ color: '#dc2626', display: 'block', marginTop: '5px' }}>{errors.passwordUsuario}</small>}
       </div>
-      {!editingItem && (
-        <div className="form-group">
-          <label>Confirmar Contraseña *</label>
-          <input 
-            type="password" 
-            value={confirmPassword} 
-            onChange={handleConfirmPasswordChange}
-            required
-          />
-          {errors.confirmPassword && <small style={{color: '#dc2626', display: 'block', marginTop: '5px'}}>{errors.confirmPassword}</small>}
-        </div>
-      )}
       <div className="form-group">
         <label>Rol *</label>
-        <select 
-          value={formData.rol?.idRol || ''} 
-          onChange={(e) => setFormData({...formData, rol: {idRol: parseInt(e.target.value)}})} 
+        <select
+          value={formData.rol?.idRol || ''}
+          onChange={(e) => setFormData({ ...formData, rol: { idRol: parseInt(e.target.value) } })}
           required
           disabled={!!editingItem}
         >
@@ -202,10 +274,10 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
       </div>
       <div className="form-group">
         <label>
-          <input 
-            type="checkbox" 
-            checked={formData.estado !== false} 
-            onChange={(e) => setFormData({...formData, estado: e.target.checked})} 
+          <input
+            type="checkbox"
+            checked={formData.estado !== false}
+            onChange={(e) => setFormData({ ...formData, estado: e.target.checked })}
           />
           Activo
         </label>
