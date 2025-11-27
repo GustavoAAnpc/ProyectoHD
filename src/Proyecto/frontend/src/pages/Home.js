@@ -23,7 +23,7 @@ const Home = () => {
     try {
       const response = await authService.login(username, password);
       const { token, rol, idUsuario, username: user, email, nombreCompleto } = response.data;
-      
+
       login(
         { idUsuario, username: user, email, rol, nombreCompleto },
         token
@@ -77,7 +77,7 @@ const Home = () => {
             Entrena como un <span className="highlight">PRO</span>, vive como un <span className="highlight">CAMPEÓN</span>
           </h1>
           <p className="hero-description">
-            El gimnasio más completo de la ciudad con equipos de última generación, 
+            El gimnasio más completo de la ciudad con equipos de última generación,
             entrenadores profesionales y un ambiente único para alcanzar tus objetivos.
           </p>
           <div className="hero-buttons">
@@ -87,10 +87,10 @@ const Home = () => {
                 <button onClick={() => scrollToSection('planes')} className="btn-secondary btn-hero">Ver Planes</button>
               </>
             ) : (
-              <Link to={user.rol === 'Administrador' ? '/dashboard/administrador' : 
-                       user.rol === 'Entrenador' ? '/dashboard/entrenador' : 
-                       '/dashboard/usuario'} 
-                    className="btn-primary btn-hero">
+              <Link to={user.rol === 'Administrador' ? '/dashboard/administrador' :
+                user.rol === 'Entrenador' ? '/dashboard/entrenador' :
+                  '/dashboard/usuario'}
+                className="btn-primary btn-hero">
                 Ir a Mi Dashboard
               </Link>
             )}
@@ -251,8 +251,8 @@ const Home = () => {
               <div className="contact-icon">🕐</div>
               <h4>Horarios</h4>
               <p>Lun - Vie: 6:00 AM - 10:00 PM<br />
-              Sáb: 8:00 AM - 8:00 PM<br />
-              Dom: 9:00 AM - 6:00 PM</p>
+                Sáb: 8:00 AM - 8:00 PM<br />
+                Dom: 9:00 AM - 6:00 PM</p>
             </div>
           </div>
         </div>
@@ -318,13 +318,13 @@ const Home = () => {
               />
             </div>
             {error && <div className="error-message">{error}</div>}
-            <div style={{display: 'flex', gap: '10px', marginTop: '25px'}}>
-              <button type="submit" disabled={loading} className="btn-primary" style={{flex: 1}}>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
+              <button type="submit" disabled={loading} className="btn-primary" style={{ flex: 1 }}>
                 {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
               </button>
-              <button 
-                type="button" 
-                className="btn-secondary" 
+              <button
+                type="button"
+                className="btn-secondary"
                 onClick={() => {
                   setShowLoginModal(false);
                   setError('');

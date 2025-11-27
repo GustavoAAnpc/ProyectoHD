@@ -465,70 +465,85 @@ const DashboardUsuario = () => {
               </div>
             </div>
           </>
-        )}
+        )
+        }
 
-        {activeTab === 'perfil' && (
-          <PerfilTab alumno={alumno} onEdit={handleEditPerfil} />
-        )}
+        {
+          activeTab === 'perfil' && (
+            <PerfilTab alumno={alumno} onEdit={handleEditPerfil} />
+          )
+        }
 
-        {activeTab === 'rutinas' && (
-          <RutinasTab rutinas={rutinas} onViewRutina={handleViewRutina} />
-        )}
+        {
+          activeTab === 'rutinas' && (
+            <RutinasTab rutinas={rutinas} onViewRutina={handleViewRutina} />
+          )
+        }
 
-        {activeTab === 'progreso' && (
-          <ProgresoTab seguimientos={seguimientos} />
-        )}
+        {
+          activeTab === 'progreso' && (
+            <ProgresoTab seguimientos={seguimientos} />
+          )
+        }
 
-        {activeTab === 'nutricion' && (
-          <NutricionTab
-            planActivo={planActivo}
-            foodSearch={foodSearch}
-            setFoodSearch={setFoodSearch}
-            foodResults={foodResults}
-            alimentosConsumidos={alimentosConsumidos}
-            alimentosDetectados={alimentosDetectados}
-            onSearch={handleFoodSearch}
-            onRegistrarAlimento={handleRegistrarAlimento}
-            onDetectarImagen={handleDetectarImagen}
-            onSeleccionarAlimento={handleSeleccionarAlimento}
-          />
+        {
+          activeTab === 'nutricion' && (
+            <NutricionTab
+              planActivo={planActivo}
+              foodSearch={foodSearch}
+              setFoodSearch={setFoodSearch}
+              foodResults={foodResults}
+              alimentosConsumidos={alimentosConsumidos}
+              alimentosDetectados={alimentosDetectados}
+              onSearch={handleFoodSearch}
+              onRegistrarAlimento={handleRegistrarAlimento}
+              onDetectarImagen={handleDetectarImagen}
+              onSeleccionarAlimento={handleSeleccionarAlimento}
+            />
 
-        )}
+          )
+        }
 
-        {activeTab === 'clases' && (
-          <ClasesTab
-            clases={clases}
-            reservas={reservas}
-            onReservar={handleReservarClase}
-            onCancelar={handleCancelarReserva}
-          />
-        )}
+        {
+          activeTab === 'clases' && (
+            <ClasesTab
+              clases={clases}
+              reservas={reservas}
+              onReservar={handleReservarClase}
+              onCancelar={handleCancelarReserva}
+            />
+          )
+        }
 
-        {activeTab === 'membresia' && (
-          <MembresiaTab membresiaActiva={membresiaActiva} pagos={pagos} />
-        )}
+        {
+          activeTab === 'membresia' && (
+            <MembresiaTab membresiaActiva={membresiaActiva} pagos={pagos} />
+          )
+        }
 
-        {activeTab === 'comunicacion' && (
-          <ComunicacionTab
-            miEntrenador={miEntrenador}
-            mensajes={mensajes}
-            onEnviarMensaje={() => {
-              setModalType('mensaje');
-              setFormData({});
-              setShowModal(true);
-            }}
-            onEnviarFeedback={() => {
-              setModalType('feedback');
-              setFormData({});
-              setShowModal(true);
-            }}
-            onMarcarLeido={handleMarcarMensajeLeido}
-          />
-        )}
+        {
+          activeTab === 'comunicacion' && (
+            <ComunicacionTab
+              miEntrenador={miEntrenador}
+              mensajes={mensajes}
+              onEnviarMensaje={() => {
+                setModalType('mensaje');
+                setFormData({});
+                setShowModal(true);
+              }}
+              onEnviarFeedback={() => {
+                setModalType('feedback');
+                setFormData({});
+                setShowModal(true);
+              }}
+              onMarcarLeido={handleMarcarMensajeLeido}
+            />
+          )
+        }
 
         {renderModal()}
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 
