@@ -122,15 +122,23 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
     }
   };
 
-  const handleConfirmPasswordChange = (e) => {
-    const value = e.target.value;
-    setConfirmPassword(value);
-    if (formData.passwordUsuario) {
-      validatePassword();
+  const generateUniqueUsername = async (baseUsername) => {
+    const usuarios = await usuarioService.getAll();
+    const existentes = usuarios.data.map(u => u.nameUsuario);
+
+    if (!existentes.includes(baseUsername)) return baseUsername;
+
+    let contador = 1;
+    let nuevo = `${baseUsername}_${contador}`;
+
+    while (existentes.includes(nuevo)) {
+      contador++;
+      nuevo = `${baseUsername}_${contador}`;
     }
+
+    return nuevo;
   };
 
-  // Generar nombre de usuario automáticamente
   const generateUsername = (nombres, apellidos, celular) => {
     if (!nombres || !apellidos || !celular) return '';
 
@@ -141,18 +149,18 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
     return `${primeraLetraNombre}${primerApellido}${ultimosDosCelular}`;
   };
 
-  // Generar contraseña automáticamente
   const generatePassword = (nombres) => {
     if (!nombres) return '';
     const primerNombre = nombres.trim().split(' ')[0].toLowerCase();
     return `${primerNombre}123`;
   };
 
-  const handleNombresChange = (e) => {
+  const handleNombresChange = async (e) => {
     const value = e.target.value;
 
     if (value && formData.apellidos && formData.celular) {
-      const username = generateUsername(value, formData.apellidos, formData.celular);
+      const base = generateUsername(value, formData.apellidos, formData.celular);
+      const username = await generateUniqueUsername(base);
       const password = generatePassword(value);
       setFormData(prev => ({ ...prev, nombres: value, nameUsuario: username, passwordUsuario: password }));
       setConfirmPassword(password);
@@ -162,11 +170,12 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
     }
   };
 
-  const handleApellidosChange = (e) => {
+  const handleApellidosChange = async (e) => {
     const value = e.target.value;
 
     if (formData.nombres && value && formData.celular) {
-      const username = generateUsername(formData.nombres, value, formData.celular);
+      const base = generateUsername(formData.nombres, value, formData.celular);
+      const username = await generateUniqueUsername(base);
       const password = generatePassword(formData.nombres);
       setFormData(prev => ({ ...prev, apellidos: value, nameUsuario: username, passwordUsuario: password }));
       setConfirmPassword(password);
@@ -176,11 +185,16 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
     }
   };
 
-  const handleCelularChange = (e) => {
+  const handleCelularChange = async (e) => {
     const value = e.target.value;
 
+    if (!/^9\d{0,8}$/.test(value) && value !== "") {
+      return;
+    }
+
     if (formData.nombres && formData.apellidos && value) {
-      const username = generateUsername(formData.nombres, formData.apellidos, value);
+      const base = generateUsername(formData.nombres, formData.apellidos, value);
+      const username = await generateUniqueUsername(base);
       const password = generatePassword(formData.nombres);
       setFormData(prev => ({ ...prev, celular: value, nameUsuario: username, passwordUsuario: password }));
       setConfirmPassword(password);
@@ -189,6 +203,7 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
       setFormData({ ...formData, celular: value });
     }
   };
+
 
   return (
     <>
@@ -215,12 +230,14 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
       <div className="form-group">
         <label>Celular *</label>
         <input
-          type="number"
+          type="text"
           value={formData.celular || ''}
+          maxLength={9}
           onChange={handleCelularChange}
           required
           disabled={!!editingItem}
         />
+
       </div>
       <div className="form-group">
         <label>Nombre de Usuario (Generado automáticamente)</label>

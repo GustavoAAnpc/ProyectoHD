@@ -15,8 +15,18 @@ const SedeModal = ({ formData, setFormData }) => {
       </div>
       <div className="form-group">
         <label>Teléfono</label>
-        <input type="number" value={formData.telefono || ''}
-          onChange={(e) => setFormData({ ...formData, telefono: e.target.value })} />
+        <input
+          type="text"
+          value={formData.telefono || ''}
+          maxLength={9}
+          pattern="9[0-9]{8}"
+          onChange={(e) => {
+            const v = e.target.value;
+            if (/^9\d{0,8}$/.test(v) || v === "") {
+              setFormData({ ...formData, telefono: v });
+            }
+          }}
+        />
       </div>
       <div className="form-group">
         <label>Horario Apertura</label>
