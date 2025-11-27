@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { 
-  instructorService, claseService, planNutricionalService, 
-  alumnoService, rutinaService, ejercicioService, 
+import {
+  instructorService, claseService, planNutricionalService,
+  alumnoService, rutinaService, ejercicioService,
   seguimientoFisicoService, alumnoInstructorService,
   rutinaEjercicioService, mensajeService, foodDataService
 } from '../services/api';
@@ -55,9 +55,9 @@ const DashboardEntrenador = () => {
       const instructor = instructorRes.data;
       if (instructor?.idInstructor) {
         setInstructorId(instructor.idInstructor);
-        
+
         const [
-          clasesRes, planesRes, clientesRes, rutinasRes, 
+          clasesRes, planesRes, clientesRes, rutinasRes,
           ejerciciosRes, seguimientosRes, mensajesRes
         ] = await Promise.all([
           claseService.getByInstructor(instructor.idInstructor),
@@ -76,7 +76,7 @@ const DashboardEntrenador = () => {
         setEjercicios(ejerciciosRes.data);
         setSeguimientos(seguimientosRes.data);
         setMensajes(mensajesRes.data);
-        
+
         setStats({
           clases: clasesRes.data.length,
           planes: planesRes.data.length,
@@ -139,7 +139,7 @@ const DashboardEntrenador = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      switch(modalType) {
+      switch (modalType) {
         case 'seguimiento':
           if (editingItem) {
             await seguimientoFisicoService.update(editingItem.idSeguimiento, formData);
@@ -154,7 +154,7 @@ const DashboardEntrenador = () => {
             const rutinaRes = await rutinaService.create(formData);
             if (formData.ejercicios?.length > 0) {
               await Promise.all(
-                formData.ejercicios.map(ej => 
+                formData.ejercicios.map(ej =>
                   rutinaEjercicioService.create({
                     ...ej,
                     rutina: { idRutina: rutinaRes.data.idRutina }
@@ -224,7 +224,7 @@ const DashboardEntrenador = () => {
   };
 
   const renderModalContent = () => {
-    switch(modalType) {
+    switch (modalType) {
       case 'seguimiento':
         return (
           <SeguimientoModal
@@ -274,7 +274,7 @@ const DashboardEntrenador = () => {
 
   return (
     <div className="dashboard">
-      <div className="dashboard-content" style={{paddingTop: '20px'}}>
+      <div className="dashboard-content" style={{ paddingTop: '20px' }}>
         <div className="tabs">
           <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
             Resumen
@@ -332,21 +332,21 @@ const DashboardEntrenador = () => {
               <section className="dashboard-section">
                 <h2>Gestión de Clientes</h2>
                 <p>Ver lista de usuarios asignados y su historial de entrenamientos.</p>
-                <button className="btn-primary" onClick={() => setActiveTab('clientes')} style={{marginTop: '15px'}}>
+                <button className="btn-primary" onClick={() => setActiveTab('clientes')} style={{ marginTop: '15px' }}>
                   Ver Clientes
                 </button>
               </section>
               <section className="dashboard-section">
                 <h2>Planificación y Rutinas</h2>
                 <p>Crear y asignar rutinas personalizadas con ejercicios específicos.</p>
-                <button className="btn-primary" onClick={() => handleCreate('rutina')} style={{marginTop: '15px'}}>
+                <button className="btn-primary" onClick={() => handleCreate('rutina')} style={{ marginTop: '15px' }}>
                   Nueva Rutina
                 </button>
               </section>
               <section className="dashboard-section">
                 <h2>Seguimiento Nutricional</h2>
                 <p>Crear planes alimenticios y ajustar dietas según objetivos.</p>
-                <button className="btn-primary" onClick={() => handleCreate('planNutricional')} style={{marginTop: '15px'}}>
+                <button className="btn-primary" onClick={() => handleCreate('planNutricional')} style={{ marginTop: '15px' }}>
                   Nuevo Plan
                 </button>
               </section>
@@ -358,7 +358,7 @@ const DashboardEntrenador = () => {
           <ClientesTab
             clientesAsignados={clientesAsignados}
             onNuevoRegistro={(id) => handleCreate('seguimiento', id)}
-            onViewCliente={() => {}}
+            onViewCliente={() => { }}
           />
         )}
 
@@ -408,7 +408,7 @@ const DashboardEntrenador = () => {
         )}
 
         {activeTab === 'comunicacion' && (
-          <ComunicacionTab mensajes={mensajes} onMarcarLeido={() => {}} />
+          <ComunicacionTab mensajes={mensajes} onMarcarLeido={() => { }} />
         )}
 
         {showModal && (
@@ -418,7 +418,7 @@ const DashboardEntrenador = () => {
             showFooter={modalType !== 'verRutina'}
             footer={
               modalType !== 'verRutina' ? (
-                <div style={{display: 'flex', gap: '10px', marginTop: '25px'}}>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
                   <button type="button" className="btn-primary" onClick={handleSubmit}>Guardar</button>
                   <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
                 </div>
