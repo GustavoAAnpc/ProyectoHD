@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { 
-  alumnoService, instructorService, claseService, 
+import {
+  alumnoService, instructorService, claseService,
   sedeService, equipoService, tipoMembresiaService,
   membresiaService, pagoService, usuarioService,
   promocionService, noticiaService, reservaClaseService
@@ -52,6 +52,8 @@ const DashboardAdmin = () => {
   const [modalType, setModalType] = useState('');
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
+
 
   const loadData = useCallback(async () => {
     // Cargar cada servicio de forma independiente para evitar que un error bloquee todo
@@ -99,7 +101,7 @@ const DashboardAdmin = () => {
       setMembresias(membresiasData.status === 'fulfilled' ? membresiasData.value : []);
       setPagos(pagosData.status === 'fulfilled' ? pagosData.value : []);
       setUsuarios(usuariosData.status === 'fulfilled' ? usuariosData.value : []);
-      
+
       // Cargar promociones y noticias de forma opcional
       try {
         const promocionesRes = await promocionService.getAll();
@@ -108,7 +110,7 @@ const DashboardAdmin = () => {
         console.warn('Error cargando promociones:', error);
         setPromociones([]);
       }
-      
+
       try {
         const noticiasRes = await noticiaService.getAll();
         setNoticias(noticiasRes.data || []);
@@ -116,7 +118,7 @@ const DashboardAdmin = () => {
         console.warn('Error cargando noticias:', error);
         setNoticias([]);
       }
-      
+
       // Calcular estadísticas con datos disponibles
       const pagosDataArray = pagosData.status === 'fulfilled' ? pagosData.value : [];
       const usuariosDataArray = usuariosData.status === 'fulfilled' ? usuariosData.value : [];
@@ -126,10 +128,10 @@ const DashboardAdmin = () => {
       const sedesDataArray = sedesData.status === 'fulfilled' ? sedesData.value : [];
       const equiposDataArray = equiposData.status === 'fulfilled' ? equiposData.value : [];
       const membresiasDataArray = membresiasData.status === 'fulfilled' ? membresiasData.value : [];
-      
+
       const totalIngresos = pagosDataArray.reduce((sum, pago) => sum + parseFloat(pago?.monto || 0), 0);
       const usuariosActivos = usuariosDataArray.filter(u => u?.estado).length;
-      
+
       setStats({
         alumnos: alumnosDataArray.length,
         entrenadores: entrenadoresDataArray.length,
@@ -191,7 +193,7 @@ const DashboardAdmin = () => {
   const handleDelete = async (type, id) => {
     if (!window.confirm('¿Está seguro de eliminar este elemento?')) return;
     try {
-      switch(type) {
+      switch (type) {
         case 'sede': await sedeService.delete(id); break;
         case 'equipo': await equipoService.delete(id); break;
         case 'tipoMembresia': await tipoMembresiaService.delete(id); break;
@@ -209,7 +211,7 @@ const DashboardAdmin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      switch(modalType) {
+      switch (modalType) {
         case 'sede':
           if (editingItem) {
             await sedeService.update(editingItem.idSede, formData);
@@ -254,7 +256,7 @@ const DashboardAdmin = () => {
               return;
             }
           }
-          
+
           if (editingItem) {
             // Al actualizar, no enviar password si está vacío
             const updateData = { ...formData };
@@ -390,7 +392,7 @@ const DashboardAdmin = () => {
   };
 
   const renderModalContent = () => {
-    switch(modalType) {
+    switch (modalType) {
       case 'sede':
         return <SedeModal formData={formData} setFormData={setFormData} />;
       case 'equipo':
@@ -416,7 +418,7 @@ const DashboardAdmin = () => {
 
   return (
     <div className="dashboard">
-      <div className="dashboard-content" style={{paddingTop: '20px'}}>
+      <div className="dashboard-content" style={{ paddingTop: '20px' }}>
         <div className="tabs">
           <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
             Resumen
@@ -488,7 +490,7 @@ const DashboardAdmin = () => {
               <section className="dashboard-section">
                 <h2>Gestión del Gimnasio</h2>
                 <p>Administra sedes, equipos y horarios del gimnasio.</p>
-                <div style={{display: 'flex', gap: '10px', marginTop: '15px'}}>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                   <button className="btn-primary" onClick={() => handleCreate('sede')}>Nueva Sede</button>
                   <button className="btn-secondary" onClick={() => setActiveTab('equipos')}>Ver Equipos</button>
                 </div>
@@ -496,7 +498,7 @@ const DashboardAdmin = () => {
               <section className="dashboard-section">
                 <h2>Gestión de Usuarios</h2>
                 <p>Crear y gestionar cuentas de entrenadores y usuarios. Asignar roles y permisos.</p>
-                <div style={{display: 'flex', gap: '10px', marginTop: '15px'}}>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                   <button className="btn-primary" onClick={() => handleCreate('usuario')}>Nuevo Usuario</button>
                   <button className="btn-secondary" onClick={() => setActiveTab('usuarios')}>Ver Usuarios</button>
                 </div>
@@ -504,7 +506,7 @@ const DashboardAdmin = () => {
               <section className="dashboard-section">
                 <h2>Membresías y Pagos</h2>
                 <p>Crear tipos de membresía, asignar membresías y registrar pagos.</p>
-                <div style={{display: 'flex', gap: '10px', marginTop: '15px'}}>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                   <button className="btn-primary" onClick={() => handleCreate('tipoMembresia')}>Nuevo Tipo</button>
                   <button className="btn-primary" onClick={() => handleCreate('membresia')}>Asignar Membresía</button>
                 </div>
@@ -512,7 +514,7 @@ const DashboardAdmin = () => {
               <section className="dashboard-section">
                 <h2>Reportes y Estadísticas</h2>
                 <p>Genera reportes de ingresos, asistencia y desempeño.</p>
-                <div style={{display: 'flex', gap: '10px', marginTop: '15px'}}>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                   <button className="btn-secondary" onClick={() => setActiveTab('reportes')}>Ver Reportes</button>
                   <button className="btn-secondary" onClick={() => handleExportReport('ingresos')}>Exportar PDF</button>
                 </div>
@@ -537,7 +539,8 @@ const DashboardAdmin = () => {
             sedes={sedes}
             onEdit={(e) => handleEdit('equipo', e)}
             onMantenimiento={(e) => {
-              const equipoEdit = {...e, estado: 'En Mantenimiento'};
+              const equipoEdit = { ...e, estado: 'En Mantenimiento' };
+
               handleEdit('equipo', equipoEdit);
             }}
             onCreate={() => handleCreate('equipo')}
@@ -626,7 +629,7 @@ const DashboardAdmin = () => {
             title={getModalTitle()}
             onClose={() => setShowModal(false)}
             footer={
-              <div style={{display: 'flex', gap: '10px', marginTop: '25px'}}>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
                 <button type="button" className="btn-primary" onClick={handleSubmit}>Guardar</button>
                 <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
               </div>
