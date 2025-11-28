@@ -1,15 +1,26 @@
 import React from 'react';
 import './Home.css';
+import logoTigreClaro from '../assets/tigrewhite.png';
+import logoTigreOscuro from '../assets/tigreblack.png';
+import { useTheme } from '../context/ThemeContext';
 
 const Inicio = () => {
   const user = null;
+  const { darkMode } = useTheme();
+  const logoSrc = darkMode ? logoTigreOscuro : logoTigreClaro;
 
   return (
     <>
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
-          <div className="hero-badge">Transforma tu vida hoy</div>
+          <div className="hero-logo-container">
+            <img 
+              src={logoSrc} // Usa la fuente del logo basada en el tema
+              alt="Logo del Tigre" 
+              className="hero-logo-tigre" 
+            />
+          </div>
           <h1 className="hero-title">
             Entrena como un <span className="highlight">PRO</span>, vive como un <span className="highlight">CAMPEÓN</span>
           </h1>

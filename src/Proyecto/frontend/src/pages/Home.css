@@ -20,14 +20,14 @@
   --text-secondary: #b0b0b0;
   --bg-light: #1a1a1a;
   --border-color: #444;
-  --bg-color: #1a1a1a;
+  --bg-color: #000000;
   --text-color: #ffffff;
   --card-bg: #2a2a2a;
   --input-bg: #333;
 }
 
 .dark-mode body {
-  background: var(--bg-color);
+  background: #000000;
   color: var(--text-color);
 }
 
@@ -88,6 +88,7 @@ html, body {
 
 .dark-mode .home-header {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  background: #000000;
 }
 
 .home-nav {
@@ -254,6 +255,23 @@ html, body {
   gap: 16px;
   margin-bottom: 48px;
   flex-wrap: wrap;
+}
+
+.dark-mode .hero-section {
+    background: #000000;
+    transition: background 0.05s;
+}
+
+.hero-logo-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px; 
+}
+
+.hero-logo-tigre {
+    max-width: 500px; 
+    height: auto;
+    transition: opacity 0.3s ease-in-out; 
 }
 
 .btn-hero {
@@ -597,7 +615,7 @@ html, body {
 }
 
 .dark-mode .home-footer {
-  background: #1a1a1a;
+  background: #000000;
   color: #ffffff;
   border-top: 1px solid #444;
 }
