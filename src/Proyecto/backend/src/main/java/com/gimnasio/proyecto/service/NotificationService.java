@@ -21,7 +21,7 @@ public class NotificationService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(toEmail);
-            helper.setSubject("Bienvenido al Sistema de Gimnasio - Tus Credenciales de Acceso");
+            helper.setSubject("Bienvenido a FORCA & FITNESS - Tus Credenciales de Acceso");
             helper.setFrom("gustavoblas2024@gmail.com");
 
             String htmlContent = buildEmailTemplate(username, password, fullName);
