@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { usuarioService } from '../../../services/api';
 
+const soloTextoRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/;
 const UsuarioModal = ({ formData, setFormData, editingItem }) => {
   const [errors, setErrors] = useState({});
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -158,6 +159,13 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
   const handleNombresChange = async (e) => {
     const value = e.target.value;
 
+    if (value && !soloTextoRegex.test(value)) {
+      setErrors(prev => ({ ...prev, nombres: 'Solo se permiten letras y espacios' }));
+      return;
+    } else {
+      setErrors(prev => ({ ...prev, nombres: null }));
+    }
+
     if (value && formData.apellidos && formData.celular) {
       const base = generateUsername(value, formData.apellidos, formData.celular);
       const username = await generateUniqueUsername(base);
@@ -170,8 +178,16 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
     }
   };
 
+
   const handleApellidosChange = async (e) => {
     const value = e.target.value;
+
+    if (value && !soloTextoRegex.test(value)) {
+      setErrors(prev => ({ ...prev, apellidos: 'Solo se permiten letras y espacios' }));
+      return;
+    } else {
+      setErrors(prev => ({ ...prev, apellidos: null }));
+    }
 
     if (formData.nombres && value && formData.celular) {
       const base = generateUsername(formData.nombres, value, formData.celular);
@@ -184,6 +200,7 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
       setFormData({ ...formData, apellidos: value });
     }
   };
+
 
   const handleCelularChange = async (e) => {
     const value = e.target.value;
