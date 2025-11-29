@@ -147,9 +147,10 @@ const PromocionModal = ({ formData, setFormData }) => {
         </label>
       </div>
 
-      <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+      <div style={{ marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
         <h4>Generador de Imagen Promocional</h4>
-        <div style={{ marginBottom: '10px' }}>
+        <br />
+        <div style={{ marginBottom: '30px' }}>
           <button type="button" className="btn-secondary" onClick={generarImagen} style={{ marginRight: '10px' }}>
             Generar Vista Previa
           </button>
@@ -164,7 +165,7 @@ const PromocionModal = ({ formData, setFormData }) => {
 
         {generatedImage && (
           <div style={{ marginTop: '10px', textAlign: 'center' }}>
-            <img src={generatedImage} alt="Vista previa" style={{ maxWidth: '100%', maxHeight: '300px', border: '1px solid #ccc' }} />
+            <img src={generatedImage} alt="Vista previa" style={{ maxWidth: '100%', maxHeight: '800px', border: '1px solid #ccc' }} />
           </div>
         )}
       </div>
