@@ -1,38 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { promocionService } from '../../../services/api';
 
-const PromocionesTab = ({ promociones, onCreate, onEdit, onDelete }) => {
-  const [promocionesList, setPromocionesList] = useState([]);
-
-  useEffect(() => {
-    loadPromociones();
-  }, []);
-
-  const loadPromociones = async () => {
-    try {
-      const res = await promocionService.getAll();
-      setPromocionesList(res.data);
-    } catch (error) {
-      console.error('Error cargando promociones:', error);
-    }
-  };
-
-  const handleToggleActiva = async (promocion) => {
-    try {
-      await promocionService.update(promocion.idPromocion, {
-        ...promocion,
-        activa: !promocion.activa
-      });
-      loadPromociones();
-    } catch (error) {
-      console.error('Error actualizando promoción:', error);
-      alert('Error al actualizar promoción');
-    }
-  };
+const PromocionesTab = ({ promociones, onCreate, onEdit, onDelete, onToggleActiva }) => {
 
   return (
     <div className="dashboard-section">
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px'}}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
         <h2>Gestión de Promociones</h2>
         <button className="btn-primary" onClick={() => onCreate()}>Nueva Promoción</button>
       </div>
@@ -50,13 +23,13 @@ const PromocionesTab = ({ promociones, onCreate, onEdit, onDelete }) => {
             </tr>
           </thead>
           <tbody>
-            {promocionesList.length > 0 ? (
-              promocionesList.map(promocion => (
+            {promociones && promociones.length > 0 ? (
+              promociones.map(promocion => (
                 <tr key={promocion.idPromocion}>
                   <td>{promocion.nombre || promocion.titulo}</td>
                   <td>
-                    {promocion.descuentoPorcentaje ? 
-                      `${promocion.descuentoPorcentaje}%` : 
+                    {promocion.descuentoPorcentaje ?
+                      `${promocion.descuentoPorcentaje}%` :
                       'N/A'}
                   </td>
                   <td>{new Date(promocion.fechaInicio).toLocaleDateString()}</td>
@@ -74,21 +47,21 @@ const PromocionesTab = ({ promociones, onCreate, onEdit, onDelete }) => {
                     </span>
                   </td>
                   <td>
-                    <div style={{fontSize: '11px'}}>
+                    <div style={{ fontSize: '11px' }}>
                       {promocion.mostrarEnWeb && <span>Web </span>}
                       {promocion.mostrarEnDashboardUsuario && <span>Usuario </span>}
                       {promocion.mostrarEnDashboardEntrenador && <span>Entrenador</span>}
                     </div>
                   </td>
                   <td>
-                    <div style={{display: 'flex', gap: '5px', flexWrap: 'wrap'}}>
-                      <button className="btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}}
+                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                      <button className="btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }}
                         onClick={() => onEdit('promocion', promocion)}>Editar</button>
-                      <button className="btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}}
-                        onClick={() => handleToggleActiva(promocion)}>
+                      <button className="btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }}
+                        onClick={() => onToggleActiva(promocion.idPromocion, promocion.activa)}>
                         {promocion.activa ? 'Desactivar' : 'Activar'}
                       </button>
-                      <button className="btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}}
+                      <button className="btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }}
                         onClick={() => onDelete('promocion', promocion.idPromocion)}>Eliminar</button>
                     </div>
                   </td>
@@ -96,7 +69,7 @@ const PromocionesTab = ({ promociones, onCreate, onEdit, onDelete }) => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" style={{textAlign: 'center', padding: '30px'}}>No hay promociones registradas</td>
+                <td colSpan="7" style={{ textAlign: 'center', padding: '30px' }}>No hay promociones registradas</td>
               </tr>
             )}
           </tbody>

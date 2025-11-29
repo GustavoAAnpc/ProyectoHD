@@ -1,6 +1,96 @@
 import React from 'react';
 
 const PromocionModal = ({ formData, setFormData }) => {
+  const canvasRef = React.useRef(null);
+  const [generatedImage, setGeneratedImage] = React.useState(null);
+
+  React.useEffect(() => {
+    // Inject font
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Trash+Hand&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+    return () => {
+      // Optional: remove on unmount, but keeping it is fine too
+      // document.head.removeChild(link); 
+    };
+  }, []);
+
+  const formatearFecha = (fecha) => {
+    if (!fecha) return "";
+    const [yyyy, mm, dd] = fecha.split("-");
+    const yy = yyyy.slice(2);
+    return `${dd}/${mm}/${yy}`;
+  };
+
+  const generarImagen = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    const plantilla = new Image();
+    plantilla.src = "/Poster.png";
+    plantilla.crossOrigin = "Anonymous"; // Handle CORS if needed
+
+    const drawContent = () => {
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "left";
+
+      // Nombre promoción (Trash Hand)
+      ctx.font = "bold 90px 'Trash Hand', cursive";
+      ctx.fillText(formData.nombre || '', 120, 330);
+
+      // Fechas
+      ctx.font = "bold 65px 'Trash Hand', cursive";
+      const inicioFmt = formatearFecha(formData.fechaInicio);
+      const finFmt = formatearFecha(formData.fechaFin);
+      if (inicioFmt && finFmt) {
+        ctx.fillText(`Del ${inicioFmt} al ${finFmt}`, 250, 510);
+      }
+
+      // Descuento
+      if (formData.descuentoPorcentaje) {
+        ctx.font = "bold 200px 'Trash Hand', cursive";
+        ctx.fillText(formData.descuentoPorcentaje + "%", 1140, 1430);
+      }
+
+      // Descripción
+      if (formData.descripcion) {
+        ctx.font = "bold 85px 'Trash Hand', cursive";
+        // Simple text wrapping or just truncate? User snippet didn't wrap.
+        ctx.fillText(formData.descripcion, 290, 1900);
+      }
+
+      const url = canvas.toDataURL("image/png");
+      setGeneratedImage(url);
+    };
+
+    plantilla.onload = () => {
+      ctx.drawImage(plantilla, 0, 0, canvas.width, canvas.height);
+      document.fonts.ready.then(drawContent);
+    };
+
+    plantilla.onerror = () => {
+      // Fallback if image fails
+      ctx.fillStyle = "#333";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 100px Arial";
+      ctx.fillText("Poster no encontrado", 100, 200);
+      document.fonts.ready.then(drawContent);
+    };
+  };
+
+  const descargarImagen = () => {
+    if (!generatedImage) return;
+    const link = document.createElement('a');
+    link.href = generatedImage;
+    link.download = `Promocion-${formData.nombre || 'nueva'}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
       <div className="form-group">
@@ -55,6 +145,28 @@ const PromocionModal = ({ formData, setFormData }) => {
             onChange={(e) => setFormData({ ...formData, activa: e.target.checked })} />
           Activa
         </label>
+      </div>
+
+      <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+        <h4>Generador de Imagen Promocional</h4>
+        <div style={{ marginBottom: '10px' }}>
+          <button type="button" className="btn-secondary" onClick={generarImagen} style={{ marginRight: '10px' }}>
+            Generar Vista Previa
+          </button>
+          {generatedImage && (
+            <button type="button" className="btn-primary" onClick={descargarImagen}>
+              Descargar Imagen
+            </button>
+          )}
+        </div>
+
+        <canvas ref={canvasRef} width="1587" height="2245" style={{ display: 'none' }}></canvas>
+
+        {generatedImage && (
+          <div style={{ marginTop: '10px', textAlign: 'center' }}>
+            <img src={generatedImage} alt="Vista previa" style={{ maxWidth: '100%', maxHeight: '300px', border: '1px solid #ccc' }} />
+          </div>
+        )}
       </div>
     </>
   );

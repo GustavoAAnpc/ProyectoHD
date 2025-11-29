@@ -314,6 +314,11 @@ const DashboardAdmin = () => {
           sede.activa = !estado;
           await sedeService.update(id, sede);
         }
+      } else if (type === 'promocion') {
+        const promocion = promociones.find(p => p.idPromocion === id);
+        if (promocion) {
+          await promocionService.update(id, { ...promocion, activa: !estado });
+        }
       }
       loadData();
     } catch (error) {
@@ -589,6 +594,7 @@ const DashboardAdmin = () => {
             onCreate={() => handleCreate('promocion')}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onToggleActiva={(id, estado) => handleToggleEstado('promocion', id, estado)}
           />
         )}
 
