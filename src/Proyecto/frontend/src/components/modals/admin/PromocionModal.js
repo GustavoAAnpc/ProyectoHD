@@ -63,6 +63,8 @@ const PromocionModal = ({ formData, setFormData }) => {
 
       const url = canvas.toDataURL("image/png");
       setGeneratedImage(url);
+      // IMPORTANTE: Guardar la imagen en formData para que se guarde en la base de datos
+      setFormData({ ...formData, imagenUrl: url });
     };
 
     plantilla.onload = () => {

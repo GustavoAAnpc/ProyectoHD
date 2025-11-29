@@ -1,5 +1,5 @@
--- Add imagen_url column to promocion table
-ALTER TABLE promocion ADD COLUMN imagen_url VARCHAR(500);
+-- Modify imagen_url column to LONGTEXT to support large base64 images
+ALTER TABLE promocion MODIFY COLUMN imagen_url LONGTEXT;
 
 -- Example: Insert a test promotion (optional - you can do this via admin dashboard instead)
 -- INSERT INTO promocion (nombre, descripcion, descuento_porcentaje, fecha_inicio, fecha_fin, activa, mostrar_en_web, mostrar_en_dashboard_usuario, mostrar_en_dashboard_entrenador, fecha_creacion, imagen_url)

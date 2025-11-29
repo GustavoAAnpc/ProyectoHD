@@ -47,7 +47,7 @@ public class Promocion {
     @Column(name = "mostrar_en_dashboard_entrenador", nullable = false)
     private Boolean mostrarEnDashboardEntrenador = true;
 
-    @Column(name = "imagen_url", length = 500)
+    @Column(name = "imagen_url", columnDefinition = "LONGTEXT")
     private String imagenUrl;
 
     @Column(name = "fecha_creacion", nullable = false)
