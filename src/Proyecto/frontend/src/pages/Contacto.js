@@ -4,7 +4,6 @@ const Contacto = () => {
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
-    telefono: '+51 ',
     mensaje: ''
   });
   const [errors, setErrors] = useState({});
@@ -18,36 +17,9 @@ const Contacto = () => {
     return regex.test(email);
   };
 
-  // Validación de teléfono peruano (9 dígitos después del +51)
-  const validatePhone = (phone) => {
-    const cleanPhone = phone.replace(/\s/g, '');
-    const regex = /^\+51\s?9\d{8}$/;
-    return regex.test(cleanPhone);
-  };
-
-  // Manejo de cambio en teléfono con formato automático
-  const handlePhoneChange = (value) => {
-    // Si está vacío, establecer el prefijo
-    if (value === '') {
-      setFormData({...formData, telefono: '+51 '});
-      return;
-    }
-    
-    // Mantener siempre el +51
-    if (!value.startsWith('+51')) {
-      value = '+51 ' + value.replace(/^\+51\s?/, '');
-    }
-    
-    // Limitar a +51 + espacio + 9 dígitos
-    const numbers = value.replace('+51 ', '').replace(/\D/g, '');
-    if (numbers.length <= 9) {
-      setFormData({...formData, telefono: '+51 ' + numbers});
-    }
-  };
-
   // Validación en tiempo real
   const handleBlur = (field) => {
-    const newErrors = {...errors};
+    const newErrors = { ...errors };
 
     if (field === 'email' && formData.email) {
       if (!validateEmail(formData.email)) {
@@ -57,17 +29,11 @@ const Contacto = () => {
       }
     }
 
-    if (field === 'telefono' && formData.telefono && formData.telefono !== '+51 ') {
-      if (!validatePhone(formData.telefono)) {
-        newErrors.telefono = 'Formato: +51 9XXXXXXXX (9 dígitos)';
-      } else {
-        delete newErrors.telefono;
-      }
-    }
-
     if (field === 'mensaje' && formData.mensaje) {
-      if (formData.mensaje.length > 500) {
-        newErrors.mensaje = 'El mensaje no puede exceder 500 caracteres';
+      if (formData.mensaje.length > 1000) {
+        newErrors.mensaje = 'El mensaje no puede exceder 1000 caracteres';
+      } else if (formData.mensaje.length < 10) {
+        newErrors.mensaje = 'El mensaje debe tener al menos 10 caracteres';
       } else {
         delete newErrors.mensaje;
       }
@@ -76,26 +42,36 @@ const Contacto = () => {
     setErrors(newErrors);
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'mensaje' && value.length > 1000) {
+      // No hacer nada si excede el límite
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  // FUNCIÓN ACTUALIZADA PARA CONECTAR CON SPRING BOOT
   const handleSubmit = async () => {
-    // Validar todos los campos
+    // 1. Validar todos los campos
     const newErrors = {};
 
     if (!formData.nombre.trim()) {
       newErrors.nombre = 'El nombre es obligatorio';
+    } else if (formData.nombre.length < 2) {
+      newErrors.nombre = 'El nombre debe tener al menos 2 caracteres';
     }
 
     if (!validateEmail(formData.email)) {
       newErrors.email = 'Por favor ingresa un email válido';
     }
 
-    if (formData.telefono && formData.telefono !== '+51 ' && !validatePhone(formData.telefono)) {
-      newErrors.telefono = 'Formato incorrecto. Debe ser +51 9XXXXXXXX';
-    }
-
     if (!formData.mensaje.trim()) {
       newErrors.mensaje = 'El mensaje es obligatorio';
-    } else if (formData.mensaje.length > 500) {
-      newErrors.mensaje = 'El mensaje no puede exceder 500 caracteres';
+    } else if (formData.mensaje.length > 1000) {
+      newErrors.mensaje = 'El mensaje no puede exceder 1000 caracteres';
+    } else if (formData.mensaje.length < 10) {
+      newErrors.mensaje = 'El mensaje debe tener al menos 10 caracteres';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -104,54 +80,71 @@ const Contacto = () => {
       return;
     }
 
-    // Simular envío
+    // 2. Preparar el objeto para la API (Mapeo de nombres)
+    const dataToSend = {
+      nombreCompleto: formData.nombre, // Mapeo: nombre -> nombreCompleto (para la Entity)
+      email: formData.email,
+      mensaje: formData.mensaje,
+    };
+
+    // 3. Llamada a la API
     setLoading(true);
     setErrorMessage('');
     setErrors({});
 
     try {
-      // Aquí iría tu llamada a la API
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          // Simular error aleatorio para pruebas (20% de probabilidad)
-          if (Math.random() < 0.2) {
-            reject(new Error('Error de conexión'));
-          } else {
-            resolve();
-          }
-        }, 2000);
+      // URL corregida a /api/comentarios
+      const response = await fetch('http://localhost:8080/api/comentarios', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToSend),
       });
 
-      setSubmitted(true);
-      setFormData({ nombre: '', email: '', telefono: '+51 ', mensaje: '' });
-      
-      setTimeout(() => {
-        setSubmitted(false);
-      }, 5000);
+      if (response.ok) {
+        setSubmitted(true);
+        // Resetear formulario
+        setFormData({ nombre: '', email: '', mensaje: '' });
+
+        setTimeout(() => {
+          setSubmitted(false);
+        }, 5000);
+
+      } else {
+        // Manejar errores HTTP (ej: 400 Bad Request)
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        // Si el backend devuelve un mapa de errores, mostrar el primero o un mensaje genérico
+        const msg = typeof errorData === 'object' ? JSON.stringify(errorData) : errorData;
+        setErrorMessage('Error al enviar: ' + msg);
+      }
 
     } catch (error) {
-      setErrorMessage('Hubo un error al enviar el mensaje. Por favor, intenta nuevamente o contáctanos por teléfono.');
+      console.error('Error de red/conexión:', error);
+      setErrorMessage('Hubo un error de conexión con el servidor.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section style={{paddingTop: '100px', fontFamily: 'system-ui, -apple-system, sans-serif', minHeight: '100vh', paddingBottom: '60px'}}>
-      <div style={{maxWidth: '1400px', margin: '0 auto', padding: '0 20px'}}>
-        <div style={{textAlign: 'center', marginBottom: '60px'}}>
-          <h2 style={{fontSize: '2.5rem', marginBottom: '10px', color: 'var(--text-color)', fontWeight: '700'}}>Contáctanos</h2>
-          <p style={{fontSize: '1.1rem', color: 'var(--text-secondary)'}}>Estamos aquí para ayudarte</p>
+    <section style={{ paddingTop: '100px', fontFamily: 'system-ui, -apple-system, sans-serif', minHeight: '100vh', paddingBottom: '60px' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+          <h2 style={{ fontSize: '2.5rem', marginBottom: '10px', color: 'var(--text-color)', fontWeight: '700' }}>Contáctanos</h2>
+          <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)' }}>Estamos aquí para ayudarte</p>
         </div>
-        
-        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '60px', maxWidth: '1200px', margin: '0 auto'}}>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '60px', maxWidth: '1200px', margin: '0 auto' }}>
+          {/* Columna de Información */}
           <div>
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px'}}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               {[
-                {icon: '📍', title: 'Ubicación', content: 'Av. Principal 123, Miraflores\nLima, Perú'},
-                {icon: '📞', title: 'Teléfono', content: '+51 1 234 5678'},
-                {icon: '✉️', title: 'Email', content: 'info@forcafitness.com'},
-                {icon: '🕐', title: 'Horarios', content: 'Lun - Vie: 6:00 AM - 10:00 PM\nSáb: 8:00 AM - 8:00 PM\nDom: 9:00 AM - 6:00 PM'}
+                { icon: '📍', title: 'Ubicación', content: 'Av. Principal 123, Miraflores\nLima, Perú' },
+                { icon: '📞', title: 'Teléfono', content: '+51 1 234 5678' },
+                { icon: '✉️', title: 'Email', content: 'info@forcafitness.com' },
+                { icon: '🕐', title: 'Horarios', content: 'Lun - Vie: 6:00 AM - 10:00 PM\nSáb: 8:00 AM - 8:00 PM\nDom: 9:00 AM - 6:00 PM' }
               ].map((item, idx) => (
                 <div key={idx} style={{
                   background: 'var(--card-bg)',
@@ -161,14 +154,15 @@ const Contacto = () => {
                   textAlign: 'center',
                   transition: 'transform 0.3s'
                 }}>
-                  <div style={{fontSize: '2.5rem', marginBottom: '15px'}}>{item.icon}</div>
-                  <h4 style={{color: 'var(--text-color)', marginBottom: '10px', fontSize: '1.1rem', fontWeight: '600'}}>{item.title}</h4>
-                  <p style={{color: 'var(--text-secondary)', fontSize: '0.95rem', whiteSpace: 'pre-line', lineHeight: '1.6'}}>{item.content}</p>
+                  <div style={{ fontSize: '2.5rem', marginBottom: '15px' }}>{item.icon}</div>
+                  <h4 style={{ color: 'var(--text-color)', marginBottom: '10px', fontSize: '1.1rem', fontWeight: '600' }}>{item.title}</h4>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', whiteSpace: 'pre-line', lineHeight: '1.6' }}>{item.content}</p>
                 </div>
               ))}
             </div>
           </div>
 
+          {/* Columna de Formulario */}
           <div>
             <div style={{
               background: 'var(--card-bg)',
@@ -176,7 +170,7 @@ const Contacto = () => {
               borderRadius: '16px',
               border: '2px solid var(--border-color)'
             }}>
-              
+
               {/* Alerta de error */}
               {errorMessage && (
                 <div style={{
@@ -193,7 +187,7 @@ const Contacto = () => {
                   lineHeight: '1.5',
                   animation: 'slideDown 0.3s ease-out'
                 }}>
-                  <span style={{fontSize: '1.5rem'}}>⚠️</span>
+                  <span style={{ fontSize: '1.5rem' }}>⚠️</span>
                   <span>{errorMessage}</span>
                 </div>
               )}
@@ -213,20 +207,21 @@ const Contacto = () => {
                   fontSize: '0.95rem',
                   animation: 'slideDown 0.3s ease-out'
                 }}>
-                  <span style={{fontSize: '1.5rem'}}>✅</span>
+                  <span style={{ fontSize: '1.5rem' }}>✅</span>
                   <span>¡Mensaje enviado! Nos pondremos en contacto contigo pronto.</span>
                 </div>
               )}
 
               {/* Campo Nombre */}
-              <div style={{marginBottom: '20px'}}>
-                <label style={{display: 'block', color: 'var(--text-color)', marginBottom: '8px', fontSize: '0.95rem', fontWeight: '500'}}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: 'var(--text-color)', marginBottom: '8px', fontSize: '0.95rem', fontWeight: '500' }}>
                   Nombre Completo *
                 </label>
                 <input
                   type="text"
+                  name="nombre"
                   value={formData.nombre}
-                  onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+                  onChange={handleChange}
                   onBlur={() => handleBlur('nombre')}
                   style={{
                     width: '100%',
@@ -243,21 +238,22 @@ const Contacto = () => {
                   }}
                 />
                 {errors.nombre && (
-                  <span style={{color: '#ff5252', fontSize: '0.85rem', marginTop: '5px', display: 'block'}}>
+                  <span style={{ color: '#ff5252', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>
                     {errors.nombre}
                   </span>
                 )}
               </div>
 
               {/* Campo Email */}
-              <div style={{marginBottom: '20px'}}>
-                <label style={{display: 'block', color: 'var(--text-color)', marginBottom: '8px', fontSize: '0.95rem', fontWeight: '500'}}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: 'var(--text-color)', marginBottom: '8px', fontSize: '0.95rem', fontWeight: '500' }}>
                   Email *
                 </label>
                 <input
                   type="email"
+                  name="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={handleChange}
                   onBlur={() => handleBlur('email')}
                   style={{
                     width: '100%',
@@ -274,59 +270,23 @@ const Contacto = () => {
                   }}
                 />
                 {errors.email && (
-                  <span style={{color: '#ff5252', fontSize: '0.85rem', marginTop: '5px', display: 'block'}}>
+                  <span style={{ color: '#ff5252', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>
                     {errors.email}
                   </span>
                 )}
               </div>
 
-              {/* Campo Teléfono */}
-              <div style={{marginBottom: '20px'}}>
-                <label style={{display: 'block', color: 'var(--text-color)', marginBottom: '8px', fontSize: '0.95rem', fontWeight: '500'}}>
-                  Teléfono (opcional)
-                </label>
-                <input
-                  type="tel"
-                  value={formData.telefono}
-                  onChange={(e) => handlePhoneChange(e.target.value)}
-                  onBlur={() => handleBlur('telefono')}
-                  placeholder="+51 9XXXXXXXX"
-                  style={{
-                    width: '100%',
-                    padding: '12px 15px',
-                    background: 'var(--input-bg)',
-                    border: `2px solid ${errors.telefono ? '#f44336' : 'var(--border-color)'}`,
-                    borderRadius: '8px',
-                    color: 'var(--text-color)',
-                    fontSize: '1rem',
-                    outline: 'none',
-                    transition: 'border 0.3s',
-                    boxSizing: 'border-box',
-                    WebkitTextFillColor: 'var(--text-color)'
-                  }}
-                />
-                {errors.telefono && (
-                  <span style={{color: '#ff5252', fontSize: '0.85rem', marginTop: '5px', display: 'block'}}>
-                    {errors.telefono}
-                  </span>
-                )}
-
-              </div>
-
               {/* Campo Mensaje */}
-              <div style={{marginBottom: '20px'}}>
-                <label style={{display: 'block', color: 'var(--text-color)', marginBottom: '8px', fontSize: '0.95rem', fontWeight: '500'}}>
-                  Mensaje * <span style={{color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '400'}}>
-                    ({formData.mensaje.length}/500)
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', color: 'var(--text-color)', marginBottom: '8px', fontSize: '0.95rem', fontWeight: '500' }}>
+                  Mensaje * <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '400' }}>
+                    ({formData.mensaje.length}/1000)
                   </span>
                 </label>
                 <textarea
+                  name="mensaje"
                   value={formData.mensaje}
-                  onChange={(e) => {
-                    if (e.target.value.length <= 500) {
-                      setFormData({...formData, mensaje: e.target.value});
-                    }
-                  }}
+                  onChange={handleChange}
                   onBlur={() => handleBlur('mensaje')}
                   rows="5"
                   style={{
@@ -346,14 +306,14 @@ const Contacto = () => {
                   }}
                 />
                 {errors.mensaje && (
-                  <span style={{color: '#ff5252', fontSize: '0.85rem', marginTop: '5px', display: 'block'}}>
+                  <span style={{ color: '#ff5252', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>
                     {errors.mensaje}
                   </span>
                 )}
               </div>
 
               {/* Botón Submit */}
-              <button 
+              <button
                 onClick={handleSubmit}
                 disabled={loading}
                 style={{
@@ -371,7 +331,7 @@ const Contacto = () => {
                 }}
               >
                 {loading ? (
-                  <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px'}}>
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                     <span style={{
                       border: '3px solid rgba(255,255,255,0.3)',
                       borderTop: '3px solid #fff',
@@ -391,34 +351,13 @@ const Contacto = () => {
       </div>
 
       <style>{`
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        input:focus, textarea:focus {
-          border-color: #667eea !important;
-        }
-        
-        input::placeholder, textarea::placeholder {
-          color: var(--text-secondary);
-          opacity: 0.6;
-        }
-        
-        button:not(:disabled):hover {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
         }
       `}</style>
     </section>

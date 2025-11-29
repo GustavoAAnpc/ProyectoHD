@@ -1,13 +1,90 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './Home.css';
 import logoTigreClaro from '../assets/tigrewhite.png';
 import logoTigreOscuro from '../assets/tigreblack.png';
 import { useTheme } from '../context/ThemeContext';
 
+// Datos iniciales simulados (MOCK DATA)
+const MOCK_REVIEWS = [
+  {
+    id: 1001,
+    nombreCompleto: "Alejandra Torres",
+    email: "alejandra.t@gmail.com",
+    mensaje: "¡Excelente gimnasio! El equipo es moderno y los entrenadores son muy atentos. ¡Lo recomiendo a todos!",
+    fechaCreacion: new Date().toISOString(),
+  },
+  {
+    id: 1002,
+    nombreCompleto: "Ricardo López",
+    email: "ricardo.l@gmail.com",
+    mensaje: "El ambiente es motivador y las clases de Spinning son increíbles. Definitivamente el mejor de la ciudad.",
+    fechaCreacion: new Date(Date.now() - 86400000 * 7).toISOString(),
+  }
+];
+
 const Inicio = () => {
   const user = null;
   const { darkMode } = useTheme();
   const logoSrc = darkMode ? logoTigreOscuro : logoTigreClaro;
+
+  const [resenas, setResenas] = useState(MOCK_REVIEWS);
+  const [loadingResenas, setLoadingResenas] = useState(true);
+  const [errorResenas, setErrorResenas] = useState(null);
+
+  // Función para obtener las iniciales del nombre
+  const getInitials = (name) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  // Función para cargar reseñas
+  const fetchResenas = async () => {
+    try {
+      setLoadingResenas(true);
+      const response = await fetch('http://localhost:8080/api/comentarios');
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+          const sortedData = data.sort((a, b) =>
+            new Date(b.fechaCreacion) - new Date(a.fechaCreacion)
+          );
+          setResenas(sortedData);
+          setErrorResenas(null);
+        } else {
+          setResenas(MOCK_REVIEWS);
+        }
+      } else {
+        setErrorResenas(`Error al cargar las reseñas: ${response.statusText}`);
+        setResenas(MOCK_REVIEWS);
+      }
+    } catch (error) {
+      console.error('Error de red al cargar reseñas:', error);
+      setErrorResenas('No se pudo conectar al servidor. Mostrando comentarios de ejemplo.');
+      setResenas(MOCK_REVIEWS);
+    } finally {
+      setLoadingResenas(false);
+    }
+  };
+
+  // Cargar reseñas al montar el componente
+  useEffect(() => {
+    fetchResenas();
+  }, []);
+
+  // Auto-refresh cada 30 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchResenas();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
@@ -15,17 +92,17 @@ const Inicio = () => {
       <section className="hero-section">
         <div className="hero-content">
           <div className="hero-logo-container">
-            <img 
-              src={logoSrc} // Usa la fuente del logo basada en el tema
-              alt="Logo del Tigre" 
-              className="hero-logo-tigre" 
+            <img
+              src={logoSrc}
+              alt="Logo del Tigre"
+              className="hero-logo-tigre"
             />
           </div>
           <h1 className="hero-title">
             Entrena como un <span className="highlight">PRO</span>, vive como un <span className="highlight">CAMPEÓN</span>
           </h1>
           <p className="hero-description">
-            El gimnasio más completo de la ciudad con equipos de última generación, 
+            El gimnasio más completo de la ciudad con equipos de última generación,
             entrenadores profesionales y un ambiente único para alcanzar tus objetivos.
           </p>
           <div className="hero-buttons">
@@ -59,6 +136,8 @@ const Inicio = () => {
           <div className="hero-gradient"></div>
         </div>
       </section>
+
+      <hr />
 
       {/* Features Section */}
       <section className="features-section">
@@ -101,6 +180,8 @@ const Inicio = () => {
           </div>
         </div>
       </section>
+
+      <hr />
 
       {/* Services Section */}
       <section className="services-section">
@@ -154,53 +235,87 @@ const Inicio = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      <hr />
+
+      {/* Testimonials Section - MEJORADO */}
       <section className="testimonials-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">Lo que dicen nuestros miembros</h2>
-            <p className="section-subtitle">Historias reales de transformación</p>
+            <h2 className="section-title">Lo que dicen nuestros visitantes</h2>
+            <p className="section-subtitle">
+              Comentarios recientes de nuestra comunidad
+              <button
+                onClick={fetchResenas}
+                disabled={loadingResenas}
+                style={{
+                  marginLeft: '15px',
+                  padding: '8px 16px',
+                  background: loadingResenas ? '#ccc' : 'var(--primary-color)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: loadingResenas ? 'not-allowed' : 'pointer',
+                  fontSize: '0.9rem',
+                  transition: 'all 0.3s'
+                }}
+              >
+                {loadingResenas ? '⏳ Cargando...' : '🔄 Actualizar'}
+              </button>
+            </p>
           </div>
-          <div className="testimonials-grid">
-            <div className="testimonial-card">
-              <div className="testimonial-rating">★★★★★</div>
-              <p className="testimonial-text">
-                "Increíble transformación. Bajé 15kg en 6 meses con el apoyo de los entrenadores. El ambiente es súper motivador."
-              </p>
-              <div className="testimonial-author">
-                <div className="testimonial-author-info">
-                  <strong>María González</strong>
-                  <span>Miembro desde 2022</span>
+
+          {loadingResenas && (
+            <p className="loading-message">Cargando comentarios recientes...</p>
+          )}
+
+          {errorResenas && (
+            <p className="error-message">⚠️ {errorResenas}</p>
+          )}
+
+          {!loadingResenas && resenas.length > 0 && (
+            <div className="testimonials-grid">
+              {resenas.map((resena) => (
+                <div key={resena.id} className="testimonial-card-improved">
+                  {/* HEADER: Avatar + Nombre + Email en la misma línea */}
+                  <div className="testimonial-header">
+                    <div className="testimonial-avatar">
+                      {getInitials(resena.nombreCompleto)}
+                    </div>
+                    <div className="testimonial-user-info">
+                      <strong className="testimonial-name">{resena.nombreCompleto}</strong>
+                      <span className="testimonial-email">{resena.email}</span>
+                    </div>
+                  </div>
+
+                  {/* CENTRO: Mensaje principal */}
+                  <p className="testimonial-message">
+                    {resena.mensaje}
+                  </p>
+
+                  {/* FOOTER: Fecha */}
+                  <div className="testimonial-footer">
+                    <span className="testimonial-date">
+                      {new Date(resena.fechaCreacion).toLocaleDateString('es-PE', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-            <div className="testimonial-card">
-              <div className="testimonial-rating">★★★★★</div>
-              <p className="testimonial-text">
-                "Los equipos son de primera, siempre limpios y en buen estado. Las clases grupales son lo mejor."
-              </p>
-              <div className="testimonial-author">
-                <div className="testimonial-author-info">
-                  <strong>Carlos Ramírez</strong>
-                  <span>Miembro desde 2021</span>
-                </div>
-              </div>
-            </div>
-            <div className="testimonial-card">
-              <div className="testimonial-rating">★★★★★</div>
-              <p className="testimonial-text">
-                "Mejor decisión que he tomado. Los entrenadores son profesionales y te ayudan a lograr tus objetivos."
-              </p>
-              <div className="testimonial-author">
-                <div className="testimonial-author-info">
-                  <strong>Ana Martínez</strong>
-                  <span>Miembro desde 2023</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
+
+          {!loadingResenas && resenas.length === 0 && !errorResenas && (
+            <p className="no-resenas-message">
+              Aún no hay comentarios. ¡Sé el primero en dejarnos tu opinión en la página de Contacto!
+            </p>
+          )}
         </div>
       </section>
+
+      <hr />
 
       {/* CTA Section */}
       <section className="cta-section">
