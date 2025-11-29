@@ -32,17 +32,25 @@ public class PromocionController {
 
     @GetMapping("/web")
     public ResponseEntity<List<Promocion>> getPromocionesWeb() {
-        return ResponseEntity.ok(promocionRepository.findByMostrarEnWebTrueAndActivaTrue());
+        LocalDate hoy = LocalDate.now();
+        return ResponseEntity.ok(promocionRepository
+                .findByMostrarEnWebTrueAndActivaTrueAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(hoy, hoy));
     }
 
     @GetMapping("/dashboard-usuario")
     public ResponseEntity<List<Promocion>> getPromocionesDashboardUsuario() {
-        return ResponseEntity.ok(promocionRepository.findByMostrarEnDashboardUsuarioTrueAndActivaTrue());
+        LocalDate hoy = LocalDate.now();
+        return ResponseEntity.ok(promocionRepository
+                .findByMostrarEnDashboardUsuarioTrueAndActivaTrueAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
+                        hoy, hoy));
     }
 
     @GetMapping("/dashboard-entrenador")
     public ResponseEntity<List<Promocion>> getPromocionesDashboardEntrenador() {
-        return ResponseEntity.ok(promocionRepository.findByMostrarEnDashboardEntrenadorTrueAndActivaTrue());
+        LocalDate hoy = LocalDate.now();
+        return ResponseEntity.ok(promocionRepository
+                .findByMostrarEnDashboardEntrenadorTrueAndActivaTrueAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
+                        hoy, hoy));
     }
 
     @GetMapping("/{id}")
