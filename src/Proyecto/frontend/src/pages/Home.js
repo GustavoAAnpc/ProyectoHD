@@ -5,6 +5,7 @@ import { authService } from '../services/api';
 import UserMenu from '../components/UserMenu';
 import ThemeToggle from '../components/ThemeToggle';
 import ModalWrapper from '../components/modals/ModalWrapper';
+import PromocionCarousel from '../components/PromocionCarousel';
 import './Home.css';
 
 const Home = () => {
@@ -222,6 +223,16 @@ const Home = () => {
               {!user && <button onClick={() => setShowLoginModal(true)} className="btn-plan">Elegir Plan</button>}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section id="promociones" className="promotions-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Promociones Especiales</h2>
+            <p className="section-subtitle">Aprovecha nuestras ofertas exclusivas</p>
+          </div>
+          <PromocionCarousel type="web" />
         </div>
       </section>
 

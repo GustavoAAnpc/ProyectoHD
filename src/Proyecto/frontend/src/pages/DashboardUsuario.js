@@ -18,6 +18,7 @@ import PerfilModal from '../components/modals/PerfilModal';
 import RutinaModal from '../components/modals/RutinaModal';
 import MensajeModal from '../components/modals/MensajeModal';
 import FeedbackModal from '../components/modals/FeedbackModal';
+import PromocionCarousel from '../components/PromocionCarousel';
 import './Dashboard.css';
 import { detectarConLogMeal } from "../services/logmealService";
 
@@ -428,6 +429,9 @@ const DashboardUsuario = () => {
           <button className={`tab ${activeTab === 'comunicacion' ? 'active' : ''}`} onClick={() => setActiveTab('comunicacion')}>
             Comunicación
           </button>
+          <button className={`tab ${activeTab === 'promociones' ? 'active' : ''}`} onClick={() => setActiveTab('promociones')}>
+            Promociones
+          </button>
         </div>
 
         {activeTab === 'overview' && (
@@ -538,6 +542,15 @@ const DashboardUsuario = () => {
               }}
               onMarcarLeido={handleMarcarMensajeLeido}
             />
+          )
+        }
+
+        {
+          activeTab === 'promociones' && (
+            <div className="tab-content">
+              <h2>Promociones Especiales</h2>
+              <PromocionCarousel type="dashboard-usuario" />
+            </div>
           )
         }
 
