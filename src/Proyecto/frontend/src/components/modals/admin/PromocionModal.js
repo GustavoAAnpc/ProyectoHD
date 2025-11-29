@@ -45,7 +45,7 @@ const PromocionModal = ({ formData, setFormData }) => {
       const inicioFmt = formatearFecha(formData.fechaInicio);
       const finFmt = formatearFecha(formData.fechaFin);
       if (inicioFmt && finFmt) {
-        ctx.fillText(`Del ${inicioFmt} al ${finFmt}`, 250, 510);
+        ctx.fillText(`Del ${inicioFmt} al ${finFmt}`, 170, 510);
       }
 
       // Descuento
@@ -63,6 +63,8 @@ const PromocionModal = ({ formData, setFormData }) => {
 
       const url = canvas.toDataURL("image/png");
       setGeneratedImage(url);
+      // IMPORTANTE: Guardar la imagen en formData para que se guarde en la base de datos
+      setFormData({ ...formData, imagenUrl: url });
     };
 
     plantilla.onload = () => {

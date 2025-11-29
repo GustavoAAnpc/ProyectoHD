@@ -11,11 +11,14 @@ import java.util.List;
 public interface PromocionRepository extends JpaRepository<Promocion, Long> {
         List<Promocion> findByActivaTrue();
 
-        List<Promocion> findByMostrarEnWebTrueAndActivaTrue();
+        List<Promocion> findByMostrarEnWebTrueAndActivaTrueAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
+                        LocalDate fechaActual1, LocalDate fechaActual2);
 
-        List<Promocion> findByMostrarEnDashboardUsuarioTrueAndActivaTrue();
+        List<Promocion> findByMostrarEnDashboardUsuarioTrueAndActivaTrueAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
+                        LocalDate fechaActual1, LocalDate fechaActual2);
 
-        List<Promocion> findByMostrarEnDashboardEntrenadorTrueAndActivaTrue();
+        List<Promocion> findByMostrarEnDashboardEntrenadorTrueAndActivaTrueAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
+                        LocalDate fechaActual1, LocalDate fechaActual2);
 
         List<Promocion> findByFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(LocalDate fechaInicio,
                         LocalDate fechaFin);

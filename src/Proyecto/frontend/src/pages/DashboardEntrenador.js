@@ -19,6 +19,7 @@ import RutinaModal from '../components/modals/entrenador/RutinaModal';
 import EjercicioModal from '../components/modals/entrenador/EjercicioModal';
 import PlanNutricionalModal from '../components/modals/entrenador/PlanNutricionalModal';
 import VerRutinaModal from '../components/modals/entrenador/VerRutinaModal';
+import PromocionCarousel from '../components/PromocionCarousel';
 import './Dashboard.css';
 
 const DashboardEntrenador = () => {
@@ -297,6 +298,9 @@ const DashboardEntrenador = () => {
           <button className={`tab ${activeTab === 'comunicacion' ? 'active' : ''}`} onClick={() => setActiveTab('comunicacion')}>
             Comunicación
           </button>
+          <button className={`tab ${activeTab === 'promociones' ? 'active' : ''}`} onClick={() => setActiveTab('promociones')}>
+            Promociones
+          </button>
         </div>
 
         {activeTab === 'overview' && (
@@ -409,6 +413,13 @@ const DashboardEntrenador = () => {
 
         {activeTab === 'comunicacion' && (
           <ComunicacionTab mensajes={mensajes} onMarcarLeido={() => { }} />
+        )}
+
+        {activeTab === 'promociones' && (
+          <div className="tab-content">
+            <h2>Promociones Especiales</h2>
+            <PromocionCarousel type="dashboard-entrenador" />
+          </div>
         )}
 
         {showModal && (
