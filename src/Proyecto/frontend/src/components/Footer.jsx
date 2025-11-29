@@ -25,7 +25,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2024 FORCA & FITNESS. Todos los derechos reservados.</p>
+          <p>&copy; 2025 FORCA & FITNESS. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>
