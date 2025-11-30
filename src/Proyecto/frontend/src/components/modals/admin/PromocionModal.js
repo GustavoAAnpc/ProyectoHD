@@ -111,14 +111,28 @@ const PromocionModal = ({ formData, setFormData }) => {
           onChange={(e) => setFormData({ ...formData, descuentoPorcentaje: parseFloat(e.target.value) || 0 })} required />
       </div>
       <div className="form-group">
+        <label>Duración en Meses *</label>
+        <input type="number" min="1" value={formData.duracionMeses || 1}
+          onChange={(e) => setFormData({ ...formData, duracionMeses: parseInt(e.target.value) || 1 })} required />
+        <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+          Número de meses de membresía mensual que cubrirá esta promoción (ej: 2 meses para promoción de verano)
+        </small>
+      </div>
+      <div className="form-group">
         <label>Fecha Inicio *</label>
         <input type="date" value={formData.fechaInicio || ''}
           onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })} required />
+        <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+          Fecha desde la cual la promoción estará disponible
+        </small>
       </div>
       <div className="form-group">
         <label>Fecha Fin *</label>
         <input type="date" value={formData.fechaFin || ''}
           onChange={(e) => setFormData({ ...formData, fechaFin: e.target.value })} required />
+        <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+          Fecha hasta la cual la promoción estará disponible
+        </small>
       </div>
       <div className="form-group">
         <label>

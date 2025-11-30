@@ -50,6 +50,9 @@ public class Promocion {
     @Column(name = "imagen_url", columnDefinition = "LONGTEXT")
     private String imagenUrl;
 
+    @Column(name = "duracion_meses", nullable = false)
+    private Integer duracionMeses = 1;
+
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDate fechaCreacion;
 
