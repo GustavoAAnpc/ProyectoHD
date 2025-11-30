@@ -516,14 +516,6 @@ const DashboardAdmin = () => {
                   <button className="btn-primary" onClick={() => handleCreate('membresia')}>Asignar Membresía</button>
                 </div>
               </section>
-              <section className="dashboard-section">
-                <h2>Reportes y Estadísticas</h2>
-                <p>Genera reportes de ingresos, asistencia y desempeño.</p>
-                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                  <button className="btn-secondary" onClick={() => setActiveTab('reportes')}>Ver Reportes</button>
-                  <button className="btn-secondary" onClick={() => handleExportReport('ingresos')}>Exportar PDF</button>
-                </div>
-              </section>
             </div>
           </>
         )}
