@@ -1,6 +1,12 @@
 import React from 'react';
 
 const AdminPerfilModal = ({ formData, setFormData, onSubmit, onClose }) => {
+    const soloLetras = (v) =>
+        v.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ ]/g, '');
+
+    const soloNumeros = (v) =>
+        v.replace(/\D/g, '');
+
     return (
         <>
             <div className="form-group">
@@ -8,49 +14,68 @@ const AdminPerfilModal = ({ formData, setFormData, onSubmit, onClose }) => {
                 <input
                     type="text"
                     value={formData.nameAdmin || ''}
-                    pattern="^[A-Za-zÀ-ÿ\s]+$"
-                    title="Solo letras y espacios"
-                    onChange={(e) => setFormData({ ...formData, nameAdmin: e.target.value })}
+                    onInput={(e) =>
+                        setFormData({
+                            ...formData,
+                            nameAdmin: soloLetras(e.target.value)
+                        })
+                    }
                     required
                 />
             </div>
+
             <div className="form-group">
                 <label>Apellidos *</label>
                 <input
                     type="text"
                     value={formData.apellidosAdmin || ''}
-                    pattern="^[A-Za-zÀ-ÿ\s]+$"
-                    title="Solo letras y espacios"
-                    onChange={(e) => setFormData({ ...formData, apellidosAdmin: e.target.value })}
+                    onInput={(e) =>
+                        setFormData({
+                            ...formData,
+                            apellidosAdmin: soloLetras(e.target.value)
+                        })
+                    }
                     required
                 />
             </div>
+
             <div className="form-group">
                 <label>DNI *</label>
                 <input
                     type="text"
                     value={formData.dni || ''}
                     maxLength={8}
-                    pattern="^\d{8}$"
-                    title="Debe tener 8 dígitos numéricos"
-                    onChange={(e) => {
-                        const val = e.target.value;
-                        if (/^\d*$/.test(val)) setFormData({ ...formData, dni: val });
-                    }}
+                    onInput={(e) =>
+                        setFormData({
+                            ...formData,
+                            dni: soloNumeros(e.target.value).slice(0, 8)
+                        })
+                    }
                     required
                 />
             </div>
+
             <div className="form-group">
                 <label>Teléfono</label>
                 <input
                     type="tel"
                     value={formData.telefono || ''}
                     maxLength={9}
-                    pattern="^9\d{8}$"
-                    title="Debe iniciar con 9 y tener 9 dígitos"
-                    onChange={(e) => {
-                        const val = e.target.value;
-                        if (/^\d*$/.test(val)) setFormData({ ...formData, telefono: val });
+                    onInput={(e) => {
+                        let val = e.target.value.replace(/\D/g, ''); // solo números
+
+                        // si empieza a escribir y NO es 9, lo forzamos
+                        if (val.length === 1 && val !== '9') {
+                            val = '9';
+                        }
+
+                        // límite
+                        val = val.slice(0, 9);
+
+                        setFormData({
+                            ...formData,
+                            telefono: val
+                        });
                     }}
                     placeholder="Ej: 999999999"
                 />
@@ -60,15 +85,20 @@ const AdminPerfilModal = ({ formData, setFormData, onSubmit, onClose }) => {
                 <input
                     type="text"
                     value={formData.direccion || ''}
-                    onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
+                    onChange={(e) =>
+                        setFormData({ ...formData, direccion: e.target.value })
+                    }
                     placeholder="Ej: Av. Principal 123"
                 />
             </div>
+
             <div className="form-group">
                 <label>Género</label>
                 <select
                     value={formData.genero || ''}
-                    onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
+                    onChange={(e) =>
+                        setFormData({ ...formData, genero: e.target.value })
+                    }
                 >
                     <option value="">Seleccionar...</option>
                     <option value="Masculino">Masculino</option>

@@ -1,6 +1,13 @@
 import React from 'react';
 
 const PerfilModal = ({ alumno, formData, setFormData, onSubmit, onClose }) => {
+
+  const soloLetras = (v) =>
+    v.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ ]/g, '');
+
+  const soloNumeros = (v) =>
+    v.replace(/\D/g, '');
+
   return (
     <form onSubmit={onSubmit}>
       <div className="form-group">
@@ -8,9 +15,12 @@ const PerfilModal = ({ alumno, formData, setFormData, onSubmit, onClose }) => {
         <input
           type="text"
           value={formData.nameAlumno || ''}
-          pattern="^[A-Za-zÀ-ÿ\s]+$"
-          title="Solo letras y espacios"
-          onChange={(e) => setFormData({ ...formData, nameAlumno: e.target.value })}
+          onInput={(e) =>
+            setFormData({
+              ...formData,
+              nameAlumno: soloLetras(e.target.value)
+            })
+          }
           required
         />
       </div>
@@ -20,9 +30,12 @@ const PerfilModal = ({ alumno, formData, setFormData, onSubmit, onClose }) => {
         <input
           type="text"
           value={formData.apellidosAlumno || ''}
-          pattern="^[A-Za-zÀ-ÿ\s]+$"
-          title="Solo letras y espacios"
-          onChange={(e) => setFormData({ ...formData, apellidosAlumno: e.target.value })}
+          onInput={(e) =>
+            setFormData({
+              ...formData,
+              apellidosAlumno: soloLetras(e.target.value)
+            })
+          }
           required
         />
       </div>
@@ -32,10 +45,13 @@ const PerfilModal = ({ alumno, formData, setFormData, onSubmit, onClose }) => {
         <input
           type="text"
           maxLength={8}
-          pattern="^\d{8}$"
-          title="Debe tener 8 dígitos numéricos"
           value={formData.dni || ''}
-          onChange={(e) => setFormData({ ...formData, dni: e.target.value })}
+          onInput={(e) =>
+            setFormData({
+              ...formData,
+              dni: soloNumeros(e.target.value)
+            })
+          }
           required
         />
       </div>
@@ -45,13 +61,26 @@ const PerfilModal = ({ alumno, formData, setFormData, onSubmit, onClose }) => {
         <input
           type="text"
           maxLength={9}
-          pattern="^9\d{8}$"
-          title="Debe iniciar con 9 y tener 9 dígitos"
           value={formData.telefono || ''}
-          onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+          onInput={(e) => {
+            let val = e.target.value.replace(/\D/g, ''); // solo números
+
+            // validar primer dígito = 9
+            if (val.length === 1 && val !== '9') {
+              val = '9';
+            }
+
+            val = val.slice(0, 9);
+
+            setFormData({
+              ...formData,
+              telefono: val
+            });
+          }}
           required
         />
       </div>
+
 
       <div className="form-group">
         <label>Email</label>
@@ -91,7 +120,12 @@ const PerfilModal = ({ alumno, formData, setFormData, onSubmit, onClose }) => {
             type="number"
             step="0.1"
             value={formData.pesoActual || ''}
-            onChange={(e) => setFormData({ ...formData, pesoActual: parseFloat(e.target.value) })}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                pesoActual: e.target.value ? parseFloat(e.target.value) : ''
+              })
+            }
           />
         </div>
 
@@ -101,7 +135,12 @@ const PerfilModal = ({ alumno, formData, setFormData, onSubmit, onClose }) => {
             type="number"
             step="0.1"
             value={formData.altura || ''}
-            onChange={(e) => setFormData({ ...formData, altura: parseFloat(e.target.value) })}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                altura: e.target.value ? parseFloat(e.target.value) : ''
+              })
+            }
           />
         </div>
       </div>

@@ -460,6 +460,9 @@ const DashboardAdmin = () => {
           <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
             Resumen
           </button>
+          <button className={`tab ${activeTab === 'perfil' ? 'active' : ''}`} onClick={() => setActiveTab('perfil')}>
+            Perfil
+          </button>
           <button className={`tab ${activeTab === 'sedes' ? 'active' : ''}`} onClick={() => setActiveTab('sedes')}>
             Sedes
           </button>
@@ -483,9 +486,6 @@ const DashboardAdmin = () => {
           </button>
           <button className={`tab ${activeTab === 'gimnasio' ? 'active' : ''}`} onClick={() => setActiveTab('gimnasio')}>
             Gimnasio
-          </button>
-          <button className={`tab ${activeTab === 'perfil' ? 'active' : ''}`} onClick={() => setActiveTab('perfil')}>
-            Perfil
           </button>
         </div>
 

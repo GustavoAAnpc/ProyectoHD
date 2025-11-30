@@ -305,6 +305,9 @@ const DashboardEntrenador = () => {
           <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
             Resumen
           </button>
+          <button className={`tab ${activeTab === 'perfil' ? 'active' : ''}`} onClick={() => setActiveTab('perfil')}>
+            Perfil
+          </button>
           <button className={`tab ${activeTab === 'clientes' ? 'active' : ''}`} onClick={() => setActiveTab('clientes')}>
             Mis Clientes
           </button>
@@ -325,9 +328,6 @@ const DashboardEntrenador = () => {
           </button>
           <button className={`tab ${activeTab === 'promociones' ? 'active' : ''}`} onClick={() => setActiveTab('promociones')}>
             Promociones
-          </button>
-          <button className={`tab ${activeTab === 'perfil' ? 'active' : ''}`} onClick={() => setActiveTab('perfil')}>
-            Perfil
           </button>
         </div>
 
