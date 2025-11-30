@@ -16,30 +16,56 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
     }));
   }, []); // Solo se ejecuta al montar
 
-  // Cuando cambia el tipo de membresía, calcular el precio
+  // Cuando cambia la promoción, calcular el precio con la misma lógica del backend
   useEffect(() => {
-    if (selectedTipoMembresiaId) {
-      const tipoMembresia = tiposMembresia.find(t => t.idTipoMembresia === parseInt(selectedTipoMembresiaId));
-      if (tipoMembresia) {
-        let precioBase = parseFloat(tipoMembresia.precio || 0);
-        
-        // Aplicar descuento de promoción si está seleccionada y vigente
-        if (selectedPromocionId) {
-          const promocion = promociones.find(p => p.idPromocion === parseInt(selectedPromocionId));
-          if (promocion && esPromocionVigente(promocion)) {
+    if (selectedPromocionId) {
+      const promocion = promociones.find(p => p.idPromocion === parseInt(selectedPromocionId));
+      if (promocion && esPromocionVigente(promocion)) {
+        const mesesPromocion = parseInt(promocion.duracionMeses || 1);
+
+        // PRIORIDAD 1: Buscar membresía que coincida con la duración de la promoción
+        const membresiaCoincidente = tiposMembresia.find(t =>
+          t.activa && t.duracionMeses === mesesPromocion
+        );
+
+        if (membresiaCoincidente) {
+          // Caso 1: Existe membresía con la misma duración (ej: anual, semestral, trimestral)
+          const precioMembresia = parseFloat(membresiaCoincidente.precio || 0);
+          const descuento = parseFloat(promocion.descuentoPorcentaje || 0);
+          const precioFinal = precioMembresia * (1 - descuento / 100);
+
+          setFormData(prev => ({
+            ...prev,
+            monto: precioFinal
+          }));
+        } else {
+          // Caso 2: No existe membresía con esa duración -> usar cálculo mensual
+          const membresiaMensual = tiposMembresia.find(t => t.activa && t.duracionMeses === 1);
+
+          if (membresiaMensual) {
+            const precioMensual = parseFloat(membresiaMensual.precio || 0);
+            const precioBase = precioMensual * mesesPromocion;
             const descuento = parseFloat(promocion.descuentoPorcentaje || 0);
-            precioBase = precioBase * (1 - descuento / 100);
+            const precioFinal = precioBase * (1 - descuento / 100);
+
+            setFormData(prev => ({
+              ...prev,
+              monto: precioFinal
+            }));
           }
         }
-        
+      }
+    } else if (selectedTipoMembresiaId && !selectedPromocionId) {
+      // Sin promoción: usar precio normal del tipo de membresía seleccionado
+      const tipoMembresia = tiposMembresia.find(t => t.idTipoMembresia === parseInt(selectedTipoMembresiaId));
+      if (tipoMembresia) {
         setFormData(prev => ({
           ...prev,
-          tipoMembresia: {idTipoMembresia: parseInt(selectedTipoMembresiaId)},
-          monto: precioBase
+          monto: parseFloat(tipoMembresia.precio || 0)
         }));
       }
     }
-  }, [selectedTipoMembresiaId, selectedPromocionId]);
+  }, [selectedPromocionId, selectedTipoMembresiaId, tiposMembresia, promociones]);
 
   const esPromocionVigente = (promocion) => {
     if (!promocion.activa) return false;
@@ -54,7 +80,7 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
     setSelectedAlumnoId(alumnoId);
     setFormData({
       ...formData,
-      alumno: {idAlumno: alumnoId}
+      alumno: { idAlumno: alumnoId }
     });
   };
 
@@ -62,10 +88,10 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
     const tipoId = parseInt(e.target.value);
     setSelectedTipoMembresiaId(tipoId);
     const tipoMembresia = tiposMembresia.find(t => t.idTipoMembresia === tipoId);
-    
+
     if (tipoMembresia) {
       let precioBase = parseFloat(tipoMembresia.precio || 0);
-      
+
       // Aplicar descuento si hay promoción seleccionada
       if (selectedPromocionId) {
         const promocion = promociones.find(p => p.idPromocion === parseInt(selectedPromocionId));
@@ -74,10 +100,10 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
           precioBase = precioBase * (1 - descuento / 100);
         }
       }
-      
+
       setFormData({
         ...formData,
-        tipoMembresia: {idTipoMembresia: tipoId},
+        tipoMembresia: { idTipoMembresia: tipoId },
         monto: precioBase
       });
     }
@@ -86,45 +112,52 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
   const handlePromocionChange = (e) => {
     const promocionId = parseInt(e.target.value);
     setSelectedPromocionId(promocionId);
-    
-    if (promocionId && selectedTipoMembresiaId) {
-      const tipoMembresia = tiposMembresia.find(t => t.idTipoMembresia === parseInt(selectedTipoMembresiaId));
+
+    if (promocionId) {
       const promocion = promociones.find(p => p.idPromocion === promocionId);
-      
-      if (tipoMembresia && promocion) {
+
+      if (promocion) {
         if (!esPromocionVigente(promocion)) {
           alert('Esta promoción no está vigente. Seleccione otra o continúe sin promoción.');
           setSelectedPromocionId('');
           setFormData({
             ...formData,
-            promocion: null,
-            monto: parseFloat(tipoMembresia.precio || 0)
+            promocion: null
           });
           return;
         }
-        
-        const precioBase = parseFloat(tipoMembresia.precio || 0);
+
+        // Buscar membresía mensual
+        const membresiaMensual = tiposMembresia.find(t => t.activa && t.duracionMeses === 1);
+
+        if (!membresiaMensual) {
+          alert('No existe una membresía mensual activa. Se requiere para aplicar promociones.');
+          setSelectedPromocionId('');
+          setFormData({
+            ...formData,
+            promocion: null
+          });
+          return;
+        }
+
+        // Calcular precio con promoción
+        const precioMensual = parseFloat(membresiaMensual.precio || 0);
+        const mesesPromocion = parseInt(promocion.duracionMeses || 1);
+        const precioBase = precioMensual * mesesPromocion;
         const descuento = parseFloat(promocion.descuentoPorcentaje || 0);
-        const precioConDescuento = precioBase * (1 - descuento / 100);
-        
+        const precioFinal = precioBase * (1 - descuento / 100);
+
         setFormData({
           ...formData,
-          promocion: {idPromocion: promocionId},
-          monto: precioConDescuento
+          promocion: { idPromocion: promocionId },
+          monto: precioFinal
         });
       }
-    } else if (!promocionId && selectedTipoMembresiaId) {
-      // Si se quita la promoción, volver al precio base
-      const tipoMembresia = tiposMembresia.find(t => t.idTipoMembresia === parseInt(selectedTipoMembresiaId));
-      setFormData({
-        ...formData,
-        promocion: null,
-        monto: parseFloat(tipoMembresia?.precio || 0)
-      });
     } else {
+      // Sin promoción
       setFormData({
         ...formData,
-        promocion: promocionId ? {idPromocion: promocionId} : null
+        promocion: null
       });
     }
   };
@@ -136,7 +169,7 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
     <>
       <div className="form-group">
         <label>Usuario (Alumno) *</label>
-        <select value={selectedAlumnoId} 
+        <select value={selectedAlumnoId}
           onChange={handleAlumnoChange} required>
           <option value="">Seleccionar usuario</option>
           {alumnos.map(a => (
@@ -148,8 +181,8 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
       </div>
       <div className="form-group">
         <label>Tipo de Membresía *</label>
-        <select value={selectedTipoMembresiaId} 
-          onChange={handleTipoMembresiaChange} required>
+        <select value={selectedTipoMembresiaId}
+          onChange={handleTipoMembresiaChange} required disabled={selectedPromocionId}>
           <option value="">Seleccionar tipo de membresía</option>
           {tiposMembresia.filter(t => t.activa).map(t => (
             <option key={t.idTipoMembresia} value={t.idTipoMembresia}>
@@ -157,49 +190,100 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
             </option>
           ))}
         </select>
+        {selectedPromocionId && (
+          <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+            Al seleccionar una promoción, se usará automáticamente la membresía mensual
+          </small>
+        )}
       </div>
       <div className="form-group">
         <label>Promoción (Opcional)</label>
-        <select value={selectedPromocionId} 
+        <select value={selectedPromocionId}
           onChange={handlePromocionChange}>
           <option value="">Sin promoción</option>
           {promocionesVigentes.map(p => (
             <option key={p.idPromocion} value={p.idPromocion}>
-              {p.nombre} - {p.descuentoPorcentaje}% descuento
+              {p.nombre} - {p.duracionMeses || 1} {(p.duracionMeses || 1) === 1 ? 'mes' : 'meses'} - {p.descuentoPorcentaje}% descuento
               {p.fechaFin && ` (Válida hasta ${new Date(p.fechaFin).toLocaleDateString()})`}
             </option>
           ))}
         </select>
+        {selectedPromocionId && (() => {
+          const promocion = promociones.find(p => p.idPromocion === parseInt(selectedPromocionId));
+          if (promocion) {
+            const meses = parseInt(promocion.duracionMeses || 1);
+            const descuento = parseFloat(promocion.descuentoPorcentaje || 0);
+
+            // Buscar membresía que coincida con la duración
+            const membresiaCoincidente = tiposMembresia.find(t =>
+              t.activa && t.duracionMeses === meses
+            );
+
+            if (membresiaCoincidente) {
+              // Caso 1: Existe membresía con la misma duración
+              const precioMembresia = parseFloat(membresiaCoincidente.precio || 0);
+              const precioFinal = precioMembresia * (1 - descuento / 100);
+              return (
+                <small style={{ color: '#2563eb', display: 'block', marginTop: '5px', fontWeight: '500' }}>
+                  📊 Cálculo: Membresía {membresiaCoincidente.nombre} S/ {precioMembresia.toFixed(2)} - {descuento}% = S/ {precioFinal.toFixed(2)}
+                  <br />
+                  ⏱️ Duración de membresía: {meses} {meses === 1 ? 'mes' : 'meses'}
+                </small>
+              );
+            } else {
+              // Caso 2: Usar cálculo mensual
+              const membresiaMensual = tiposMembresia.find(t => t.activa && t.duracionMeses === 1);
+              if (membresiaMensual) {
+                const precioMensual = parseFloat(membresiaMensual.precio || 0);
+                const precioBase = precioMensual * meses;
+                const precioFinal = precioBase * (1 - descuento / 100);
+                return (
+                  <small style={{ color: '#2563eb', display: 'block', marginTop: '5px', fontWeight: '500' }}>
+                    📊 Cálculo: S/ {precioMensual.toFixed(2)} × {meses} {meses === 1 ? 'mes' : 'meses'} = S/ {precioBase.toFixed(2)} - {descuento}% = S/ {precioFinal.toFixed(2)}
+                    <br />
+                    ⏱️ Duración de membresía: {meses} {meses === 1 ? 'mes' : 'meses'}
+                  </small>
+                );
+              }
+            }
+          }
+          return null;
+        })()}
         {promocionesVigentes.length === 0 && (
-          <small style={{color: '#666', display: 'block', marginTop: '5px'}}>
+          <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
             No hay promociones vigentes en este momento
           </small>
         )}
       </div>
       <div className="form-group">
         <label>Monto *</label>
-        <input type="number" step="0.01" min="0" value={formData.monto || ''} 
-          onChange={(e) => setFormData({...formData, monto: parseFloat(e.target.value)})} required 
-          readOnly={selectedTipoMembresiaId && selectedPromocionId} />
-        {selectedTipoMembresiaId && selectedPromocionId && (
-          <small style={{color: '#666', display: 'block', marginTop: '5px'}}>
-            Monto calculado automáticamente con descuento aplicado
+        <input type="number" step="0.01" min="0" value={formData.monto || ''}
+          onChange={(e) => setFormData({ ...formData, monto: parseFloat(e.target.value) })} required
+          readOnly={selectedPromocionId || selectedTipoMembresiaId} />
+        {selectedPromocionId && (
+          <small style={{ color: '#2563eb', display: 'block', marginTop: '5px', fontWeight: '500' }}>
+            💰 Monto calculado automáticamente con promoción aplicada
+          </small>
+        )}
+        {!selectedPromocionId && selectedTipoMembresiaId && (
+          <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+            Monto según tipo de membresía seleccionado
           </small>
         )}
       </div>
       <div className="form-group">
         <label>Fecha de Pago *</label>
-        <input type="date" value={formData.fechaPago || new Date().toISOString().split('T')[0]} 
-          onChange={(e) => setFormData({...formData, fechaPago: e.target.value})} required 
+        <input type="date" value={formData.fechaPago || new Date().toISOString().split('T')[0]}
+          onChange={(e) => setFormData({ ...formData, fechaPago: e.target.value })} required
           readOnly />
-        <small style={{color: '#666', display: 'block', marginTop: '5px'}}>
+        <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
           Fecha establecida automáticamente al día de hoy
         </small>
       </div>
       <div className="form-group">
         <label>Método de Pago *</label>
-        <select value={formData.metodoPago || 'Efectivo'} 
-          onChange={(e) => setFormData({...formData, metodoPago: e.target.value})} required>
+        <select value={formData.metodoPago || 'Efectivo'}
+          onChange={(e) => setFormData({ ...formData, metodoPago: e.target.value })} required>
           <option value="Efectivo">Efectivo</option>
         </select>
       </div>
