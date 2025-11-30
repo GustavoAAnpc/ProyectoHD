@@ -49,6 +49,7 @@ const ChangePasswordModal = ({ user, onClose }) => {
             <div className="modal-content" style={{ maxWidth: '400px' }}>
                 <div className="modal-header">
                     <h3>Cambiar Contraseña</h3>
+                    <button className="close-button" onClick={onClose}>✕</button>
                 </div>
                 <div className="modal-body">
                     <p style={{ marginBottom: '15px' }}>

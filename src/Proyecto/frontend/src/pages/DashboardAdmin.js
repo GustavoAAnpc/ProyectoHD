@@ -238,6 +238,7 @@ const DashboardAdmin = () => {
           if (administrador) {
             await administradorService.update(administrador.idAdministrador, formData);
             alert('Perfil actualizado exitosamente');
+            loadData();
           }
           break;
         case 'sede':

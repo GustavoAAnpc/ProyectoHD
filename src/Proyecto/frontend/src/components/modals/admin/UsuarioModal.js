@@ -230,6 +230,8 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
           type="text"
           value={formData.nombres || ''}
           onChange={handleNombresChange}
+          pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
+          title="Solo letras y espacios"
           required
           disabled={!!editingItem}
         />
@@ -240,6 +242,8 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
           type="text"
           value={formData.apellidos || ''}
           onChange={handleApellidosChange}
+          pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
+          title="Solo letras y espacios"
           required
           disabled={!!editingItem}
         />
@@ -250,11 +254,12 @@ const UsuarioModal = ({ formData, setFormData, editingItem }) => {
           type="text"
           value={formData.celular || ''}
           maxLength={9}
+          pattern="^9\d{8}$"
+          title="Debe iniciar con 9 y tener 9 dígitos"
           onChange={handleCelularChange}
           required
           disabled={!!editingItem}
         />
-
       </div>
       <div className="form-group">
         <label>Nombre de Usuario (Generado automáticamente)</label>

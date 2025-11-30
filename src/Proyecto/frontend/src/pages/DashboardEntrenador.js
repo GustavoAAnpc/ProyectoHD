@@ -21,6 +21,7 @@ import EjercicioModal from '../components/modals/entrenador/EjercicioModal';
 import PlanNutricionalModal from '../components/modals/entrenador/PlanNutricionalModal';
 import VerRutinaModal from '../components/modals/entrenador/VerRutinaModal';
 import EntrenadorPerfilModal from '../components/modals/entrenador/EntrenadorPerfilModal';
+import ChangePasswordModal from '../components/modals/ChangePasswordModal';
 import PromocionCarousel from '../components/PromocionCarousel';
 import './Dashboard.css';
 
@@ -189,6 +190,13 @@ const DashboardEntrenador = () => {
             await planNutricionalService.update(editingItem.idPlan, formData);
           } else {
             await planNutricionalService.create(formData);
+          }
+          break;
+        case 'entrenadorPerfil':
+          if (instructor) {
+            await instructorService.update(instructor.idInstructor, formData);
+            alert('Perfil actualizado exitosamente');
+            loadData();
           }
           break;
       }
@@ -475,6 +483,13 @@ const DashboardEntrenador = () => {
               renderModalContent()
             )}
           </ModalWrapper>
+        )}
+
+        {showPasswordModal && user && (
+          <ChangePasswordModal
+            user={user}
+            onClose={() => setShowPasswordModal(false)}
+          />
         )}
       </div>
     </div>

@@ -8,6 +8,8 @@ const AdminPerfilModal = ({ formData, setFormData, onSubmit, onClose }) => {
                 <input
                     type="text"
                     value={formData.nameAdmin || ''}
+                    pattern="^[A-Za-zÀ-ÿ\s]+$"
+                    title="Solo letras y espacios"
                     onChange={(e) => setFormData({ ...formData, nameAdmin: e.target.value })}
                     required
                 />
@@ -17,6 +19,8 @@ const AdminPerfilModal = ({ formData, setFormData, onSubmit, onClose }) => {
                 <input
                     type="text"
                     value={formData.apellidosAdmin || ''}
+                    pattern="^[A-Za-zÀ-ÿ\s]+$"
+                    title="Solo letras y espacios"
                     onChange={(e) => setFormData({ ...formData, apellidosAdmin: e.target.value })}
                     required
                 />
@@ -26,7 +30,13 @@ const AdminPerfilModal = ({ formData, setFormData, onSubmit, onClose }) => {
                 <input
                     type="text"
                     value={formData.dni || ''}
-                    onChange={(e) => setFormData({ ...formData, dni: e.target.value })}
+                    maxLength={8}
+                    pattern="^\d{8}$"
+                    title="Debe tener 8 dígitos numéricos"
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        if (/^\d*$/.test(val)) setFormData({ ...formData, dni: val });
+                    }}
                     required
                 />
             </div>
@@ -35,7 +45,13 @@ const AdminPerfilModal = ({ formData, setFormData, onSubmit, onClose }) => {
                 <input
                     type="tel"
                     value={formData.telefono || ''}
-                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                    maxLength={9}
+                    pattern="^9\d{8}$"
+                    title="Debe iniciar con 9 y tener 9 dígitos"
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        if (/^\d*$/.test(val)) setFormData({ ...formData, telefono: val });
+                    }}
                     placeholder="Ej: 999999999"
                 />
             </div>
