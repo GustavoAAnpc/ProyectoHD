@@ -13,12 +13,15 @@ import EjerciciosTab from '../components/dashboard/entrenador/EjerciciosTab';
 import NutricionTab from '../components/dashboard/entrenador/NutricionTab';
 import SeguimientoTab from '../components/dashboard/entrenador/SeguimientoTab';
 import ComunicacionTab from '../components/dashboard/entrenador/ComunicacionTab';
+import EntrenadorPerfilTab from '../components/dashboard/entrenador/EntrenadorPerfilTab';
 import ModalWrapper from '../components/modals/ModalWrapper';
 import SeguimientoModal from '../components/modals/entrenador/SeguimientoModal';
 import RutinaModal from '../components/modals/entrenador/RutinaModal';
 import EjercicioModal from '../components/modals/entrenador/EjercicioModal';
 import PlanNutricionalModal from '../components/modals/entrenador/PlanNutricionalModal';
 import VerRutinaModal from '../components/modals/entrenador/VerRutinaModal';
+import EntrenadorPerfilModal from '../components/modals/entrenador/EntrenadorPerfilModal';
+import ChangePasswordModal from '../components/modals/ChangePasswordModal';
 import PromocionCarousel from '../components/PromocionCarousel';
 import './Dashboard.css';
 
@@ -49,6 +52,15 @@ const DashboardEntrenador = () => {
   const [foodResults, setFoodResults] = useState([]);
   const [filterGrupoMuscular, setFilterGrupoMuscular] = useState('');
   const [filterNivel, setFilterNivel] = useState('');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [instructor, setInstructor] = useState(null);
+
+  // Check if user needs to change password on mount
+  useEffect(() => {
+    if (user && user.passwordChanged === false) {
+      setShowPasswordModal(true);
+    }
+  }, [user]);
 
   const loadData = useCallback(async () => {
     try {
@@ -56,6 +68,7 @@ const DashboardEntrenador = () => {
       const instructor = instructorRes.data;
       if (instructor?.idInstructor) {
         setInstructorId(instructor.idInstructor);
+        setInstructor(instructor);
 
         const [
           clasesRes, planesRes, clientesRes, rutinasRes,
@@ -179,6 +192,13 @@ const DashboardEntrenador = () => {
             await planNutricionalService.create(formData);
           }
           break;
+        case 'entrenadorPerfil':
+          if (instructor) {
+            await instructorService.update(instructor.idInstructor, formData);
+            alert('Perfil actualizado exitosamente');
+            loadData();
+          }
+          break;
       }
       setShowModal(false);
       loadData();
@@ -219,7 +239,10 @@ const DashboardEntrenador = () => {
       'rutina': editingItem ? 'Editar Rutina' : 'Nueva Rutina',
       'ejercicio': editingItem ? 'Editar Ejercicio' : 'Nuevo Ejercicio',
       'planNutricional': editingItem ? 'Editar Plan Nutricional' : 'Nuevo Plan Nutricional',
-      'verRutina': 'Ejercicios de la Rutina'
+      'ejercicio': editingItem ? 'Editar Ejercicio' : 'Nuevo Ejercicio',
+      'planNutricional': editingItem ? 'Editar Plan Nutricional' : 'Nuevo Plan Nutricional',
+      'verRutina': 'Ejercicios de la Rutina',
+      'entrenadorPerfil': 'Editar Mi Perfil'
     };
     return titles[modalType] || '';
   };
@@ -268,6 +291,8 @@ const DashboardEntrenador = () => {
             onClose={() => setShowModal(false)}
           />
         );
+      case 'entrenadorPerfil':
+        return <EntrenadorPerfilModal formData={formData} setFormData={setFormData} />;
       default:
         return null;
     }
@@ -279,6 +304,9 @@ const DashboardEntrenador = () => {
         <div className="tabs">
           <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
             Resumen
+          </button>
+          <button className={`tab ${activeTab === 'perfil' ? 'active' : ''}`} onClick={() => setActiveTab('perfil')}>
+            Perfil
           </button>
           <button className={`tab ${activeTab === 'clientes' ? 'active' : ''}`} onClick={() => setActiveTab('clientes')}>
             Mis Clientes
@@ -417,9 +445,24 @@ const DashboardEntrenador = () => {
 
         {activeTab === 'promociones' && (
           <div className="tab-content">
-            <h2>Promociones Especiales</h2>
             <PromocionCarousel type="dashboard-entrenador" />
           </div>
+        )}
+
+        {activeTab === 'perfil' && (
+          <EntrenadorPerfilTab
+            usuario={user}
+            instructor={instructor}
+            onEditInstructor={() => {
+              setModalType('entrenadorPerfil');
+              setFormData({
+                ...instructor,
+                email: instructor.usuario?.email || user?.email || ''
+              });
+              setShowModal(true);
+            }}
+            onCambiarPassword={() => setShowPasswordModal(true)}
+          />
         )}
 
         {showModal && (
@@ -444,6 +487,13 @@ const DashboardEntrenador = () => {
               renderModalContent()
             )}
           </ModalWrapper>
+        )}
+
+        {showPasswordModal && user && (
+          <ChangePasswordModal
+            user={user}
+            onClose={() => setShowPasswordModal(false)}
+          />
         )}
       </div>
     </div>

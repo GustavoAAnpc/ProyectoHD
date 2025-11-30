@@ -40,6 +40,7 @@ export const instructorService = {
   getAll: () => api.get('/instructores'),
   getById: (id) => api.get(`/instructores/${id}`),
   getByUsuario: (idUsuario) => api.get(`/instructores/usuario/${idUsuario}`),
+  update: (id, instructor) => api.put(`/instructores/${id}`, instructor),
 };
 
 export const claseService = {
@@ -200,6 +201,14 @@ export const usuarioService = {
   delete: (id) => api.delete(`/usuarios/${id}`),
   cambiarEstado: (id, estado) => api.put(`/usuarios/${id}/estado`, estado),
   resetPassword: (id, password) => api.put(`/usuarios/${id}/reset-password`, { password }),
+  changePassword: (id, currentPassword, newPassword) => api.put(`/usuarios/${id}/change-password`, { currentPassword, newPassword }),
+};
+
+export const administradorService = {
+  getAll: () => api.get('/administradores'),
+  getById: (id) => api.get(`/administradores/${id}`),
+  getByUsuario: (idUsuario) => api.get(`/administradores/usuario/${idUsuario}`),
+  update: (id, administrador) => api.put(`/administradores/${id}`, administrador),
 };
 
 export const promocionService = {

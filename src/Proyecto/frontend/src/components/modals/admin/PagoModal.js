@@ -5,8 +5,19 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
   const [selectedTipoMembresiaId, setSelectedTipoMembresiaId] = useState(formData.tipoMembresia?.idTipoMembresia || '');
   const [selectedPromocionId, setSelectedPromocionId] = useState(formData.promocion?.idPromocion || '');
 
+  // Establecer fecha de pago, método de pago y estado al montar el componente
   useEffect(() => {
-    // Cuando cambia el tipo de membresía, calcular el precio
+    const fechaHoy = new Date().toISOString().split('T')[0];
+    setFormData(prev => ({
+      ...prev,
+      fechaPago: prev.fechaPago || fechaHoy,
+      metodoPago: prev.metodoPago || 'Efectivo',
+      estado: prev.estado || 'Pagado'
+    }));
+  }, []); // Solo se ejecuta al montar
+
+  // Cuando cambia el tipo de membresía, calcular el precio
+  useEffect(() => {
     if (selectedTipoMembresiaId) {
       const tipoMembresia = tiposMembresia.find(t => t.idTipoMembresia === parseInt(selectedTipoMembresiaId));
       if (tipoMembresia) {
@@ -21,11 +32,11 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
           }
         }
         
-        setFormData({
-          ...formData,
+        setFormData(prev => ({
+          ...prev,
           tipoMembresia: {idTipoMembresia: parseInt(selectedTipoMembresiaId)},
           monto: precioBase
-        });
+        }));
       }
     }
   }, [selectedTipoMembresiaId, selectedPromocionId]);
@@ -179,30 +190,17 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
       <div className="form-group">
         <label>Fecha de Pago *</label>
         <input type="date" value={formData.fechaPago || new Date().toISOString().split('T')[0]} 
-          onChange={(e) => setFormData({...formData, fechaPago: e.target.value})} required />
+          onChange={(e) => setFormData({...formData, fechaPago: e.target.value})} required 
+          readOnly />
+        <small style={{color: '#666', display: 'block', marginTop: '5px'}}>
+          Fecha establecida automáticamente al día de hoy
+        </small>
       </div>
       <div className="form-group">
         <label>Método de Pago *</label>
-        <select value={formData.metodoPago || ''} 
+        <select value={formData.metodoPago || 'Efectivo'} 
           onChange={(e) => setFormData({...formData, metodoPago: e.target.value})} required>
-          <option value="">Seleccionar método</option>
           <option value="Efectivo">Efectivo</option>
-          <option value="Tarjeta">Tarjeta</option>
-          <option value="Transferencia">Transferencia</option>
-        </select>
-      </div>
-      <div className="form-group">
-        <label>Comprobante</label>
-        <input type="text" value={formData.comprobante || ''} 
-          onChange={(e) => setFormData({...formData, comprobante: e.target.value})} />
-      </div>
-      <div className="form-group">
-        <label>Estado</label>
-        <select value={formData.estado || 'Pagado'} 
-          onChange={(e) => setFormData({...formData, estado: e.target.value})}>
-          <option value="Pagado">Pagado</option>
-          <option value="Pendiente">Pendiente</option>
-          <option value="Cancelado">Cancelado</option>
         </select>
       </div>
     </>

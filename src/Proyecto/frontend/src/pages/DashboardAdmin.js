@@ -5,7 +5,8 @@ import {
   alumnoService, instructorService, claseService,
   sedeService, equipoService, tipoMembresiaService,
   membresiaService, pagoService, usuarioService,
-  promocionService, noticiaService, reservaClaseService
+  promocionService, noticiaService, reservaClaseService,
+  administradorService
 } from '../services/api';
 import SedesTab from '../components/dashboard/admin/SedesTab';
 import EquiposTab from '../components/dashboard/admin/EquiposTab';
@@ -16,6 +17,7 @@ import PromocionesTab from '../components/dashboard/admin/PromocionesTab';
 import EntrenadoresTab from '../components/dashboard/admin/EntrenadoresTab';
 import GimnasioTab from '../components/dashboard/admin/GimnasioTab';
 import ReportesTab from '../components/dashboard/admin/ReportesTab';
+import AdminPerfilTab from '../components/dashboard/admin/AdminPerfilTab';
 import ModalWrapper from '../components/modals/ModalWrapper';
 import SedeModal from '../components/modals/admin/SedeModal';
 import EquipoModal from '../components/modals/admin/EquipoModal';
@@ -26,6 +28,8 @@ import UsuarioModal from '../components/modals/admin/UsuarioModal';
 import PromocionModal from '../components/modals/admin/PromocionModal';
 import NoticiaModal from '../components/modals/admin/NoticiaModal';
 import ClaseModal from '../components/modals/admin/ClaseModal';
+import AdminPerfilModal from '../components/modals/admin/AdminPerfilModal';
+import ChangePasswordModal from '../components/modals/ChangePasswordModal';
 import './Dashboard.css';
 
 const DashboardAdmin = () => {
@@ -53,6 +57,15 @@ const DashboardAdmin = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [administrador, setAdministrador] = useState(null);
+
+  // Check if user needs to change password on mount
+  useEffect(() => {
+    if (user && user.passwordChanged === false) {
+      setShowPasswordModal(true);
+    }
+  }, [user]);
 
 
   const loadData = useCallback(async () => {
@@ -117,6 +130,15 @@ const DashboardAdmin = () => {
       } catch (error) {
         console.warn('Error cargando noticias:', error);
         setNoticias([]);
+      }
+
+      // Cargar datos del administrador
+      try {
+        const adminRes = await administradorService.getByUsuario(user.idUsuario);
+        setAdministrador(adminRes.data);
+      } catch (error) {
+        console.warn('Error cargando datos de administrador:', error);
+        setAdministrador(null);
       }
 
       // Calcular estadísticas con datos disponibles
@@ -212,6 +234,13 @@ const DashboardAdmin = () => {
     e.preventDefault();
     try {
       switch (modalType) {
+        case 'adminPerfil':
+          if (administrador) {
+            await administradorService.update(administrador.idAdministrador, formData);
+            alert('Perfil actualizado exitosamente');
+            loadData();
+          }
+          break;
         case 'sede':
           if (editingItem) {
             await sedeService.update(editingItem.idSede, formData);
@@ -383,6 +412,7 @@ const DashboardAdmin = () => {
 
   const getModalTitle = () => {
     const titles = {
+      'adminPerfil': 'Editar Mi Perfil',
       'sede': editingItem ? 'Editar Sede' : 'Nueva Sede',
       'equipo': editingItem ? 'Editar Equipo' : 'Nuevo Equipo',
       'tipoMembresia': editingItem ? 'Editar Tipo de Membresía' : 'Nuevo Tipo de Membresía',
@@ -398,6 +428,8 @@ const DashboardAdmin = () => {
 
   const renderModalContent = () => {
     switch (modalType) {
+      case 'adminPerfil':
+        return <AdminPerfilModal formData={formData} setFormData={setFormData} />;
       case 'sede':
         return <SedeModal formData={formData} setFormData={setFormData} />;
       case 'equipo':
@@ -427,6 +459,9 @@ const DashboardAdmin = () => {
         <div className="tabs">
           <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
             Resumen
+          </button>
+          <button className={`tab ${activeTab === 'perfil' ? 'active' : ''}`} onClick={() => setActiveTab('perfil')}>
+            Perfil
           </button>
           <button className={`tab ${activeTab === 'sedes' ? 'active' : ''}`} onClick={() => setActiveTab('sedes')}>
             Sedes
@@ -514,14 +549,6 @@ const DashboardAdmin = () => {
                 <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                   <button className="btn-primary" onClick={() => handleCreate('tipoMembresia')}>Nuevo Tipo</button>
                   <button className="btn-primary" onClick={() => handleCreate('membresia')}>Asignar Membresía</button>
-                </div>
-              </section>
-              <section className="dashboard-section">
-                <h2>Reportes y Estadísticas</h2>
-                <p>Genera reportes de ingresos, asistencia y desempeño.</p>
-                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                  <button className="btn-secondary" onClick={() => setActiveTab('reportes')}>Ver Reportes</button>
-                  <button className="btn-secondary" onClick={() => handleExportReport('ingresos')}>Exportar PDF</button>
                 </div>
               </section>
             </div>
@@ -630,6 +657,18 @@ const DashboardAdmin = () => {
           />
         )}
 
+        {activeTab === 'perfil' && (
+          <AdminPerfilTab
+            administrador={administrador}
+            onEdit={() => {
+              setModalType('adminPerfil');
+              setFormData(administrador || {});
+              setShowModal(true);
+            }}
+            onChangePassword={() => setShowPasswordModal(true)}
+          />
+        )}
+
         {showModal && (
           <ModalWrapper
             title={getModalTitle()}
@@ -645,6 +684,13 @@ const DashboardAdmin = () => {
               {renderModalContent()}
             </form>
           </ModalWrapper>
+        )}
+
+        {showPasswordModal && user && (
+          <ChangePasswordModal
+            user={user}
+            onClose={() => setShowPasswordModal(false)}
+          />
         )}
       </div>
     </div>

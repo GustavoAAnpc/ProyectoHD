@@ -19,6 +19,7 @@ import RutinaModal from '../components/modals/RutinaModal';
 import MensajeModal from '../components/modals/MensajeModal';
 import FeedbackModal from '../components/modals/FeedbackModal';
 import PromocionCarousel from '../components/PromocionCarousel';
+import ChangePasswordModal from '../components/modals/ChangePasswordModal';
 import './Dashboard.css';
 import { detectarConLogMeal } from "../services/logmealService";
 
@@ -47,6 +48,14 @@ const DashboardUsuario = () => {
   const [modalType, setModalType] = useState('');
   const [formData, setFormData] = useState({});
   const [miEntrenador, setMiEntrenador] = useState(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+  // Check if user needs to change password on mount
+  useEffect(() => {
+    if (user && user.passwordChanged === false) {
+      setShowPasswordModal(true);
+    }
+  }, [user]);
 
   const loadData = useCallback(async () => {
     try {
@@ -108,7 +117,12 @@ const DashboardUsuario = () => {
   // Handlers
   const handleEditPerfil = () => {
     setModalType('perfil');
-    setFormData(alumno);
+    // Asegurar que el email esté disponible en formData desde usuario
+    setFormData({
+      ...alumno,
+      email: alumno.usuario?.email || alumno.email || '',
+      telefono: alumno.telefono || alumno.celular || ''
+    });
     setShowModal(true);
   };
 
@@ -474,7 +488,11 @@ const DashboardUsuario = () => {
 
         {
           activeTab === 'perfil' && (
-            <PerfilTab alumno={alumno} onEdit={handleEditPerfil} />
+            <PerfilTab
+              alumno={alumno}
+              onEdit={handleEditPerfil}
+              onChangePassword={() => setShowPasswordModal(true)}
+            />
           )
         }
 
@@ -555,6 +573,13 @@ const DashboardUsuario = () => {
         }
 
         {renderModal()}
+
+        {showPasswordModal && user && (
+          <ChangePasswordModal
+            user={user}
+            onClose={() => setShowPasswordModal(false)}
+          />
+        )}
       </div >
     </div >
   );

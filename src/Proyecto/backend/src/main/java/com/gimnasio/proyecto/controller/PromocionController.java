@@ -6,8 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/promociones")
@@ -32,9 +34,44 @@ public class PromocionController {
 
     @GetMapping("/web")
     public ResponseEntity<List<Promocion>> getPromocionesWeb() {
-        LocalDate hoy = LocalDate.now();
-        return ResponseEntity.ok(promocionRepository
-                .findByMostrarEnWebTrueAndActivaTrueAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(hoy, hoy));
+        try {
+            LocalDate hoy = LocalDate.now();
+            System.out.println("=== Buscando promociones web para fecha: " + hoy + " ===");
+            
+            // Primero, obtener todas las promociones que cumplen los criterios básicos
+            List<Promocion> todas = promocionRepository.findAll();
+            System.out.println("Total de promociones en BD: " + todas.size());
+            
+            // Filtrar manualmente para tener control total
+            List<Promocion> filtradas = todas.stream()
+                    .filter(p -> {
+                        boolean mostrarEnWeb = p.getMostrarEnWeb() != null && p.getMostrarEnWeb();
+                        boolean activa = p.getActiva() != null && p.getActiva();
+                        boolean fechaValida = p.getFechaInicio() != null 
+                                && p.getFechaFin() != null
+                                && !hoy.isBefore(p.getFechaInicio())
+                                && !hoy.isAfter(p.getFechaFin());
+                        
+                        if (mostrarEnWeb && activa) {
+                            System.out.println("Promoción: " + p.getNombre() + 
+                                    " | mostrarEnWeb: " + mostrarEnWeb + 
+                                    " | activa: " + activa + 
+                                    " | fechaInicio: " + p.getFechaInicio() + 
+                                    " | fechaFin: " + p.getFechaFin() + 
+                                    " | fechaValida: " + fechaValida);
+                        }
+                        
+                        return mostrarEnWeb && activa && fechaValida;
+                    })
+                    .collect(Collectors.toList());
+            
+            System.out.println("Promociones web válidas encontradas: " + filtradas.size());
+            return ResponseEntity.ok(filtradas);
+        } catch (Exception e) {
+            System.err.println("Error al obtener promociones web: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.ok(new ArrayList<>());
+        }
     }
 
     @GetMapping("/dashboard-usuario")

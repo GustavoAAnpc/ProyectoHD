@@ -12,28 +12,36 @@ import java.util.Optional;
 @RequestMapping("/api/instructores")
 @CrossOrigin(origins = "http://localhost:3000")
 public class InstructorController {
-    
+
     private final InstructorRepository instructorRepository;
-    
+
     public InstructorController(InstructorRepository instructorRepository) {
         this.instructorRepository = instructorRepository;
     }
-    
+
     @GetMapping
     public ResponseEntity<List<Instructor>> getAllInstructores() {
         return ResponseEntity.ok(instructorRepository.findAll());
     }
-    
+
     @GetMapping("/{id}")
     public ResponseEntity<Instructor> getInstructorById(@PathVariable Long id) {
         Optional<Instructor> instructor = instructorRepository.findById(id);
         return instructor.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
-    
+
     @GetMapping("/usuario/{idUsuario}")
     public ResponseEntity<Instructor> getInstructorByUsuario(@PathVariable Long idUsuario) {
         Optional<Instructor> instructor = instructorRepository.findByUsuarioIdUsuario(idUsuario);
         return instructor.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
-}
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Instructor> updateInstructor(@PathVariable Long id, @RequestBody Instructor instructor) {
+        if (!instructorRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        instructor.setIdInstructor(id);
+        return ResponseEntity.ok(instructorRepository.save(instructor));
+    }
+}

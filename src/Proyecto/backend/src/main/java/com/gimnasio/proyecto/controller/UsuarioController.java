@@ -85,6 +85,7 @@ public class UsuarioController {
             }
 
             usuario.setEstado(request.get("estado") != null ? (Boolean) request.get("estado") : true);
+            usuario.setPasswordChanged(false);
 
             usuario = usuarioRepository.save(usuario);
 
@@ -115,6 +116,12 @@ public class UsuarioController {
                         alumno.setApellidosAlumno("");
                     }
 
+                    // Mapear celular a telefono si viene en el request
+                    String celular = (String) request.get("celular");
+                    if (celular != null && !celular.trim().isEmpty()) {
+                        alumno.setTelefono(celular);
+                    }
+
                     String dniTemporal = "TEMP-" + System.currentTimeMillis() + "-" + usuario.getIdUsuario();
                     alumno.setDni(dniTemporal);
                     alumno.setFechaInscripcion(LocalDate.now());
@@ -133,6 +140,12 @@ public class UsuarioController {
                     } else {
                         instructor.setNamaInstructor(usuario.getNameUsuario());
                         instructor.setApellidosInstructor("");
+                    }
+
+                    // Mapear celular a telefono si viene en el request
+                    String celular = (String) request.get("celular");
+                    if (celular != null && !celular.trim().isEmpty()) {
+                        instructor.setTelefono(celular);
                     }
 
                     String dniTemporal = "TEMP-" + System.currentTimeMillis() + "-" + usuario.getIdUsuario();
@@ -206,6 +219,32 @@ public class UsuarioController {
 
         Usuario usuario = usuarioOpt.get();
         usuario.setPasswordUsuario(passwordEncoder.encode(nuevaPassword));
+        usuario.setPasswordChanged(false);
+        return ResponseEntity.ok(usuarioRepository.save(usuario));
+    }
+
+    @PutMapping("/{id}/change-password")
+    public ResponseEntity<?> changePassword(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String currentPassword = request.get("currentPassword");
+        String newPassword = request.get("newPassword");
+
+        if (currentPassword == null || newPassword == null || newPassword.isEmpty()) {
+            return ResponseEntity.badRequest().body("Contraseña actual y nueva son requeridas");
+        }
+
+        Usuario usuario = usuarioOpt.get();
+
+        if (!passwordEncoder.matches(currentPassword, usuario.getPasswordUsuario())) {
+            return ResponseEntity.badRequest().body("Contraseña actual incorrecta");
+        }
+
+        usuario.setPasswordUsuario(passwordEncoder.encode(newPassword));
+        usuario.setPasswordChanged(true);
         return ResponseEntity.ok(usuarioRepository.save(usuario));
     }
 
