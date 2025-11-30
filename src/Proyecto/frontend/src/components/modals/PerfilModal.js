@@ -61,7 +61,7 @@ const PerfilModal = ({ alumno, formData, setFormData, onSubmit, onClose }) => {
         <input
           type="text"
           maxLength={9}
-          value={formData.telefono || ''}
+          value={formData.telefono || formData.celular || ''}
           onInput={(e) => {
             let val = e.target.value.replace(/\D/g, ''); // solo números
 
@@ -74,7 +74,8 @@ const PerfilModal = ({ alumno, formData, setFormData, onSubmit, onClose }) => {
 
             setFormData({
               ...formData,
-              telefono: val
+              telefono: val,
+              celular: val // Mantener ambos por compatibilidad
             });
           }}
           required

@@ -117,7 +117,12 @@ const DashboardUsuario = () => {
   // Handlers
   const handleEditPerfil = () => {
     setModalType('perfil');
-    setFormData(alumno);
+    // Asegurar que el email esté disponible en formData desde usuario
+    setFormData({
+      ...alumno,
+      email: alumno.usuario?.email || alumno.email || '',
+      telefono: alumno.telefono || alumno.celular || ''
+    });
     setShowModal(true);
   };
 

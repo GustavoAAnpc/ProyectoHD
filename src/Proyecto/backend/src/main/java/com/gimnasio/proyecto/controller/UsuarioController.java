@@ -116,6 +116,12 @@ public class UsuarioController {
                         alumno.setApellidosAlumno("");
                     }
 
+                    // Mapear celular a telefono si viene en el request
+                    String celular = (String) request.get("celular");
+                    if (celular != null && !celular.trim().isEmpty()) {
+                        alumno.setTelefono(celular);
+                    }
+
                     String dniTemporal = "TEMP-" + System.currentTimeMillis() + "-" + usuario.getIdUsuario();
                     alumno.setDni(dniTemporal);
                     alumno.setFechaInscripcion(LocalDate.now());
@@ -134,6 +140,12 @@ public class UsuarioController {
                     } else {
                         instructor.setNamaInstructor(usuario.getNameUsuario());
                         instructor.setApellidosInstructor("");
+                    }
+
+                    // Mapear celular a telefono si viene en el request
+                    String celular = (String) request.get("celular");
+                    if (celular != null && !celular.trim().isEmpty()) {
+                        instructor.setTelefono(celular);
                     }
 
                     String dniTemporal = "TEMP-" + System.currentTimeMillis() + "-" + usuario.getIdUsuario();

@@ -451,13 +451,17 @@ const DashboardEntrenador = () => {
 
         {activeTab === 'perfil' && (
           <EntrenadorPerfilTab
+            usuario={user}
             instructor={instructor}
-            onEdit={() => {
+            onEditInstructor={() => {
               setModalType('entrenadorPerfil');
-              setFormData(instructor || {});
+              setFormData({
+                ...instructor,
+                email: instructor.usuario?.email || user?.email || ''
+              });
               setShowModal(true);
             }}
-            onChangePassword={() => setShowPasswordModal(true)}
+            onCambiarPassword={() => setShowPasswordModal(true)}
           />
         )}
 

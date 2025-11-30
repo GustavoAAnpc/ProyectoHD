@@ -24,8 +24,8 @@ const PerfilTab = ({ alumno, onEdit, onChangePassword }) => {
 
       <div className="profile-info">
         <p><strong>Nombre Completo:</strong> {alumno.nameAlumno} {alumno.apellidosAlumno}</p>
-        <p><strong>Teléfono:</strong> {alumno.telefono}</p>
-        <p><strong>Email:</strong> {alumno.usuario?.email || 'No especificado'}</p>
+        <p><strong>Teléfono:</strong> {alumno.telefono || alumno.celular || 'No especificado'}</p>
+        <p><strong>Email:</strong> {alumno.usuario?.email || alumno.email || 'No especificado'}</p>
         <p><strong>Dirección:</strong> {alumno.direccion || 'No especificada'}</p>
         <p><strong>Género:</strong> {alumno.genero || 'No especificado'}</p>
         <p><strong>Peso Actual:</strong> {peso || 'N/A'} kg</p>
