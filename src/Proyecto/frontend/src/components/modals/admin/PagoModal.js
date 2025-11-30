@@ -16,25 +16,43 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
     }));
   }, []); // Solo se ejecuta al montar
 
-  // Cuando cambia la promoción, calcular el precio basado en membresía mensual
+  // Cuando cambia la promoción, calcular el precio con la misma lógica del backend
   useEffect(() => {
     if (selectedPromocionId) {
       const promocion = promociones.find(p => p.idPromocion === parseInt(selectedPromocionId));
       if (promocion && esPromocionVigente(promocion)) {
-        // Buscar membresía mensual (duracionMeses = 1)
-        const membresiaMensual = tiposMembresia.find(t => t.activa && t.duracionMeses === 1);
+        const mesesPromocion = parseInt(promocion.duracionMeses || 1);
 
-        if (membresiaMensual) {
-          const precioMensual = parseFloat(membresiaMensual.precio || 0);
-          const mesesPromocion = parseInt(promocion.duracionMeses || 1);
-          const precioBase = precioMensual * mesesPromocion;
+        // PRIORIDAD 1: Buscar membresía que coincida con la duración de la promoción
+        const membresiaCoincidente = tiposMembresia.find(t =>
+          t.activa && t.duracionMeses === mesesPromocion
+        );
+
+        if (membresiaCoincidente) {
+          // Caso 1: Existe membresía con la misma duración (ej: anual, semestral, trimestral)
+          const precioMembresia = parseFloat(membresiaCoincidente.precio || 0);
           const descuento = parseFloat(promocion.descuentoPorcentaje || 0);
-          const precioFinal = precioBase * (1 - descuento / 100);
+          const precioFinal = precioMembresia * (1 - descuento / 100);
 
           setFormData(prev => ({
             ...prev,
             monto: precioFinal
           }));
+        } else {
+          // Caso 2: No existe membresía con esa duración -> usar cálculo mensual
+          const membresiaMensual = tiposMembresia.find(t => t.activa && t.duracionMeses === 1);
+
+          if (membresiaMensual) {
+            const precioMensual = parseFloat(membresiaMensual.precio || 0);
+            const precioBase = precioMensual * mesesPromocion;
+            const descuento = parseFloat(promocion.descuentoPorcentaje || 0);
+            const precioFinal = precioBase * (1 - descuento / 100);
+
+            setFormData(prev => ({
+              ...prev,
+              monto: precioFinal
+            }));
+          }
         }
       }
     } else if (selectedTipoMembresiaId && !selectedPromocionId) {
@@ -192,20 +210,42 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
         </select>
         {selectedPromocionId && (() => {
           const promocion = promociones.find(p => p.idPromocion === parseInt(selectedPromocionId));
-          const membresiaMensual = tiposMembresia.find(t => t.activa && t.duracionMeses === 1);
-          if (promocion && membresiaMensual) {
-            const precioMensual = parseFloat(membresiaMensual.precio || 0);
+          if (promocion) {
             const meses = parseInt(promocion.duracionMeses || 1);
-            const precioBase = precioMensual * meses;
             const descuento = parseFloat(promocion.descuentoPorcentaje || 0);
-            const precioFinal = precioBase * (1 - descuento / 100);
-            return (
-              <small style={{ color: '#2563eb', display: 'block', marginTop: '5px', fontWeight: '500' }}>
-                📊 Cálculo: S/ {precioMensual.toFixed(2)} × {meses} {meses === 1 ? 'mes' : 'meses'} = S/ {precioBase.toFixed(2)} - {descuento}% = S/ {precioFinal.toFixed(2)}
-                <br />
-                ⏱️ Duración de membresía: {meses} {meses === 1 ? 'mes' : 'meses'}
-              </small>
+
+            // Buscar membresía que coincida con la duración
+            const membresiaCoincidente = tiposMembresia.find(t =>
+              t.activa && t.duracionMeses === meses
             );
+
+            if (membresiaCoincidente) {
+              // Caso 1: Existe membresía con la misma duración
+              const precioMembresia = parseFloat(membresiaCoincidente.precio || 0);
+              const precioFinal = precioMembresia * (1 - descuento / 100);
+              return (
+                <small style={{ color: '#2563eb', display: 'block', marginTop: '5px', fontWeight: '500' }}>
+                  📊 Cálculo: Membresía {membresiaCoincidente.nombre} S/ {precioMembresia.toFixed(2)} - {descuento}% = S/ {precioFinal.toFixed(2)}
+                  <br />
+                  ⏱️ Duración de membresía: {meses} {meses === 1 ? 'mes' : 'meses'}
+                </small>
+              );
+            } else {
+              // Caso 2: Usar cálculo mensual
+              const membresiaMensual = tiposMembresia.find(t => t.activa && t.duracionMeses === 1);
+              if (membresiaMensual) {
+                const precioMensual = parseFloat(membresiaMensual.precio || 0);
+                const precioBase = precioMensual * meses;
+                const precioFinal = precioBase * (1 - descuento / 100);
+                return (
+                  <small style={{ color: '#2563eb', display: 'block', marginTop: '5px', fontWeight: '500' }}>
+                    📊 Cálculo: S/ {precioMensual.toFixed(2)} × {meses} {meses === 1 ? 'mes' : 'meses'} = S/ {precioBase.toFixed(2)} - {descuento}% = S/ {precioFinal.toFixed(2)}
+                    <br />
+                    ⏱️ Duración de membresía: {meses} {meses === 1 ? 'mes' : 'meses'}
+                  </small>
+                );
+              }
+            }
           }
           return null;
         })()}
