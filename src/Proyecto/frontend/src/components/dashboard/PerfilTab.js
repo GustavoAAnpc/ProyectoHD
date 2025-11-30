@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PerfilTab = ({ alumno, onEdit }) => {
+const PerfilTab = ({ alumno, onEdit, onChangePassword }) => {
   if (!alumno) return <p>Cargando...</p>;
 
   const peso = alumno.pesoActual;
@@ -14,9 +14,12 @@ const PerfilTab = ({ alumno, onEdit }) => {
 
   return (
     <div className="dashboard-section">
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px'}}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
         <h2>Mi Perfil</h2>
-        <button className="btn-primary" onClick={onEdit}>Editar Perfil</button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn-secondary" onClick={onChangePassword}>Cambiar Contraseña</button>
+          <button className="btn-primary" onClick={onEdit}>Editar Perfil</button>
+        </div>
       </div>
 
       <div className="profile-info">
