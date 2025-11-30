@@ -31,11 +31,28 @@ const PromocionCarousel = ({ type = 'web' }) => {
                     response = await promocionService.getActivas();
             }
 
-            setPromociones(response.data || []);
+            const promocionesData = response?.data || response || [];
+            console.log(`Promociones cargadas para tipo "${type}":`, promocionesData);
+            console.log(`Total de promociones: ${promocionesData.length}`);
+            if (promocionesData.length > 0) {
+                promocionesData.forEach((p, idx) => {
+                    console.log(`Promoción ${idx + 1}:`, {
+                        id: p.idPromocion,
+                        nombre: p.nombre,
+                        mostrarEnWeb: p.mostrarEnWeb,
+                        activa: p.activa,
+                        fechaInicio: p.fechaInicio,
+                        fechaFin: p.fechaFin
+                    });
+                });
+            }
+            setPromociones(promocionesData);
             setError(null);
         } catch (err) {
             console.error('Error cargando promociones:', err);
-            setError('Error al cargar las promociones');
+            console.error('Error completo:', err.response || err.message || err);
+            setError(`Error al cargar las promociones: ${err.message || 'Error desconocido'}`);
+            setPromociones([]);
         } finally {
             setLoading(false);
         }
@@ -60,10 +77,14 @@ const PromocionCarousel = ({ type = 'web' }) => {
     // Auto-advance carousel
     useEffect(() => {
         if (promociones.length > 1) {
-            const interval = setInterval(nextSlide, 5000); // Change slide every 5 seconds
+            const interval = setInterval(() => {
+                setCurrentIndex((prevIndex) =>
+                    prevIndex === promociones.length - 1 ? 0 : prevIndex + 1
+                );
+            }, 5000); // Change slide every 5 seconds
             return () => clearInterval(interval);
         }
-    }, [promociones.length, currentIndex]);
+    }, [promociones.length]);
 
     if (loading) {
         return (
@@ -82,7 +103,17 @@ const PromocionCarousel = ({ type = 'web' }) => {
     }
 
     if (promociones.length === 0) {
-        return null; // Don't show anything if there are no promotions
+        // Mostrar mensaje en desarrollo para ayudar con la depuración
+        if (process.env.NODE_ENV === 'development') {
+            return (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#666', fontStyle: 'italic' }}>
+                    No hay promociones disponibles para mostrar en este momento.
+                    <br />
+                    <small>Tipo: {type}</small>
+                </div>
+            );
+        }
+        return null; // No mostrar nada en producción si no hay promociones
     }
 
     return (
@@ -94,12 +125,31 @@ const PromocionCarousel = ({ type = 'web' }) => {
                             key={promocion.idPromocion}
                             className={`carousel-slide ${index === currentIndex ? 'active' : ''}`}
                         >
-                            {promocion.imagenUrl && (
+                            {promocion.imagenUrl ? (
                                 <img
                                     src={promocion.imagenUrl}
-                                    alt={promocion.titulo || 'Promoción'}
+                                    alt={promocion.nombre || 'Promoción'}
                                     className="carousel-image"
                                 />
+                            ) : (
+                                <div className="carousel-content">
+                                    <h3>{promocion.nombre || 'Promoción Especial'}</h3>
+                                    {promocion.descripcion && (
+                                        <p className="carousel-description">{promocion.descripcion}</p>
+                                    )}
+                                    {promocion.descuentoPorcentaje && (
+                                        <div className="carousel-discount">
+                                            <span className="discount-badge">
+                                                {promocion.descuentoPorcentaje}% OFF
+                                            </span>
+                                        </div>
+                                    )}
+                                    {promocion.fechaInicio && promocion.fechaFin && (
+                                        <p className="carousel-dates">
+                                            Válido del {new Date(promocion.fechaInicio).toLocaleDateString()} al {new Date(promocion.fechaFin).toLocaleDateString()}
+                                        </p>
+                                    )}
+                                </div>
                             )}
                         </div>
                     ))}
