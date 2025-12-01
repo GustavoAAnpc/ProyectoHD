@@ -447,7 +447,7 @@ const DashboardAdmin = () => {
       case 'noticia':
         return <NoticiaModal formData={formData} setFormData={setFormData} instructores={instructores} />;
       case 'clase':
-        return <ClaseModal formData={formData} setFormData={setFormData} instructores={instructores} />;
+        return <ClaseModal formData={formData} setFormData={setFormData} instructores={instructores} sedes={sedes} />;
       default:
         return null;
     }
