@@ -39,7 +39,6 @@ const DashboardUsuario = () => {
   const [mensajes, setMensajes] = useState([]);
   const [seguimientos, setSeguimientos] = useState([]);
   const [selectedRutina, setSelectedRutina] = useState(null);
-  const [selectedDia, setSelectedDia] = useState('');
   const [foodSearch, setFoodSearch] = useState('');
   const [foodResults, setFoodResults] = useState([]);
   const [alimentosConsumidos, setAlimentosConsumidos] = useState([]);
@@ -362,7 +361,7 @@ const DashboardUsuario = () => {
     if (!showModal) return null;
 
     const modalTitle = {
-      'verRutina': 'Mi Rutina - ' + selectedDia,
+      'verRutina': 'Mi Rutina - ' + (selectedRutina?.nombre || ''),
       'perfil': 'Editar Perfil',
       'mensaje': 'Enviar Mensaje a mi Entrenador',
       'feedback': 'Enviar Feedback'
@@ -378,8 +377,6 @@ const DashboardUsuario = () => {
           {modalType === 'verRutina' && (
             <RutinaModal
               rutina={selectedRutina}
-              selectedDia={selectedDia}
-              setSelectedDia={setSelectedDia}
               ejerciciosRutina={ejerciciosRutina}
               onMarcarCompletado={handleMarcarCompletado}
               onClose={() => setShowModal(false)}

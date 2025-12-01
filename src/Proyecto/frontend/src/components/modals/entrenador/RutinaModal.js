@@ -22,8 +22,11 @@ const RutinaModal = ({ formData, setFormData, clientesAsignados }) => {
           <option value="">Seleccionar rutina</option>
           <option value="Pecho">Pecho</option>
           <option value="Espalda">Espalda</option>
-          <option value="Piernas">Piernas</option>
           <option value="Hombros">Hombros</option>
+          <option value="Brazos">Brazos</option>
+          <option value="Piernas">Piernas</option>
+          <option value="Core">Core</option>
+          <option value="Cardio">Cardio</option>
         </select>
       </div>
       <div className="form-group">

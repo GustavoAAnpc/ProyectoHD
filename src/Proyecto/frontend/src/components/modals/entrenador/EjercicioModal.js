@@ -1,7 +1,6 @@
 import React from 'react';
 
 const EjercicioModal = ({ formData, setFormData }) => {
-  // Ejercicios predefinidos por grupo muscular
   const ejerciciosPorGrupo = {
     'Pecho': [
       'Press de banca',
