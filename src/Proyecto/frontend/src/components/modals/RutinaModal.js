@@ -31,7 +31,7 @@ const RutinaModal = ({ rutina, ejerciciosRutina, onMarcarCompletado, onClose }) 
   return (
     <div>
       <div style={{ marginBottom: '20px' }}>
-        <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500' }}>Día de Entrenamiento:</label>
+        <label style={{ display: 'block', marginBottom: '10px', fontWeight: '500', color: 'var(--text-color)' }}>Día de Entrenamiento:</label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {diasSemana.map(dia => (
             <button
@@ -39,15 +39,16 @@ const RutinaModal = ({ rutina, ejerciciosRutina, onMarcarCompletado, onClose }) 
               onClick={() => setSelectedDia(dia)}
               style={{
                 padding: '8px 12px',
-                border: selectedDia === dia ? '2px solid #2563eb' : '1px solid #ddd',
-                background: selectedDia === dia ? '#e3f2fd' : 'white',
-                color: selectedDia === dia ? '#1976d2' : '#666',
+                border: selectedDia === dia ? '2px solid #2563eb' : '1px solid var(--border-color)',
+                background: selectedDia === dia ? '#e3f2fd' : 'var(--bg-color)',
+                color: selectedDia === dia ? '#1976d2' : 'var(--text-gray)',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: selectedDia === dia ? '600' : '400',
                 flex: '1 0 auto',
-                textAlign: 'center'
+                textAlign: 'center',
+                transition: 'all 0.2s'
               }}
             >
               {dia}
@@ -58,9 +59,9 @@ const RutinaModal = ({ rutina, ejerciciosRutina, onMarcarCompletado, onClose }) 
 
       {selectedDia && ejerciciosHoy.length > 0 ? (
         <div>
-          <h4 style={{ marginBottom: '15px', color: '#2c3e50' }}>
+          <h4 style={{ marginBottom: '15px', color: 'var(--text-color)' }}>
             Ejercicios para {selectedDia}
-            <span style={{ fontSize: '14px', fontWeight: 'normal', color: '#666', marginLeft: '10px' }}>
+            <span style={{ fontSize: '14px', fontWeight: 'normal', color: 'var(--text-gray)', marginLeft: '10px' }}>
               ({ejerciciosHoy.length} ejercicios)
             </span>
           </h4>
@@ -71,30 +72,30 @@ const RutinaModal = ({ rutina, ejerciciosRutina, onMarcarCompletado, onClose }) 
 
               return (
                 <div key={ej.idRutinaEjercicio} style={{
-                  border: '1px solid #e0e0e0',
+                  border: '1px solid var(--border-color)',
                   borderRadius: '8px',
                   padding: '15px',
-                  background: ej.completado ? '#f0fff4' : 'white',
-                  borderLeft: ej.completado ? '4px solid #4caf50' : '1px solid #e0e0e0',
+                  background: ej.completado ? 'rgba(76, 175, 80, 0.1)' : 'var(--bg-color)',
+                  borderLeft: ej.completado ? '4px solid #4caf50' : '1px solid var(--border-color)',
                   transition: 'all 0.2s'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ flex: 1 }}>
-                      <h5 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#333' }}>
+                      <h5 style={{ margin: '0 0 10px 0', fontSize: '16px', color: 'var(--text-color)' }}>
                         {ej.ejercicio?.nombre}
                       </h5>
 
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '10px' }}>
-                        <div style={{ fontSize: '13px', color: '#666' }}>
+                        <div style={{ fontSize: '13px', color: 'var(--text-gray)' }}>
                           <strong>Series:</strong> {ej.series}
                         </div>
-                        <div style={{ fontSize: '13px', color: '#666' }}>
+                        <div style={{ fontSize: '13px', color: 'var(--text-gray)' }}>
                           <strong>Reps:</strong> {ej.repeticiones}
                         </div>
-                        <div style={{ fontSize: '13px', color: '#666' }}>
+                        <div style={{ fontSize: '13px', color: 'var(--text-gray)' }}>
                           <strong>Peso:</strong> {ej.peso || '-'}
                         </div>
-                        <div style={{ fontSize: '13px', color: '#666' }}>
+                        <div style={{ fontSize: '13px', color: 'var(--text-gray)' }}>
                           <strong>Descanso:</strong> {ej.tiempoDescanso}
                         </div>
                       </div>
@@ -113,7 +114,7 @@ const RutinaModal = ({ rutina, ejerciciosRutina, onMarcarCompletado, onClose }) 
                           style={{ width: '18px', height: '18px', marginRight: '8px' }}
                         />
                         <span style={{
-                          color: ej.completado ? '#2e7d32' : '#666',
+                          color: ej.completado ? '#4caf50' : 'var(--text-gray)',
                           fontWeight: ej.completado ? '600' : '400'
                         }}>
                           {ej.completado ? '¡Completado!' : 'Marcar como completado'}
@@ -173,9 +174,9 @@ const RutinaModal = ({ rutina, ejerciciosRutina, onMarcarCompletado, onClose }) 
         <div style={{
           padding: '40px',
           textAlign: 'center',
-          background: '#f8f9fa',
+          background: 'var(--bg-light)',
           borderRadius: '8px',
-          color: '#666'
+          color: 'var(--text-gray)'
         }}>
           <p style={{ fontSize: '16px', marginBottom: '5px' }}>💤 Descanso</p>
           <p>No hay ejercicios programados para este día.</p>

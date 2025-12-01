@@ -66,7 +66,7 @@ const EjercicioModal = ({ formData, setFormData }) => {
   return (
     <>
       <div className="form-group">
-        <label>Grupo Muscular *</label>
+        <label style={{ color: 'var(--text-color)' }}>Grupo Muscular *</label>
         <select
           value={formData.grupoMuscular || ''}
           onChange={(e) => {
@@ -77,6 +77,11 @@ const EjercicioModal = ({ formData, setFormData }) => {
             });
           }}
           required
+          style={{
+            background: 'var(--bg-color)',
+            color: 'var(--text-color)',
+            borderColor: 'var(--border-color)'
+          }}
         >
           <option value="">Seleccionar grupo muscular</option>
           <option value="Pecho">Pecho</option>
@@ -91,11 +96,16 @@ const EjercicioModal = ({ formData, setFormData }) => {
 
       {formData.grupoMuscular && (
         <div className="form-group">
-          <label>Nombre del Ejercicio *</label>
+          <label style={{ color: 'var(--text-color)' }}>Nombre del Ejercicio *</label>
           <select
             value={formData.nombre || ''}
             onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
             required
+            style={{
+              background: 'var(--bg-color)',
+              color: 'var(--text-color)',
+              borderColor: 'var(--border-color)'
+            }}
           >
             <option value="">Seleccionar ejercicio</option>
             {ejerciciosPorGrupo[formData.grupoMuscular]?.map((ejercicio, index) => (
@@ -106,20 +116,30 @@ const EjercicioModal = ({ formData, setFormData }) => {
       )}
 
       <div className="form-group">
-        <label>Descripción</label>
+        <label style={{ color: 'var(--text-color)' }}>Descripción</label>
         <textarea
           value={formData.descripcion || ''}
           onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
           rows="4"
           placeholder="Instrucciones de ejecución, consejos, etc."
+          style={{
+            background: 'var(--bg-color)',
+            color: 'var(--text-color)',
+            borderColor: 'var(--border-color)'
+          }}
         />
       </div>
 
       <div className="form-group">
-        <label>Nivel</label>
+        <label style={{ color: 'var(--text-color)' }}>Nivel</label>
         <select
           value={formData.nivel || ''}
           onChange={(e) => setFormData({ ...formData, nivel: e.target.value })}
+          style={{
+            background: 'var(--bg-color)',
+            color: 'var(--text-color)',
+            borderColor: 'var(--border-color)'
+          }}
         >
           <option value="">Seleccionar nivel</option>
           <option value="Principiante">Principiante</option>
@@ -129,14 +149,19 @@ const EjercicioModal = ({ formData, setFormData }) => {
       </div>
 
       <div className="form-group">
-        <label>URL del Video (YouTube)</label>
+        <label style={{ color: 'var(--text-color)' }}>URL del Video (YouTube)</label>
         <input
           type="url"
           value={formData.videoUrl || ''}
           onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
           placeholder="https://www.youtube.com/watch?v=..."
+          style={{
+            background: 'var(--bg-color)',
+            color: 'var(--text-color)',
+            borderColor: 'var(--border-color)'
+          }}
         />
-        <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+        <small style={{ color: 'var(--text-gray)', display: 'block', marginTop: '5px' }}>
           Pega el enlace de YouTube del ejercicio
         </small>
       </div>
@@ -144,10 +169,10 @@ const EjercicioModal = ({ formData, setFormData }) => {
       {/* Previsualización del video */}
       {formData.videoUrl && (
         <div className="form-group">
-          <label>Vista Previa del Video</label>
+          <label style={{ color: 'var(--text-color)' }}>Vista Previa del Video</label>
           {videoId ? (
             <div style={{
-              border: '1px solid #ddd',
+              border: '1px solid var(--border-color)',
               borderRadius: '8px',
               overflow: 'hidden',
               marginTop: '10px'
@@ -191,7 +216,7 @@ const EjercicioModal = ({ formData, setFormData }) => {
               </a>
               <div style={{
                 padding: '10px',
-                background: '#f5f5f5',
+                background: 'var(--bg-light)',
                 fontSize: '14px'
               }}>
                 <a
@@ -226,10 +251,10 @@ const EjercicioModal = ({ formData, setFormData }) => {
       {!formData.videoUrl && (
         <div style={{
           padding: '12px',
-          background: '#f8f9fa',
-          border: '1px solid #dee2e6',
+          background: 'var(--bg-light)',
+          border: '1px solid var(--border-color)',
           borderRadius: '4px',
-          color: '#6c757d',
+          color: 'var(--text-gray)',
           fontSize: '14px',
           marginTop: '10px'
         }}>

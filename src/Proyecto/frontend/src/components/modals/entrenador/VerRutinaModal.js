@@ -159,13 +159,13 @@ const VerRutinaModal = ({ rutina, ejerciciosRutina, onClose, onSave }) => {
   };
 
   if (loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>Cargando ejercicios...</div>;
+    return <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-color)' }}>Cargando ejercicios...</div>;
   }
 
   return (
     <div>
-      <h4>{rutina?.nombre}</h4>
-      <p style={{ color: '#666', marginBottom: '20px' }}>
+      <h4 style={{ color: 'var(--text-color)' }}>{rutina?.nombre}</h4>
+      <p style={{ color: 'var(--text-gray)', marginBottom: '20px' }}>
         Selecciona los ejercicios y los días de la semana para esta rutina
       </p>
 
@@ -175,11 +175,12 @@ const VerRutinaModal = ({ rutina, ejerciciosRutina, onClose, onSave }) => {
             <div
               key={item.ejercicio.idEjercicio}
               style={{
-                border: '1px solid #e0e0e0',
+                border: '1px solid var(--border-color)',
                 borderRadius: '8px',
                 padding: '15px',
                 marginBottom: '15px',
-                background: item.seleccionado ? '#f8f9fa' : 'white'
+                background: item.seleccionado ? 'var(--bg-light)' : 'var(--bg-color)',
+                transition: 'background-color 0.3s, border-color 0.3s'
               }}
             >
               {/* Checkbox para seleccionar ejercicio */}
@@ -190,7 +191,7 @@ const VerRutinaModal = ({ rutina, ejerciciosRutina, onClose, onSave }) => {
                   onChange={() => toggleEjercicio(index)}
                   style={{ marginRight: '10px', width: '18px', height: '18px', cursor: 'pointer' }}
                 />
-                <strong style={{ fontSize: '16px' }}>{item.ejercicio.nombre}</strong>
+                <strong style={{ fontSize: '16px', color: 'var(--text-color)' }}>{item.ejercicio.nombre}</strong>
                 {item.ejercicio.videoUrl && (
                   <a
                     href={item.ejercicio.videoUrl}
@@ -213,7 +214,7 @@ const VerRutinaModal = ({ rutina, ejerciciosRutina, onClose, onSave }) => {
                 <>
                   {/* Selector de días */}
                   <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px', color: 'var(--text-color)' }}>
                       Frecuencia (días de la semana):
                     </label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -224,9 +225,9 @@ const VerRutinaModal = ({ rutina, ejerciciosRutina, onClose, onSave }) => {
                           onClick={() => toggleDia(index, dia)}
                           style={{
                             padding: '8px 12px',
-                            border: item.dias.includes(dia) ? '2px solid #2563eb' : '1px solid #ddd',
-                            background: item.dias.includes(dia) ? '#e3f2fd' : 'white',
-                            color: item.dias.includes(dia) ? '#1976d2' : '#666',
+                            border: item.dias.includes(dia) ? '2px solid #2563eb' : '1px solid var(--border-color)',
+                            background: item.dias.includes(dia) ? '#e3f2fd' : 'var(--bg-color)',
+                            color: item.dias.includes(dia) ? '#1976d2' : 'var(--text-gray)',
                             borderRadius: '6px',
                             cursor: 'pointer',
                             fontSize: '13px',
@@ -243,50 +244,50 @@ const VerRutinaModal = ({ rutina, ejerciciosRutina, onClose, onSave }) => {
                   {/* Configuración de series, reps, etc. */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
                     <div>
-                      <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '4px' }}>
+                      <label style={{ fontSize: '12px', color: 'var(--text-gray)', display: 'block', marginBottom: '4px' }}>
                         Series
                       </label>
                       <input
                         type="number"
                         value={item.series}
                         onChange={(e) => updateField(index, 'series', parseInt(e.target.value) || 0)}
-                        style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #ddd' }}
+                        style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-color)' }}
                         min="1"
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '4px' }}>
+                      <label style={{ fontSize: '12px', color: 'var(--text-gray)', display: 'block', marginBottom: '4px' }}>
                         Repeticiones
                       </label>
                       <input
                         type="number"
                         value={item.repeticiones}
                         onChange={(e) => updateField(index, 'repeticiones', parseInt(e.target.value) || 0)}
-                        style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #ddd' }}
+                        style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-color)' }}
                         min="1"
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '4px' }}>
+                      <label style={{ fontSize: '12px', color: 'var(--text-gray)', display: 'block', marginBottom: '4px' }}>
                         Peso (kg)
                       </label>
                       <input
                         type="text"
                         value={item.peso}
                         onChange={(e) => updateField(index, 'peso', e.target.value)}
-                        style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #ddd' }}
+                        style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-color)' }}
                         placeholder="Ej: 20kg"
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: '12px', color: '#666', display: 'block', marginBottom: '4px' }}>
+                      <label style={{ fontSize: '12px', color: 'var(--text-gray)', display: 'block', marginBottom: '4px' }}>
                         Descanso
                       </label>
                       <input
                         type="text"
                         value={item.tiempoDescanso}
                         onChange={(e) => updateField(index, 'tiempoDescanso', e.target.value)}
-                        style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #ddd' }}
+                        style={{ width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-color)' }}
                         placeholder="Ej: 60s"
                       />
                     </div>
@@ -300,7 +301,7 @@ const VerRutinaModal = ({ rutina, ejerciciosRutina, onClose, onSave }) => {
         <div style={{
           padding: '30px',
           textAlign: 'center',
-          color: '#666',
+          color: '#856404',
           background: '#fff3cd',
           borderRadius: '8px',
           border: '1px solid #ffc107'
