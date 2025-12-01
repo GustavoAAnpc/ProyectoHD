@@ -18,23 +18,23 @@ const EntrenadoresTab = ({ instructores, alumnos, onCreate }) => {
         rutinaService.getAll(),
         seguimientoFisicoService.getAll()
       ]);
-      
+
       setAsignaciones(asignacionesRes.data);
       setRutinas(rutinasRes.data);
       setSeguimientos(seguimientosRes.data);
-      
+
       // Calcular reportes por entrenador
       const reportesData = instructores.map(instructor => {
-        const alumnosAsignados = asignacionesRes.data.filter(a => 
+        const alumnosAsignados = asignacionesRes.data.filter(a =>
           a.instructor?.idInstructor === instructor.idInstructor && a.estado === 'Activo'
         );
-        const rutinasAsignadas = rutinasRes.data.filter(r => 
+        const rutinasAsignadas = rutinasRes.data.filter(r =>
           r.instructor?.idInstructor === instructor.idInstructor
         );
-        const seguimientosRealizados = seguimientosRes.data.filter(s => 
+        const seguimientosRealizados = seguimientosRes.data.filter(s =>
           s.instructor?.idInstructor === instructor.idInstructor
         );
-        
+
         return {
           instructor,
           usuariosActivos: alumnosAsignados.length,
@@ -43,7 +43,7 @@ const EntrenadoresTab = ({ instructores, alumnos, onCreate }) => {
           alumnos: alumnosAsignados.map(a => a.alumno)
         };
       });
-      
+
       setReportes(reportesData);
     } catch (error) {
       console.error('Error cargando datos:', error);
@@ -52,12 +52,11 @@ const EntrenadoresTab = ({ instructores, alumnos, onCreate }) => {
 
   return (
     <div className="dashboard-section">
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px'}}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
         <h2>Gestión de Entrenadores</h2>
-        <button className="btn-primary" onClick={() => onCreate()}>Registrar Entrenador</button>
       </div>
 
-      <h3 style={{marginBottom: '20px'}}>Reportes de Desempeño</h3>
+      <h3 style={{ marginBottom: '20px' }}>Reportes de Desempeño</h3>
       <div className="table-container">
         <table className="table">
           <thead>
@@ -76,15 +75,15 @@ const EntrenadoresTab = ({ instructores, alumnos, onCreate }) => {
                   <td>
                     {reporte.instructor.namaInstructor} {reporte.instructor.apellidosInstructor}
                     <br />
-                    <small style={{color: '#666'}}>{reporte.instructor.especialidad || 'Sin especialidad'}</small>
+                    <small style={{ color: '#666' }}>{reporte.instructor.especialidad || 'Sin especialidad'}</small>
                   </td>
                   <td>{reporte.usuariosActivos}</td>
                   <td>{reporte.rutinasAsignadas}</td>
                   <td>{reporte.seguimientosRealizados}</td>
                   <td>
-                    <button className="btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}}
+                    <button className="btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }}
                       onClick={() => {
-                        const alumnosList = reporte.alumnos.map(a => 
+                        const alumnosList = reporte.alumnos.map(a =>
                           `${a.nameAlumno} ${a.apellidosAlumno}`
                         ).join(', ');
                         alert(`Alumnos asignados:\n${alumnosList || 'Ninguno'}`);
@@ -96,14 +95,14 @@ const EntrenadoresTab = ({ instructores, alumnos, onCreate }) => {
               ))
             ) : (
               <tr>
-                <td colSpan="5" style={{textAlign: 'center', padding: '30px'}}>No hay entrenadores registrados</td>
+                <td colSpan="5" style={{ textAlign: 'center', padding: '30px' }}>No hay entrenadores registrados</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      <h3 style={{marginTop: '40px', marginBottom: '20px'}}>Lista de Entrenadores</h3>
+      <h3 style={{ marginTop: '40px', marginBottom: '20px' }}>Lista de Entrenadores</h3>
       <div className="table-container">
         <table className="table">
           <thead>
@@ -128,7 +127,7 @@ const EntrenadoresTab = ({ instructores, alumnos, onCreate }) => {
               ))
             ) : (
               <tr>
-                <td colSpan="5" style={{textAlign: 'center', padding: '30px'}}>No hay entrenadores registrados</td>
+                <td colSpan="5" style={{ textAlign: 'center', padding: '30px' }}>No hay entrenadores registrados</td>
               </tr>
             )}
           </tbody>

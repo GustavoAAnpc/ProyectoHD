@@ -5,20 +5,23 @@ const ClasesTab = ({ clases, reservas, onReservar, onCancelar }) => {
     <div className="dashboard-section">
       <h2>Clases Disponibles</h2>
       <div className="data-list">
-        {clases.length > 0 ? (
+        {clases && clases.length > 0 ? (
           clases.map(clase => {
-            const yaReservada = reservas.some(r => r.clase.idClase === clase.idClase && r.estado !== 'Cancelada');
+            const yaReservada = reservas && reservas.some(r =>
+              r.clase?.idClase === clase.idClase &&
+              r.estado !== 'Cancelada'
+            );
             return (
               <div key={clase.idClase} className="data-item">
                 <h4>{clase.nameClase}</h4>
                 <p>{clase.descripcion}</p>
                 <p><strong>Entrenador:</strong> {clase.instructor?.namaInstructor} {clase.instructor?.apellidosInstructor}</p>
+                <p><strong>Sede:</strong> {clase.sede?.nombre || 'No especificada'}</p>
                 <span>{clase.diaSemana} - {clase.horaInicio} a {clase.horaFin}</span>
-                <span>Duración: {clase.duracionMinutos} min</span>
                 {yaReservada ? (
-                  <span style={{color: '#4caf50', fontWeight: 'bold'}}>Ya reservada</span>
+                  <span style={{ color: '#4caf50', fontWeight: 'bold', display: 'block', marginTop: '10px' }}>✓ Ya reservada</span>
                 ) : (
-                  <button className="btn-primary" style={{marginTop: '10px'}} 
+                  <button className="btn-primary" style={{ marginTop: '10px' }}
                     onClick={() => onReservar(clase)}>Reservar Clase</button>
                 )}
               </div>
@@ -29,7 +32,7 @@ const ClasesTab = ({ clases, reservas, onReservar, onCancelar }) => {
         )}
       </div>
 
-      <h3 style={{marginTop: '40px', marginBottom: '20px'}}>Mis Reservas</h3>
+      <h3 style={{ marginTop: '40px', marginBottom: '20px' }}>Mis Reservas</h3>
       <div className="table-container">
         <table className="table">
           <thead>
@@ -43,7 +46,7 @@ const ClasesTab = ({ clases, reservas, onReservar, onCancelar }) => {
             </tr>
           </thead>
           <tbody>
-            {reservas.length > 0 ? (
+            {reservas && reservas.length > 0 ? (
               reservas.map(reserva => (
                 <tr key={reserva.idReserva}>
                   <td>{reserva.clase?.nameClase}</td>
@@ -56,19 +59,19 @@ const ClasesTab = ({ clases, reservas, onReservar, onCancelar }) => {
                       borderRadius: '4px',
                       fontSize: '12px',
                       fontWeight: '500',
-                      background: reserva.estado === 'Asistida' ? '#d4edda' : 
-                                 reserva.estado === 'Reservada' ? '#d1ecf1' : 
-                                 reserva.estado === 'Cancelada' ? '#f8d7da' : '#fff3cd',
-                      color: reserva.estado === 'Asistida' ? '#155724' : 
-                             reserva.estado === 'Reservada' ? '#0c5460' : 
-                             reserva.estado === 'Cancelada' ? '#721c24' : '#856404'
+                      background: reserva.estado === 'Asistida' ? '#d4edda' :
+                        reserva.estado === 'Reservada' ? '#d1ecf1' :
+                          reserva.estado === 'Cancelada' ? '#f8d7da' : '#fff3cd',
+                      color: reserva.estado === 'Asistida' ? '#155724' :
+                        reserva.estado === 'Reservada' ? '#0c5460' :
+                          reserva.estado === 'Cancelada' ? '#721c24' : '#856404'
                     }}>
                       {reserva.estado}
                     </span>
                   </td>
                   <td>
                     {(reserva.estado === 'Reservada' || reserva.estado === 'Confirmada') && (
-                      <button className="btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}}
+                      <button className="btn-secondary" style={{ fontSize: '12px', padding: '6px 12px' }}
                         onClick={() => onCancelar(reserva)}>Cancelar</button>
                     )}
                   </td>
@@ -76,7 +79,7 @@ const ClasesTab = ({ clases, reservas, onReservar, onCancelar }) => {
               ))
             ) : (
               <tr>
-                <td colSpan="6" style={{textAlign: 'center', padding: '30px'}}>No tienes reservas</td>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '30px' }}>No tienes reservas</td>
               </tr>
             )}
           </tbody>
@@ -87,4 +90,3 @@ const ClasesTab = ({ clases, reservas, onReservar, onCancelar }) => {
 };
 
 export default ClasesTab;
-

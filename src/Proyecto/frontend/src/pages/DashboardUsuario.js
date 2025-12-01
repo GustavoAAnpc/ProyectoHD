@@ -454,10 +454,13 @@ const DashboardUsuario = () => {
               <div className="profile-section">
                 <h2>Mi Resumen</h2>
                 <div className="profile-info">
+                  <br />
                   <p><strong>Nombre:</strong> {alumno.nameAlumno} {alumno.apellidosAlumno}</p>
+                  <br />
                   <p><strong>Membresía:</strong> {membresiaActiva ?
                     `Activa hasta ${new Date(membresiaActiva.fechaFin).toLocaleDateString()}` :
                     'Sin membresía activa'}</p>
+                  <br />
                   {miEntrenador && (
                     <p><strong>Mi Entrenador:</strong> {miEntrenador.namaInstructor} {miEntrenador.apellidosInstructor}</p>
                   )}

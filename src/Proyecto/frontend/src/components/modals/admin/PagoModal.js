@@ -225,9 +225,9 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
               const precioFinal = precioMembresia * (1 - descuento / 100);
               return (
                 <small style={{ color: '#2563eb', display: 'block', marginTop: '5px', fontWeight: '500' }}>
-                  📊 Cálculo: Membresía {membresiaCoincidente.nombre} S/ {precioMembresia.toFixed(2)} - {descuento}% = S/ {precioFinal.toFixed(2)}
+                  Cálculo: Membresía {membresiaCoincidente.nombre} S/ {precioMembresia.toFixed(2)} - {descuento}% = S/ {precioFinal.toFixed(2)}
                   <br />
-                  ⏱️ Duración de membresía: {meses} {meses === 1 ? 'mes' : 'meses'}
+                  Duración de membresía: {meses} {meses === 1 ? 'mes' : 'meses'}
                 </small>
               );
             } else {
@@ -239,9 +239,9 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
                 const precioFinal = precioBase * (1 - descuento / 100);
                 return (
                   <small style={{ color: '#2563eb', display: 'block', marginTop: '5px', fontWeight: '500' }}>
-                    📊 Cálculo: S/ {precioMensual.toFixed(2)} × {meses} {meses === 1 ? 'mes' : 'meses'} = S/ {precioBase.toFixed(2)} - {descuento}% = S/ {precioFinal.toFixed(2)}
+                    Cálculo: S/ {precioMensual.toFixed(2)} × {meses} {meses === 1 ? 'mes' : 'meses'} = S/ {precioBase.toFixed(2)} - {descuento}% = S/ {precioFinal.toFixed(2)}
                     <br />
-                    ⏱️ Duración de membresía: {meses} {meses === 1 ? 'mes' : 'meses'}
+                    Duración de membresía: {meses} {meses === 1 ? 'mes' : 'meses'}
                   </small>
                 );
               }
@@ -262,7 +262,7 @@ const PagoModal = ({ formData, setFormData, alumnos, tiposMembresia, promociones
           readOnly={selectedPromocionId || selectedTipoMembresiaId} />
         {selectedPromocionId && (
           <small style={{ color: '#2563eb', display: 'block', marginTop: '5px', fontWeight: '500' }}>
-            💰 Monto calculado automáticamente con promoción aplicada
+            Monto calculado automáticamente con promoción aplicada
           </small>
         )}
         {!selectedPromocionId && selectedTipoMembresiaId && (
