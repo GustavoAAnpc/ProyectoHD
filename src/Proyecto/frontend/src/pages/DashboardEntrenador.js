@@ -47,7 +47,6 @@ const DashboardEntrenador = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
   const [selectedRutina, setSelectedRutina] = useState(null);
-  const [selectedDia, setSelectedDia] = useState('');
   const [foodSearch, setFoodSearch] = useState('');
   const [foodResults, setFoodResults] = useState([]);
   const [filterGrupoMuscular, setFilterGrupoMuscular] = useState('');
@@ -286,8 +285,6 @@ const DashboardEntrenador = () => {
           <VerRutinaModal
             rutina={selectedRutina}
             ejerciciosRutina={ejerciciosRutina}
-            selectedDia={selectedDia}
-            setSelectedDia={setSelectedDia}
             onClose={() => setShowModal(false)}
           />
         );
@@ -451,9 +448,8 @@ const DashboardEntrenador = () => {
 
         {activeTab === 'perfil' && (
           <EntrenadorPerfilTab
-            usuario={user}
             instructor={instructor}
-            onEditInstructor={() => {
+            onEdit={() => {
               setModalType('entrenadorPerfil');
               setFormData({
                 ...instructor,
@@ -461,7 +457,7 @@ const DashboardEntrenador = () => {
               });
               setShowModal(true);
             }}
-            onCambiarPassword={() => setShowPasswordModal(true)}
+            onChangePassword={() => setShowPasswordModal(true)}
           />
         )}
 
