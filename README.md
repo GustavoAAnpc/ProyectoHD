@@ -23,7 +23,15 @@
 >    ```bash
 >    npm start
 >    ```
-
+> ### UsuarioPrueba
+>  Usuario
+>    ```bash
+>    admin
+>    ```
+> Password:
+>    ```bash
+>    admin123
+>    ```
 
 
 
