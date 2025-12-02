@@ -1,5 +1,32 @@
 # DESARROLLO DE UNA PLATAFORMA DE GESTIÓN CENTRALIZADO CON UN MÓDULO DE NUTRICIÓN PERSONALIZADA PARA EL GIMNASIO FORCA & FITNESS
 
+## 🚀 INSTRUCCIONES DE INSTALACIÓN Y EJECUCIÓN
+
+> ### Backend (Spring Boot)
+> 1. Navegar al directorio del backend
+> 2. Instalar dependencias:
+>    ```bash
+>    npm install
+>    ```
+> 3. Ejecutar la aplicación:
+>    ```bash
+>    mvn spring-boot:run
+>    ```
+>
+> ### Frontend (React)
+> 1. Navegar al directorio del frontend
+> 2. Instalar dependencias:
+>    ```bash
+>    npm install
+>    ```
+> 3. Iniciar la aplicación:
+>    ```bash
+>    npm start
+>    ```
+
+
+
+
 ## AUTORES:
 - **ASTO AIQUIPA, Gustavo Blas**
 - **ICHPAS CLEMENTE, Luis Angel**
