@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -46,6 +47,50 @@ public class MembresiaController {
             return ResponseEntity.notFound().build();
         }
         membresia.setIdMembresia(id);
+        return ResponseEntity.ok(membresiaRepository.save(membresia));
+    }
+    
+    @PutMapping("/{id}/renovar")
+    public ResponseEntity<Membresia> renovarMembresia(@PathVariable Long id, @RequestBody Map<String, Object> request) {
+        Optional<Membresia> membresiaOpt = membresiaRepository.findById(id);
+        if (membresiaOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Membresia membresia = membresiaOpt.get();
+        Integer mesesAdicionales = request.get("mesesAdicionales") != null ? 
+            ((Number) request.get("mesesAdicionales")).intValue() : 
+            (membresia.getTipoMembresia().getDuracionMeses() != null ? membresia.getTipoMembresia().getDuracionMeses() : 1);
+        
+        membresia.setFechaFin(membresia.getFechaFin().plusMonths(mesesAdicionales));
+        membresia.setEstado("Activa");
+        
+        return ResponseEntity.ok(membresiaRepository.save(membresia));
+    }
+    
+    @PutMapping("/{id}/suspender")
+    public ResponseEntity<Membresia> suspenderMembresia(@PathVariable Long id) {
+        Optional<Membresia> membresiaOpt = membresiaRepository.findById(id);
+        if (membresiaOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Membresia membresia = membresiaOpt.get();
+        membresia.setEstado("Suspendida");
+        
+        return ResponseEntity.ok(membresiaRepository.save(membresia));
+    }
+    
+    @PutMapping("/{id}/activar")
+    public ResponseEntity<Membresia> activarMembresia(@PathVariable Long id) {
+        Optional<Membresia> membresiaOpt = membresiaRepository.findById(id);
+        if (membresiaOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Membresia membresia = membresiaOpt.get();
+        membresia.setEstado("Activa");
+        
         return ResponseEntity.ok(membresiaRepository.save(membresia));
     }
 }

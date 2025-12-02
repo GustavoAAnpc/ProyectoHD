@@ -1,5 +1,6 @@
 package com.gimnasio.proyecto.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,13 +30,14 @@ public class TipoMembresia {
     @Column(name = "precio", nullable = false, precision = 10, scale = 2)
     private BigDecimal precio;
     
-    @Column(name = "duracion_dias")
-    private Integer duracionDias;
+    @Column(name = "duracion_meses")
+    private Integer duracionMeses;
     
     @Column(name = "activa", nullable = false)
     private Boolean activa = true;
     
     @OneToMany(mappedBy = "tipoMembresia", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Membresia> membresias;
 }
 

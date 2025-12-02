@@ -1,5 +1,6 @@
 package com.gimnasio.proyecto.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -58,27 +59,35 @@ public class Alumno {
     private String estadoMembresia = "Activo";
     
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<AlumnoInstructor> alumnoInstructores;
     
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<InscripcionClase> inscripcionesClases;
     
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<PlanNutricional> planesNutricionales;
     
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Incidencia> incidencias;
     
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Membresia> membresias;
     
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Rutina> rutinas;
     
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<SeguimientoFisico> seguimientosFisicos;
     
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<ReservaClase> reservasClases;
     
     @PrePersist

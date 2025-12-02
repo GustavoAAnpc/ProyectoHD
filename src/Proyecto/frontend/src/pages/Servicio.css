@@ -1,0 +1,367 @@
+/* Service Cards - Clickeable */
+.service-card {
+  cursor: pointer;
+  position: relative;
+}
+
+.service-more-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: transparent;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.service-card:hover .service-more-btn {
+  background: #667eea;
+  color: #fff;
+  transform: translateX(5px);
+}
+
+/* Service Detail Section */
+.service-detail-section {
+  padding: 80px 20px;
+  background: var(--bg-color);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.service-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 60px;
+  padding: 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  color: #fff;
+}
+
+.service-detail-icon {
+  font-size: 5rem;
+  filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
+}
+
+.service-detail-header h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.service-detail-header p {
+  font-size: 1.2rem;
+  opacity: 0.95;
+}
+
+/* Training Details */
+.training-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.training-card {
+  background: var(--card-bg);
+  padding: 35px;
+  border-radius: 20px;
+  border: 2px solid var(--border-color);
+  transition: all 0.3s;
+}
+
+.training-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.4);
+}
+
+.training-card h3 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 3px solid #667eea;
+}
+
+.training-benefits,
+.training-exercises {
+  margin-bottom: 25px;
+}
+
+.training-benefits h4,
+.training-exercises h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 15px;
+}
+
+.training-benefits ul,
+.nutrition-benefits ul,
+.class-benefits ul,
+.tracking-measurements ul,
+.tracking-benefits ul {
+  list-style: none;
+  padding: 0;
+}
+
+.training-benefits ul li,
+.nutrition-benefits ul li,
+.class-benefits ul li,
+.tracking-measurements ul li,
+.tracking-benefits ul li {
+  padding: 10px 0 10px 30px;
+  color: var(--text-secondary);
+  position: relative;
+  line-height: 1.6;
+}
+
+.training-benefits ul li::before,
+.nutrition-benefits ul li::before,
+.class-benefits ul li::before,
+.tracking-measurements ul li::before,
+.tracking-benefits ul li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #667eea;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.exercise-tags,
+.food-tags,
+.discipline-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.exercise-tag,
+.food-tag,
+.discipline-tag {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 20px;
+  color: var(--text-color);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* Nutrition Details */
+.nutrition-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.nutrition-card {
+  background: var(--card-bg);
+  padding: 35px;
+  border-radius: 20px;
+  border: 2px solid var(--border-color);
+  transition: all 0.3s;
+}
+
+.nutrition-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.4);
+}
+
+.nutrition-card h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 3px solid #4ecdc4;
+}
+
+.nutrition-benefits,
+.nutrition-foods {
+  margin-bottom: 25px;
+}
+
+.nutrition-benefits h4,
+.nutrition-foods h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 15px;
+}
+
+/* Classes Details */
+.classes-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.class-card {
+  background: var(--card-bg);
+  padding: 35px;
+  border-radius: 20px;
+  border: 2px solid var(--border-color);
+  transition: all 0.3s;
+}
+
+.class-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.4);
+}
+
+.class-card h3 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 3px solid #ff6b6b;
+}
+
+.class-disciplines,
+.class-benefits {
+  margin-bottom: 25px;
+}
+
+.class-disciplines h4,
+.class-benefits h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 15px;
+}
+
+/* Tracking Details */
+.tracking-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.tracking-card {
+  background: var(--card-bg);
+  padding: 35px;
+  border-radius: 20px;
+  border: 2px solid var(--border-color);
+  transition: all 0.3s;
+}
+
+.tracking-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.4);
+}
+
+.tracking-card h3 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 3px solid #f7b731;
+}
+
+.tracking-measurements,
+.tracking-benefits {
+  margin-bottom: 25px;
+}
+
+.tracking-measurements h4,
+.tracking-benefits h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 15px;
+}
+
+/* Service Detail CTA */
+.service-detail-cta {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 60px;
+  flex-wrap: wrap;
+}
+
+.btn-service-primary,
+.btn-service-secondary {
+  padding: 18px 45px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s;
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-service-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.btn-service-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+}
+
+.btn-service-secondary {
+  background: var(--card-bg);
+  color: var(--text-color);
+  border: 2px solid var(--border-color);
+}
+
+.btn-service-secondary:hover {
+  border-color: rgba(102, 126, 234, 0.5);
+  transform: translateY(-3px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .service-detail-header {
+    flex-direction: column;
+    text-align: center;
+    padding: 30px 25px;
+  }
+
+  .service-detail-icon {
+    font-size: 4rem;
+  }
+
+  .service-detail-header h2 {
+    font-size: 2rem;
+  }
+
+  .service-detail-header p {
+    font-size: 1rem;
+  }
+
+  .training-detail-grid,
+  .nutrition-detail-grid,
+  .classes-detail-grid,
+  .tracking-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .service-detail-cta {
+    flex-direction: column;
+  }
+
+  .btn-service-primary,
+  .btn-service-secondary {
+    width: 100%;
+  }
+}

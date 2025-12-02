@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useSearchParams } from 'react-router-dom';
-import ThemeToggle from '../components/ThemeToggle';
-import { 
-  alumnoService, planNutricionalService, reservaClaseService, 
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import {
+  alumnoService, planNutricionalService, reservaClaseService,
   incidenciaService, rutinaService, membresiaService,
   pagoService, claseService, foodDataService, mensajeService,
   rutinaEjercicioService, seguimientoFisicoService, alumnoInstructorService
@@ -19,10 +18,14 @@ import PerfilModal from '../components/modals/PerfilModal';
 import RutinaModal from '../components/modals/RutinaModal';
 import MensajeModal from '../components/modals/MensajeModal';
 import FeedbackModal from '../components/modals/FeedbackModal';
+import PromocionCarousel from '../components/PromocionCarousel';
+import ChangePasswordModal from '../components/modals/ChangePasswordModal';
 import './Dashboard.css';
+import { detectarConLogMeal } from "../services/logmealService";
 
 const DashboardUsuario = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
   const [alumno, setAlumno] = useState(null);
@@ -36,14 +39,22 @@ const DashboardUsuario = () => {
   const [mensajes, setMensajes] = useState([]);
   const [seguimientos, setSeguimientos] = useState([]);
   const [selectedRutina, setSelectedRutina] = useState(null);
-  const [selectedDia, setSelectedDia] = useState('');
   const [foodSearch, setFoodSearch] = useState('');
   const [foodResults, setFoodResults] = useState([]);
   const [alimentosConsumidos, setAlimentosConsumidos] = useState([]);
+  const [alimentosDetectados, setAlimentosDetectados] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
   const [formData, setFormData] = useState({});
   const [miEntrenador, setMiEntrenador] = useState(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+  // Check if user needs to change password on mount
+  useEffect(() => {
+    if (user && user.passwordChanged === false) {
+      setShowPasswordModal(true);
+    }
+  }, [user]);
 
   const loadData = useCallback(async () => {
     try {
@@ -53,7 +64,7 @@ const DashboardUsuario = () => {
 
       if (alumnoData?.idAlumno) {
         const [
-          planesRes, reservasRes, rutinasRes, membresiasRes, 
+          planesRes, reservasRes, rutinasRes, membresiasRes,
           pagosRes, clasesRes, mensajesRes, seguimientosRes
         ] = await Promise.all([
           planNutricionalService.getByAlumno(alumnoData.idAlumno),
@@ -105,7 +116,12 @@ const DashboardUsuario = () => {
   // Handlers
   const handleEditPerfil = () => {
     setModalType('perfil');
-    setFormData(alumno);
+    // Asegurar que el email esté disponible en formData desde usuario
+    setFormData({
+      ...alumno,
+      email: alumno.usuario?.email || alumno.email || '',
+      telefono: alumno.telefono || alumno.celular || ''
+    });
     setShowModal(true);
   };
 
@@ -166,25 +182,98 @@ const DashboardUsuario = () => {
     }
   };
 
-  const handleFoodSearch = async () => {
-    if (!foodSearch.trim()) return;
+  const handleFoodSearch = async (input) => {
     try {
+
+      // Si es foto
+      if (input instanceof File) {
+        const detectados = await detectarConLogMeal(input);
+
+        if (detectados.length === 0) {
+          alert("No se detectaron alimentos en la imagen");
+          return;
+        }
+
+        const alimentoDetectado = detectados[0];
+        setFoodSearch(alimentoDetectado);
+
+        const response = await foodDataService.search(alimentoDetectado);
+        setFoodResults(response.data?.foods || []);
+        return;
+      }
+
+      // Si es búsqueda por texto
+      if (!foodSearch.trim()) return;
+
       const response = await foodDataService.search(foodSearch);
       setFoodResults(response.data?.foods || []);
+
     } catch (error) {
-      console.error('Error buscando alimento:', error);
-      alert('Error al buscar alimentos');
+      console.error("Error en handleFoodSearch:", error);
+      alert("Error al procesar la búsqueda");
     }
   };
 
-  const handleRegistrarAlimento = (food) => {
+
+  const handleDetectarImagen = async (imageFile) => {
+    try {
+      const alimentos = await detectarConLogMeal(imageFile);
+
+      if (!alimentos || alimentos.length === 0) {
+        alert("No se detectaron alimentos en la imagen");
+        setAlimentosDetectados([]);
+        return;
+      }
+
+      // Guardar todos los alimentos detectados para mostrarlos como botones
+      setAlimentosDetectados(alimentos);
+
+      // Limpiar búsqueda anterior
+      setFoodResults([]);
+      setFoodSearch('');
+
+
+    } catch (err) {
+      console.error("Error al detectar:", err);
+      setAlimentosDetectados([]);
+    }
+  };
+
+  const handleSeleccionarAlimento = async (alimento) => {
+    try {
+      // Actualiza el input
+      setFoodSearch(alimento);
+
+      // Ejecuta búsqueda USDA
+      const response = await foodDataService.search(alimento);
+      setFoodResults(response.data?.foods || []);
+    } catch (error) {
+      console.error("Error al buscar alimento:", error);
+
+      if (error.response?.status === 403) {
+        alert("Error de autenticación. Por favor, inicia sesión nuevamente.");
+      } else if (error.response?.status === 404) {
+        alert("No se encontró información para este alimento.");
+        setFoodResults([]);
+      } else {
+        alert("Error al buscar el alimento. Por favor, intenta nuevamente.");
+      }
+    }
+  };
+
+
+  const handleRegistrarAlimento = (food, cantidad = 100) => {
+    // Los valores de USDA son por 100g, calculamos proporcionalmente
+    const factor = cantidad / 100;
+
     const alimento = {
       id: Date.now(),
       nombre: food.description,
-      calorias: food.foodNutrients?.find(n => n.nutrientId === 1008)?.value || 0,
-      proteinas: food.foodNutrients?.find(n => n.nutrientId === 1003)?.value || 0,
-      carbohidratos: food.foodNutrients?.find(n => n.nutrientId === 1005)?.value || 0,
-      grasas: food.foodNutrients?.find(n => n.nutrientId === 1004)?.value || 0,
+      cantidad: cantidad,
+      calorias: (food.foodNutrients?.find(n => n.nutrientId === 1008)?.value || 0) * factor,
+      proteinas: (food.foodNutrients?.find(n => n.nutrientId === 1003)?.value || 0) * factor,
+      carbohidratos: (food.foodNutrients?.find(n => n.nutrientId === 1005)?.value || 0) * factor,
+      grasas: (food.foodNutrients?.find(n => n.nutrientId === 1004)?.value || 0) * factor,
       fecha: new Date().toISOString().split('T')[0]
     };
     setAlimentosConsumidos([...alimentosConsumidos, alimento]);
@@ -270,9 +359,9 @@ const DashboardUsuario = () => {
 
   const renderModal = () => {
     if (!showModal) return null;
-    
+
     const modalTitle = {
-      'verRutina': 'Mi Rutina - ' + selectedDia,
+      'verRutina': 'Mi Rutina - ' + (selectedRutina?.nombre || ''),
       'perfil': 'Editar Perfil',
       'mensaje': 'Enviar Mensaje a mi Entrenador',
       'feedback': 'Enviar Feedback'
@@ -288,8 +377,6 @@ const DashboardUsuario = () => {
           {modalType === 'verRutina' && (
             <RutinaModal
               rutina={selectedRutina}
-              selectedDia={selectedDia}
-              setSelectedDia={setSelectedDia}
               ejerciciosRutina={ejerciciosRutina}
               onMarcarCompletado={handleMarcarCompletado}
               onClose={() => setShowModal(false)}
@@ -327,16 +414,7 @@ const DashboardUsuario = () => {
 
   return (
     <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>💪 FORCA & FITNESS - Dashboard Usuario</h1>
-        <div className="user-info">
-          <ThemeToggle />
-          <span>Bienvenido, {user?.nombreCompleto || user?.username}</span>
-          <button onClick={logout} className="logout-button">Cerrar Sesión</button>
-        </div>
-      </header>
-
-      <div className="dashboard-content">
+      <div className="dashboard-content" style={{ paddingTop: '20px' }}>
         <div className="tabs">
           <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
             Resumen
@@ -362,6 +440,9 @@ const DashboardUsuario = () => {
           <button className={`tab ${activeTab === 'comunicacion' ? 'active' : ''}`} onClick={() => setActiveTab('comunicacion')}>
             Comunicación
           </button>
+          <button className={`tab ${activeTab === 'promociones' ? 'active' : ''}`} onClick={() => setActiveTab('promociones')}>
+            Promociones
+          </button>
         </div>
 
         {activeTab === 'overview' && (
@@ -370,10 +451,13 @@ const DashboardUsuario = () => {
               <div className="profile-section">
                 <h2>Mi Resumen</h2>
                 <div className="profile-info">
+                  <br />
                   <p><strong>Nombre:</strong> {alumno.nameAlumno} {alumno.apellidosAlumno}</p>
-                  <p><strong>Membresía:</strong> {membresiaActiva ? 
-                    `Activa hasta ${new Date(membresiaActiva.fechaFin).toLocaleDateString()}` : 
+                  <br />
+                  <p><strong>Membresía:</strong> {membresiaActiva ?
+                    `Activa hasta ${new Date(membresiaActiva.fechaFin).toLocaleDateString()}` :
                     'Sin membresía activa'}</p>
+                  <br />
                   {miEntrenador && (
                     <p><strong>Mi Entrenador:</strong> {miEntrenador.namaInstructor} {miEntrenador.apellidosInstructor}</p>
                   )}
@@ -399,66 +483,105 @@ const DashboardUsuario = () => {
               </div>
             </div>
           </>
-        )}
+        )
+        }
 
-        {activeTab === 'perfil' && (
-          <PerfilTab alumno={alumno} onEdit={handleEditPerfil} />
-        )}
+        {
+          activeTab === 'perfil' && (
+            <PerfilTab
+              alumno={alumno}
+              onEdit={handleEditPerfil}
+              onChangePassword={() => setShowPasswordModal(true)}
+            />
+          )
+        }
 
-        {activeTab === 'rutinas' && (
-          <RutinasTab rutinas={rutinas} onViewRutina={handleViewRutina} />
-        )}
+        {
+          activeTab === 'rutinas' && (
+            <RutinasTab rutinas={rutinas} onViewRutina={handleViewRutina} />
+          )
+        }
 
-        {activeTab === 'progreso' && (
-          <ProgresoTab seguimientos={seguimientos} />
-        )}
+        {
+          activeTab === 'progreso' && (
+            <ProgresoTab seguimientos={seguimientos} />
+          )
+        }
 
-        {activeTab === 'nutricion' && (
-          <NutricionTab
-            planActivo={planActivo}
-            foodSearch={foodSearch}
-            setFoodSearch={setFoodSearch}
-            foodResults={foodResults}
-            alimentosConsumidos={alimentosConsumidos}
-            onSearch={handleFoodSearch}
-            onRegistrarAlimento={handleRegistrarAlimento}
-          />
-        )}
+        {
+          activeTab === 'nutricion' && (
+            <NutricionTab
+              planActivo={planActivo}
+              foodSearch={foodSearch}
+              setFoodSearch={setFoodSearch}
+              foodResults={foodResults}
+              alimentosConsumidos={alimentosConsumidos}
+              alimentosDetectados={alimentosDetectados}
+              onSearch={handleFoodSearch}
+              onRegistrarAlimento={handleRegistrarAlimento}
+              onDetectarImagen={handleDetectarImagen}
+              onSeleccionarAlimento={handleSeleccionarAlimento}
+            />
 
-        {activeTab === 'clases' && (
-          <ClasesTab
-            clases={clases}
-            reservas={reservas}
-            onReservar={handleReservarClase}
-            onCancelar={handleCancelarReserva}
-          />
-        )}
+          )
+        }
 
-        {activeTab === 'membresia' && (
-          <MembresiaTab membresiaActiva={membresiaActiva} pagos={pagos} />
-        )}
+        {
+          activeTab === 'clases' && (
+            <ClasesTab
+              clases={clases}
+              reservas={reservas}
+              onReservar={handleReservarClase}
+              onCancelar={handleCancelarReserva}
+            />
+          )
+        }
 
-        {activeTab === 'comunicacion' && (
-          <ComunicacionTab
-            miEntrenador={miEntrenador}
-            mensajes={mensajes}
-            onEnviarMensaje={() => {
-              setModalType('mensaje');
-              setFormData({});
-              setShowModal(true);
-            }}
-            onEnviarFeedback={() => {
-              setModalType('feedback');
-              setFormData({});
-              setShowModal(true);
-            }}
-            onMarcarLeido={handleMarcarMensajeLeido}
-          />
-        )}
+        {
+          activeTab === 'membresia' && (
+            <MembresiaTab membresiaActiva={membresiaActiva} pagos={pagos} />
+          )
+        }
+
+        {
+          activeTab === 'comunicacion' && (
+            <ComunicacionTab
+              miEntrenador={miEntrenador}
+              mensajes={mensajes}
+              onEnviarMensaje={() => {
+                setModalType('mensaje');
+                setFormData({});
+                setShowModal(true);
+              }}
+              onEnviarFeedback={() => {
+                setModalType('feedback');
+                setFormData({});
+                setShowModal(true);
+              }}
+              onMarcarLeido={handleMarcarMensajeLeido}
+            />
+          )
+        }
+
+        {
+          activeTab === 'promociones' && (
+            <div className="tab-content">
+              <h2>Promociones Especiales</h2>
+              <PromocionCarousel type="dashboard-usuario" />
+            </div>
+          )
+        }
 
         {renderModal()}
-      </div>
-    </div>
+
+        {showPasswordModal && user && (
+          <ChangePasswordModal
+            user={user}
+            onClose={() => setShowPasswordModal(false)}
+          />
+        )}
+      </div >
+    </div >
   );
 };
 

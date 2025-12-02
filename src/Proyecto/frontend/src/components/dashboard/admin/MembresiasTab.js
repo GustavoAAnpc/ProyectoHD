@@ -1,6 +1,6 @@
 import React from 'react';
 
-const MembresiasTab = ({ tiposMembresia, membresias, alumnos, tiposActivos, onEdit, onDelete, onCreateTipo, onCreate }) => {
+const MembresiasTab = ({ tiposMembresia, membresias, alumnos, tiposActivos, onEdit, onDelete, onCreateTipo, onCreate, onRenovar, onSuspender, onActivar }) => {
   return (
     <div className="dashboard-section">
       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px'}}>
@@ -59,7 +59,6 @@ const MembresiasTab = ({ tiposMembresia, membresias, alumnos, tiposActivos, onEd
       <h3 style={{marginTop: '40px', marginBottom: '20px'}}>Membresías Asignadas</h3>
       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
         <span></span>
-        <button className="btn-primary" onClick={() => onCreate()}>Asignar Membresía</button>
       </div>
       <div className="table-container">
         <table className="table">
@@ -94,8 +93,22 @@ const MembresiasTab = ({ tiposMembresia, membresias, alumnos, tiposActivos, onEd
                     </span>
                   </td>
                   <td>
-                    <button className="btn-secondary" style={{marginRight: '8px', fontSize: '12px', padding: '6px 12px'}}
-                      onClick={() => onEdit('membresia', membresia)}>Editar</button>
+                    <div style={{display: 'flex', gap: '5px', flexWrap: 'wrap'}}>
+                      <button className="btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}}
+                        onClick={() => onEdit('membresia', membresia)}>Editar</button>
+                      {membresia.estado === 'Activa' && (
+                        <>
+                          <button className="btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}}
+                            onClick={() => onRenovar(membresia.idMembresia)}>Renovar</button>
+                          <button className="btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}}
+                            onClick={() => onSuspender(membresia.idMembresia)}>Suspender</button>
+                        </>
+                      )}
+                      {membresia.estado === 'Suspendida' && (
+                        <button className="btn-secondary" style={{fontSize: '12px', padding: '6px 12px'}}
+                          onClick={() => onActivar(membresia.idMembresia)}>Activar</button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))

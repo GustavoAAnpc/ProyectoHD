@@ -15,5 +15,5 @@ public class LoginResponse {
     private String email;
     private String rol;
     private String nombreCompleto;
+    private Boolean passwordChanged;
 }
-

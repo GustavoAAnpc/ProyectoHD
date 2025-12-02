@@ -1,18 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useSearchParams } from 'react-router-dom';
-import ThemeToggle from '../components/ThemeToggle';
-import { 
-  alumnoService, instructorService, claseService, 
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import {
+  alumnoService, instructorService, claseService,
   sedeService, equipoService, tipoMembresiaService,
-  membresiaService, pagoService, usuarioService
+  membresiaService, pagoService, usuarioService,
+  promocionService, noticiaService, reservaClaseService,
+  administradorService
 } from '../services/api';
 import SedesTab from '../components/dashboard/admin/SedesTab';
 import EquiposTab from '../components/dashboard/admin/EquiposTab';
 import UsuariosTab from '../components/dashboard/admin/UsuariosTab';
 import MembresiasTab from '../components/dashboard/admin/MembresiasTab';
 import PagosTab from '../components/dashboard/admin/PagosTab';
+import PromocionesTab from '../components/dashboard/admin/PromocionesTab';
+import EntrenadoresTab from '../components/dashboard/admin/EntrenadoresTab';
+import GimnasioTab from '../components/dashboard/admin/GimnasioTab';
 import ReportesTab from '../components/dashboard/admin/ReportesTab';
+import AdminPerfilTab from '../components/dashboard/admin/AdminPerfilTab';
 import ModalWrapper from '../components/modals/ModalWrapper';
 import SedeModal from '../components/modals/admin/SedeModal';
 import EquipoModal from '../components/modals/admin/EquipoModal';
@@ -20,10 +25,16 @@ import TipoMembresiaModal from '../components/modals/admin/TipoMembresiaModal';
 import MembresiaModal from '../components/modals/admin/MembresiaModal';
 import PagoModal from '../components/modals/admin/PagoModal';
 import UsuarioModal from '../components/modals/admin/UsuarioModal';
+import PromocionModal from '../components/modals/admin/PromocionModal';
+import NoticiaModal from '../components/modals/admin/NoticiaModal';
+import ClaseModal from '../components/modals/admin/ClaseModal';
+import AdminPerfilModal from '../components/modals/admin/AdminPerfilModal';
+import ChangePasswordModal from '../components/modals/ChangePasswordModal';
 import './Dashboard.css';
 
 const DashboardAdmin = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
   const [stats, setStats] = useState({
@@ -38,52 +49,135 @@ const DashboardAdmin = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [alumnos, setAlumnos] = useState([]);
   const [instructores, setInstructores] = useState([]);
+  const [clases, setClases] = useState([]);
+  const [promociones, setPromociones] = useState([]);
+  const [noticias, setNoticias] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
   const [editingItem, setEditingItem] = useState(null);
   const [formData, setFormData] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [administrador, setAdministrador] = useState(null);
+
+  // Check if user needs to change password on mount
+  useEffect(() => {
+    if (user && user.passwordChanged === false) {
+      setShowPasswordModal(true);
+    }
+  }, [user]);
+
 
   const loadData = useCallback(async () => {
+    // Cargar cada servicio de forma independiente para evitar que un error bloquee todo
+    const loadService = async (serviceCall, defaultValue = []) => {
+      try {
+        const response = await serviceCall();
+        return response.data || defaultValue;
+      } catch (error) {
+        console.warn('Error cargando servicio:', error);
+        return defaultValue;
+      }
+    };
+
     try {
+      // Cargar todos los servicios en paralelo pero con manejo individual de errores
       const [
-        alumnosRes, entrenadoresRes, clasesRes, sedesRes, 
-        equiposRes, tiposRes, membresiasRes, pagosRes, usuariosRes
-      ] = await Promise.all([
-        alumnoService.getAll(),
-        instructorService.getAll(),
-        claseService.getAll(),
-        sedeService.getAll(),
-        equipoService.getAll(),
-        tipoMembresiaService.getAll(),
-        membresiaService.getAll(),
-        pagoService.getAll(),
-        usuarioService.getAll()
+        alumnosData,
+        entrenadoresData,
+        clasesData,
+        sedesData,
+        equiposData,
+        tiposData,
+        membresiasData,
+        pagosData,
+        usuariosData
+      ] = await Promise.allSettled([
+        loadService(() => alumnoService.getAll(), []),
+        loadService(() => instructorService.getAll(), []),
+        loadService(() => claseService.getAll(), []),
+        loadService(() => sedeService.getAll(), []),
+        loadService(() => equipoService.getAll(), []),
+        loadService(() => tipoMembresiaService.getAll(), []),
+        loadService(() => membresiaService.getAll(), []),
+        loadService(() => pagoService.getAll(), []),
+        loadService(() => usuarioService.getAll(), [])
       ]);
-      
-      setSedes(sedesRes.data);
-      setEquipos(equiposRes.data);
-      setTiposMembresia(tiposRes.data);
-      setMembresias(membresiasRes.data);
-      setPagos(pagosRes.data);
-      setUsuarios(usuariosRes.data);
-      setAlumnos(alumnosRes.data);
-      setInstructores(entrenadoresRes.data);
-      
-      const totalIngresos = pagosRes.data.reduce((sum, pago) => sum + parseFloat(pago.monto || 0), 0);
-      const usuariosActivos = usuariosRes.data.filter(u => u.estado).length;
-      
+
+      // Extraer datos de las promesas resueltas
+      setAlumnos(alumnosData.status === 'fulfilled' ? alumnosData.value : []);
+      setInstructores(entrenadoresData.status === 'fulfilled' ? entrenadoresData.value : []);
+      setClases(clasesData.status === 'fulfilled' ? clasesData.value : []);
+      setSedes(sedesData.status === 'fulfilled' ? sedesData.value : []);
+      setEquipos(equiposData.status === 'fulfilled' ? equiposData.value : []);
+      setTiposMembresia(tiposData.status === 'fulfilled' ? tiposData.value : []);
+      setMembresias(membresiasData.status === 'fulfilled' ? membresiasData.value : []);
+      setPagos(pagosData.status === 'fulfilled' ? pagosData.value : []);
+      setUsuarios(usuariosData.status === 'fulfilled' ? usuariosData.value : []);
+
+      // Cargar promociones y noticias de forma opcional
+      try {
+        const promocionesRes = await promocionService.getAll();
+        setPromociones(promocionesRes.data || []);
+      } catch (error) {
+        console.warn('Error cargando promociones:', error);
+        setPromociones([]);
+      }
+
+      try {
+        const noticiasRes = await noticiaService.getAll();
+        setNoticias(noticiasRes.data || []);
+      } catch (error) {
+        console.warn('Error cargando noticias:', error);
+        setNoticias([]);
+      }
+
+      // Cargar datos del administrador
+      try {
+        const adminRes = await administradorService.getByUsuario(user.idUsuario);
+        setAdministrador(adminRes.data);
+      } catch (error) {
+        console.warn('Error cargando datos de administrador:', error);
+        setAdministrador(null);
+      }
+
+      // Calcular estadísticas con datos disponibles
+      const pagosDataArray = pagosData.status === 'fulfilled' ? pagosData.value : [];
+      const usuariosDataArray = usuariosData.status === 'fulfilled' ? usuariosData.value : [];
+      const alumnosDataArray = alumnosData.status === 'fulfilled' ? alumnosData.value : [];
+      const entrenadoresDataArray = entrenadoresData.status === 'fulfilled' ? entrenadoresData.value : [];
+      const clasesDataArray = clasesData.status === 'fulfilled' ? clasesData.value : [];
+      const sedesDataArray = sedesData.status === 'fulfilled' ? sedesData.value : [];
+      const equiposDataArray = equiposData.status === 'fulfilled' ? equiposData.value : [];
+      const membresiasDataArray = membresiasData.status === 'fulfilled' ? membresiasData.value : [];
+
+      const totalIngresos = pagosDataArray.reduce((sum, pago) => sum + parseFloat(pago?.monto || 0), 0);
+      const usuariosActivos = usuariosDataArray.filter(u => u?.estado).length;
+
       setStats({
-        alumnos: alumnosRes.data.length,
-        entrenadores: entrenadoresRes.data.length,
-        clases: clasesRes.data.length,
-        sedes: sedesRes.data.length,
-        equipos: equiposRes.data.length,
-        membresias: membresiasRes.data.length,
+        alumnos: alumnosDataArray.length,
+        entrenadores: entrenadoresDataArray.length,
+        clases: clasesDataArray.length,
+        sedes: sedesDataArray.length,
+        equipos: equiposDataArray.length,
+        membresias: membresiasDataArray.length,
         ingresos: totalIngresos,
         usuariosActivos: usuariosActivos
       });
     } catch (error) {
-      console.error('Error cargando datos:', error);
+      console.error('Error general cargando datos:', error);
+      // Asegurar que al menos tenemos arrays vacíos
+      setSedes([]);
+      setEquipos([]);
+      setTiposMembresia([]);
+      setMembresias([]);
+      setPagos([]);
+      setUsuarios([]);
+      setAlumnos([]);
+      setInstructores([]);
+      setClases([]);
+      setPromociones([]);
+      setNoticias([]);
     }
   }, []);
 
@@ -121,11 +215,13 @@ const DashboardAdmin = () => {
   const handleDelete = async (type, id) => {
     if (!window.confirm('¿Está seguro de eliminar este elemento?')) return;
     try {
-      switch(type) {
+      switch (type) {
         case 'sede': await sedeService.delete(id); break;
         case 'equipo': await equipoService.delete(id); break;
         case 'tipoMembresia': await tipoMembresiaService.delete(id); break;
         case 'usuario': await usuarioService.delete(id); break;
+        case 'promocion': await promocionService.delete(id); break;
+        case 'noticia': await noticiaService.delete(id); break;
       }
       loadData();
     } catch (error) {
@@ -137,7 +233,14 @@ const DashboardAdmin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      switch(modalType) {
+      switch (modalType) {
+        case 'adminPerfil':
+          if (administrador) {
+            await administradorService.update(administrador.idAdministrador, formData);
+            alert('Perfil actualizado exitosamente');
+            loadData();
+          }
+          break;
         case 'sede':
           if (editingItem) {
             await sedeService.update(editingItem.idSede, formData);
@@ -170,10 +273,54 @@ const DashboardAdmin = () => {
           await pagoService.create(formData);
           break;
         case 'usuario':
+          // Validar antes de crear/actualizar
+          if (!editingItem) {
+            // Validaciones para creación
+            if (!formData.nameUsuario || formData.nameUsuario.length < 3) {
+              alert('El nombre de usuario debe tener al menos 3 caracteres');
+              return;
+            }
+            if (!formData.passwordUsuario || formData.passwordUsuario.length < 6) {
+              alert('La contraseña debe tener al menos 6 caracteres');
+              return;
+            }
+          }
+
           if (editingItem) {
-            await usuarioService.update(editingItem.idUsuario, formData);
+            // Al actualizar, no enviar password si está vacío
+            const updateData = { ...formData };
+            if (!updateData.passwordUsuario) {
+              delete updateData.passwordUsuario;
+            }
+            await usuarioService.update(editingItem.idUsuario, updateData);
           } else {
             await usuarioService.create(formData);
+          }
+          break;
+        case 'promocion':
+          if (editingItem) {
+            await promocionService.update(editingItem.idPromocion, formData);
+          } else {
+            await promocionService.create(formData);
+          }
+          break;
+        case 'noticia':
+          if (editingItem) {
+            await noticiaService.update(editingItem.idNoticia, formData);
+          } else {
+            // Fecha automática al crear
+            const noticiaData = {
+              ...formData,
+              fechaPublicacion: formData.fechaPublicacion || new Date().toISOString().split('T')[0]
+            };
+            await noticiaService.create(noticiaData);
+          }
+          break;
+        case 'clase':
+          if (editingItem) {
+            await claseService.update(editingItem.idClase, formData);
+          } else {
+            await claseService.create(formData);
           }
           break;
       }
@@ -181,7 +328,8 @@ const DashboardAdmin = () => {
       loadData();
     } catch (error) {
       console.error('Error guardando:', error);
-      alert('Error al guardar los datos');
+      const errorMessage = error.response?.data?.message || error.response?.data || error.message || 'Error al guardar los datos';
+      alert(errorMessage);
     }
   };
 
@@ -194,6 +342,11 @@ const DashboardAdmin = () => {
         if (sede) {
           sede.activa = !estado;
           await sedeService.update(id, sede);
+        }
+      } else if (type === 'promocion') {
+        const promocion = promociones.find(p => p.idPromocion === id);
+        if (promocion) {
+          await promocionService.update(id, { ...promocion, activa: !estado });
         }
       }
       loadData();
@@ -214,24 +367,69 @@ const DashboardAdmin = () => {
     }
   };
 
+  const handleRenovarMembresia = async (id) => {
+    const dias = prompt('Ingrese los días adicionales para renovar:');
+    if (!dias || isNaN(dias)) {
+      alert('Ingrese un número válido de días');
+      return;
+    }
+    try {
+      await membresiaService.renovar(id, parseInt(dias));
+      alert('Membresía renovada correctamente');
+      loadData();
+    } catch (error) {
+      console.error('Error renovando membresía:', error);
+      alert('Error al renovar membresía');
+    }
+  };
+
+  const handleSuspenderMembresia = async (id) => {
+    if (!window.confirm('¿Está seguro de suspender esta membresía?')) return;
+    try {
+      await membresiaService.suspender(id);
+      alert('Membresía suspendida correctamente');
+      loadData();
+    } catch (error) {
+      console.error('Error suspendiendo membresía:', error);
+      alert('Error al suspender membresía');
+    }
+  };
+
+  const handleActivarMembresia = async (id) => {
+    try {
+      await membresiaService.activar(id);
+      alert('Membresía activada correctamente');
+      loadData();
+    } catch (error) {
+      console.error('Error activando membresía:', error);
+      alert('Error al activar membresía');
+    }
+  };
+
   const handleExportReport = (type) => {
     alert(`Exportando reporte de ${type}...`);
   };
 
   const getModalTitle = () => {
     const titles = {
+      'adminPerfil': 'Editar Mi Perfil',
       'sede': editingItem ? 'Editar Sede' : 'Nueva Sede',
       'equipo': editingItem ? 'Editar Equipo' : 'Nuevo Equipo',
       'tipoMembresia': editingItem ? 'Editar Tipo de Membresía' : 'Nuevo Tipo de Membresía',
       'membresia': editingItem ? 'Editar Membresía' : 'Nueva Membresía',
       'pago': 'Registrar Pago',
-      'usuario': editingItem ? 'Editar Usuario' : 'Nuevo Usuario'
+      'usuario': editingItem ? 'Editar Usuario' : 'Nuevo Usuario',
+      'promocion': editingItem ? 'Editar Promoción' : 'Nueva Promoción',
+      'noticia': editingItem ? 'Editar Noticia' : 'Nueva Noticia',
+      'clase': editingItem ? 'Editar Clase' : 'Nueva Clase'
     };
     return titles[modalType] || '';
   };
 
   const renderModalContent = () => {
-    switch(modalType) {
+    switch (modalType) {
+      case 'adminPerfil':
+        return <AdminPerfilModal formData={formData} setFormData={setFormData} />;
       case 'sede':
         return <SedeModal formData={formData} setFormData={setFormData} />;
       case 'equipo':
@@ -241,9 +439,15 @@ const DashboardAdmin = () => {
       case 'membresia':
         return <MembresiaModal formData={formData} setFormData={setFormData} alumnos={alumnos} tiposMembresia={tiposMembresia} />;
       case 'pago':
-        return <PagoModal formData={formData} setFormData={setFormData} membresias={membresias} />;
+        return <PagoModal formData={formData} setFormData={setFormData} alumnos={alumnos} tiposMembresia={tiposMembresia} promociones={promociones} />;
       case 'usuario':
         return <UsuarioModal formData={formData} setFormData={setFormData} editingItem={editingItem} />;
+      case 'promocion':
+        return <PromocionModal formData={formData} setFormData={setFormData} />;
+      case 'noticia':
+        return <NoticiaModal formData={formData} setFormData={setFormData} instructores={instructores} />;
+      case 'clase':
+        return <ClaseModal formData={formData} setFormData={setFormData} instructores={instructores} sedes={sedes} />;
       default:
         return null;
     }
@@ -251,19 +455,13 @@ const DashboardAdmin = () => {
 
   return (
     <div className="dashboard">
-      <header className="dashboard-header">
-        <h1>💪 FORCA & FITNESS - Dashboard Administrador</h1>
-        <div className="user-info">
-          <ThemeToggle />
-          <span>Bienvenido, {user?.nombreCompleto || user?.username}</span>
-          <button onClick={logout} className="logout-button">Cerrar Sesión</button>
-        </div>
-      </header>
-
-      <div className="dashboard-content">
+      <div className="dashboard-content" style={{ paddingTop: '20px' }}>
         <div className="tabs">
           <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
             Resumen
+          </button>
+          <button className={`tab ${activeTab === 'perfil' ? 'active' : ''}`} onClick={() => setActiveTab('perfil')}>
+            Perfil
           </button>
           <button className={`tab ${activeTab === 'sedes' ? 'active' : ''}`} onClick={() => setActiveTab('sedes')}>
             Sedes
@@ -280,8 +478,14 @@ const DashboardAdmin = () => {
           <button className={`tab ${activeTab === 'pagos' ? 'active' : ''}`} onClick={() => setActiveTab('pagos')}>
             Pagos
           </button>
-          <button className={`tab ${activeTab === 'reportes' ? 'active' : ''}`} onClick={() => setActiveTab('reportes')}>
-            Reportes
+          <button className={`tab ${activeTab === 'promociones' ? 'active' : ''}`} onClick={() => setActiveTab('promociones')}>
+            Promociones
+          </button>
+          <button className={`tab ${activeTab === 'entrenadores' ? 'active' : ''}`} onClick={() => setActiveTab('entrenadores')}>
+            Entrenadores
+          </button>
+          <button className={`tab ${activeTab === 'gimnasio' ? 'active' : ''}`} onClick={() => setActiveTab('gimnasio')}>
+            Gimnasio
           </button>
         </div>
 
@@ -326,7 +530,7 @@ const DashboardAdmin = () => {
               <section className="dashboard-section">
                 <h2>Gestión del Gimnasio</h2>
                 <p>Administra sedes, equipos y horarios del gimnasio.</p>
-                <div style={{display: 'flex', gap: '10px', marginTop: '15px'}}>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                   <button className="btn-primary" onClick={() => handleCreate('sede')}>Nueva Sede</button>
                   <button className="btn-secondary" onClick={() => setActiveTab('equipos')}>Ver Equipos</button>
                 </div>
@@ -334,7 +538,7 @@ const DashboardAdmin = () => {
               <section className="dashboard-section">
                 <h2>Gestión de Usuarios</h2>
                 <p>Crear y gestionar cuentas de entrenadores y usuarios. Asignar roles y permisos.</p>
-                <div style={{display: 'flex', gap: '10px', marginTop: '15px'}}>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                   <button className="btn-primary" onClick={() => handleCreate('usuario')}>Nuevo Usuario</button>
                   <button className="btn-secondary" onClick={() => setActiveTab('usuarios')}>Ver Usuarios</button>
                 </div>
@@ -342,17 +546,9 @@ const DashboardAdmin = () => {
               <section className="dashboard-section">
                 <h2>Membresías y Pagos</h2>
                 <p>Crear tipos de membresía, asignar membresías y registrar pagos.</p>
-                <div style={{display: 'flex', gap: '10px', marginTop: '15px'}}>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                   <button className="btn-primary" onClick={() => handleCreate('tipoMembresia')}>Nuevo Tipo</button>
                   <button className="btn-primary" onClick={() => handleCreate('membresia')}>Asignar Membresía</button>
-                </div>
-              </section>
-              <section className="dashboard-section">
-                <h2>Reportes y Estadísticas</h2>
-                <p>Genera reportes de ingresos, asistencia y desempeño.</p>
-                <div style={{display: 'flex', gap: '10px', marginTop: '15px'}}>
-                  <button className="btn-secondary" onClick={() => setActiveTab('reportes')}>Ver Reportes</button>
-                  <button className="btn-secondary" onClick={() => handleExportReport('ingresos')}>Exportar PDF</button>
                 </div>
               </section>
             </div>
@@ -375,7 +571,8 @@ const DashboardAdmin = () => {
             sedes={sedes}
             onEdit={(e) => handleEdit('equipo', e)}
             onMantenimiento={(e) => {
-              const equipoEdit = {...e, estado: 'En Mantenimiento'};
+              const equipoEdit = { ...e, estado: 'En Mantenimiento' };
+
               handleEdit('equipo', equipoEdit);
             }}
             onCreate={() => handleCreate('equipo')}
@@ -385,6 +582,8 @@ const DashboardAdmin = () => {
         {activeTab === 'usuarios' && (
           <UsuariosTab
             usuarios={usuarios}
+            alumnos={alumnos}
+            instructores={instructores}
             onEdit={(u) => handleEdit('usuario', u)}
             onToggleEstado={(id, estado) => handleToggleEstado('usuario', id, estado)}
             onResetPassword={handleResetPassword}
@@ -402,6 +601,9 @@ const DashboardAdmin = () => {
             onDelete={handleDelete}
             onCreateTipo={() => handleCreate('tipoMembresia')}
             onCreate={() => handleCreate('membresia')}
+            onRenovar={handleRenovarMembresia}
+            onSuspender={handleSuspenderMembresia}
+            onActivar={handleActivarMembresia}
           />
         )}
 
@@ -413,6 +615,36 @@ const DashboardAdmin = () => {
           />
         )}
 
+        {activeTab === 'promociones' && (
+          <PromocionesTab
+            promociones={promociones}
+            onCreate={() => handleCreate('promocion')}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onToggleActiva={(id, estado) => handleToggleEstado('promocion', id, estado)}
+          />
+        )}
+
+        {activeTab === 'entrenadores' && (
+          <EntrenadoresTab
+            instructores={instructores}
+            alumnos={alumnos}
+            onCreate={() => handleCreate('usuario')}
+          />
+        )}
+
+        {activeTab === 'gimnasio' && (
+          <GimnasioTab
+            clases={clases}
+            sedes={sedes}
+            onCreateClase={() => handleCreate('clase')}
+            onEditClase={(c) => handleEdit('clase', c)}
+            onCreateNoticia={() => handleCreate('noticia')}
+            onEditNoticia={(n) => handleEdit('noticia', n)}
+            onDeleteNoticia={(id) => handleDelete('noticia', id)}
+          />
+        )}
+
         {activeTab === 'reportes' && (
           <ReportesTab
             stats={stats}
@@ -420,8 +652,20 @@ const DashboardAdmin = () => {
             membresias={membresias}
             alumnos={alumnos}
             entrenadores={instructores}
-            clases={[]}
+            clases={clases}
             onExport={handleExportReport}
+          />
+        )}
+
+        {activeTab === 'perfil' && (
+          <AdminPerfilTab
+            administrador={administrador}
+            onEdit={() => {
+              setModalType('adminPerfil');
+              setFormData(administrador || {});
+              setShowModal(true);
+            }}
+            onChangePassword={() => setShowPasswordModal(true)}
           />
         )}
 
@@ -430,7 +674,7 @@ const DashboardAdmin = () => {
             title={getModalTitle()}
             onClose={() => setShowModal(false)}
             footer={
-              <div style={{display: 'flex', gap: '10px', marginTop: '25px'}}>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
                 <button type="button" className="btn-primary" onClick={handleSubmit}>Guardar</button>
                 <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
               </div>
@@ -440,6 +684,13 @@ const DashboardAdmin = () => {
               {renderModalContent()}
             </form>
           </ModalWrapper>
+        )}
+
+        {showPasswordModal && user && (
+          <ChangePasswordModal
+            user={user}
+            onClose={() => setShowPasswordModal(false)}
+          />
         )}
       </div>
     </div>

@@ -1,12 +1,52 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { authService } from '../services/api';
 import UserMenu from '../components/UserMenu';
 import ThemeToggle from '../components/ThemeToggle';
+import ModalWrapper from '../components/modals/ModalWrapper';
+import PromocionCarousel from '../components/PromocionCarousel';
 import './Home.css';
 
 const Home = () => {
-  const { user } = useAuth();
+  const { user, login } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLoginSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await authService.login(username, password);
+      const { token, rol, idUsuario, username: user, email, nombreCompleto } = response.data;
+
+      login(
+        { idUsuario, username: user, email, rol, nombreCompleto },
+        token
+      );
+
+      setShowLoginModal(false);
+      setUsername('');
+      setPassword('');
+      setError('');
+    } catch (err) {
+      setError('Usuario o contraseña incorrectos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   return (
     <div className="home-page">
@@ -17,15 +57,15 @@ const Home = () => {
             <span className="logo-text">FORCA & FITNESS</span>
           </Link>
           <div className="nav-links">
-            <a href="#inicio" className="nav-link">Inicio</a>
-            <a href="#servicios" className="nav-link">Servicios</a>
-            <a href="#planes" className="nav-link">Planes</a>
-            <a href="#contacto" className="nav-link">Contacto</a>
+            <button onClick={() => scrollToSection('inicio')} className="nav-link">Inicio</button>
+            <button onClick={() => scrollToSection('servicios')} className="nav-link">Servicios</button>
+            <button onClick={() => scrollToSection('planes')} className="nav-link">Planes</button>
+            <button onClick={() => scrollToSection('contacto')} className="nav-link">Contacto</button>
             <ThemeToggle />
             {user ? (
               <UserMenu />
             ) : (
-              <Link to="/login" className="btn-login">Iniciar Sesión</Link>
+              <button onClick={() => setShowLoginModal(true)} className="btn-login">Iniciar Sesión</button>
             )}
           </div>
         </nav>
@@ -38,20 +78,20 @@ const Home = () => {
             Entrena como un <span className="highlight">PRO</span>, vive como un <span className="highlight">CAMPEÓN</span>
           </h1>
           <p className="hero-description">
-            El gimnasio más completo de la ciudad con equipos de última generación, 
+            El gimnasio más completo de la ciudad con equipos de última generación,
             entrenadores profesionales y un ambiente único para alcanzar tus objetivos.
           </p>
           <div className="hero-buttons">
             {!user ? (
               <>
-                <Link to="/login" className="btn-primary btn-hero">Únete Ahora</Link>
-                <a href="#planes" className="btn-secondary btn-hero">Ver Planes</a>
+                <button onClick={() => setShowLoginModal(true)} className="btn-primary btn-hero">Únete Ahora</button>
+                <button onClick={() => scrollToSection('planes')} className="btn-secondary btn-hero">Ver Planes</button>
               </>
             ) : (
-              <Link to={user.rol === 'Administrador' ? '/dashboard/administrador' : 
-                       user.rol === 'Entrenador' ? '/dashboard/entrenador' : 
-                       '/dashboard/usuario'} 
-                    className="btn-primary btn-hero">
+              <Link to={user.rol === 'Administrador' ? '/dashboard/administrador' :
+                user.rol === 'Entrenador' ? '/dashboard/entrenador' :
+                  '/dashboard/usuario'}
+                className="btn-primary btn-hero">
                 Ir a Mi Dashboard
               </Link>
             )}
@@ -144,7 +184,7 @@ const Home = () => {
                 <li>✅ App móvil gratuita</li>
                 <li>✅ Sin permanencia</li>
               </ul>
-              {!user && <Link to="/login" className="btn-plan">Elegir Plan</Link>}
+              {!user && <button onClick={() => setShowLoginModal(true)} className="btn-plan">Elegir Plan</button>}
             </div>
             <div className="plan-card featured">
               <div className="plan-badge">MÁS POPULAR</div>
@@ -180,9 +220,19 @@ const Home = () => {
                 <li>✅ Suplementos incluidos</li>
                 <li>✅ Consultas ilimitadas</li>
               </ul>
-              {!user && <Link to="/login" className="btn-plan">Elegir Plan</Link>}
+              {!user && <button onClick={() => setShowLoginModal(true)} className="btn-plan">Elegir Plan</button>}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section id="promociones" className="promotions-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Promociones Especiales</h2>
+            <p className="section-subtitle">Aprovecha nuestras ofertas exclusivas</p>
+          </div>
+          <PromocionCarousel type="web" />
         </div>
       </section>
 
@@ -212,8 +262,8 @@ const Home = () => {
               <div className="contact-icon">🕐</div>
               <h4>Horarios</h4>
               <p>Lun - Vie: 6:00 AM - 10:00 PM<br />
-              Sáb: 8:00 AM - 8:00 PM<br />
-              Dom: 9:00 AM - 6:00 PM</p>
+                Sáb: 8:00 AM - 8:00 PM<br />
+                Dom: 9:00 AM - 6:00 PM</p>
             </div>
           </div>
         </div>
@@ -228,10 +278,10 @@ const Home = () => {
             </div>
             <div className="footer-section">
               <h5>Enlaces</h5>
-              <a href="#inicio">Inicio</a>
-              <a href="#servicios">Servicios</a>
-              <a href="#planes">Planes</a>
-              <a href="#contacto">Contacto</a>
+              <button onClick={() => scrollToSection('inicio')} className="footer-link">Inicio</button>
+              <button onClick={() => scrollToSection('servicios')} className="footer-link">Servicios</button>
+              <button onClick={() => scrollToSection('planes')} className="footer-link">Planes</button>
+              <button onClick={() => scrollToSection('contacto')} className="footer-link">Contacto</button>
             </div>
             <div className="footer-section">
               <h5>Legal</h5>
@@ -244,6 +294,61 @@ const Home = () => {
           </div>
         </div>
       </footer>
+
+      {showLoginModal && (
+        <ModalWrapper
+          title="Iniciar Sesión"
+          onClose={() => {
+            setShowLoginModal(false);
+            setError('');
+            setUsername('');
+            setPassword('');
+          }}
+          footer={null}
+        >
+          <form onSubmit={handleLoginSubmit}>
+            <div className="form-group">
+              <label>Usuario</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                placeholder="Ingrese su usuario"
+                autoFocus
+              />
+            </div>
+            <div className="form-group">
+              <label>Contraseña</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="Ingrese su contraseña"
+              />
+            </div>
+            {error && <div className="error-message">{error}</div>}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
+              <button type="submit" disabled={loading} className="btn-primary" style={{ flex: 1 }}>
+                {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              </button>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  setShowLoginModal(false);
+                  setError('');
+                  setUsername('');
+                  setPassword('');
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </ModalWrapper>
+      )}
     </div>
   );
 };

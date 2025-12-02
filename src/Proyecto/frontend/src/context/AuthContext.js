@@ -29,12 +29,17 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
   };
 
-  const logout = () => {
+  const logout = (navigate) => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     setUser(null);
-    // Redirigir a la página principal después de cerrar sesión
-    window.location.href = '/';
+    // Redirigir directamente al inicio sin pasar por login
+    if (navigate) {
+      navigate('/', { replace: true });
+    } else {
+      // Fallback si no hay navigate disponible
+      window.location.pathname = '/';
+    }
   };
 
   return (
@@ -43,4 +48,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-

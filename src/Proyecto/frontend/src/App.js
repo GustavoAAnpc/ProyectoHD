@@ -2,26 +2,51 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
-import Home from './pages/Home';
-import Login from './components/Login';
+import PublicLayout from './layouts/PublicLayout';
+import DashboardLayout from './layouts/DashboardLayout';
+import PrivateRoute from './components/PrivateRoute';
+import Inicio from './pages/Inicio';
+import Servicios from './pages/Servicios';
+import Planes from './pages/Planes';
+import Contacto from './pages/Contacto';
 import DashboardAdmin from './pages/DashboardAdmin';
 import DashboardEntrenador from './pages/DashboardEntrenador';
 import DashboardUsuario from './pages/DashboardUsuario';
-import PrivateRoute from './components/PrivateRoute';
 import './App.css';
 
 const AppRoutes = () => {
-  const { user } = useAuth();
-
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={!user ? <Login /> : <Navigate to="/" replace />} />
+      {/* Rutas públicas */}
+      <Route path="/" element={
+        <PublicLayout>
+          <Inicio />
+        </PublicLayout>
+      } />
+      <Route path="/servicios" element={
+        <PublicLayout>
+          <Servicios />
+        </PublicLayout>
+      } />
+      <Route path="/planes" element={
+        <PublicLayout>
+          <Planes />
+        </PublicLayout>
+      } />
+      <Route path="/contacto" element={
+        <PublicLayout>
+          <Contacto />
+        </PublicLayout>
+      } />
+
+      {/* Rutas del dashboard */}
       <Route
         path="/dashboard/administrador"
         element={
           <PrivateRoute allowedRoles={['Administrador']}>
-            <DashboardAdmin />
+            <DashboardLayout>
+              <DashboardAdmin />
+            </DashboardLayout>
           </PrivateRoute>
         }
       />
@@ -29,7 +54,9 @@ const AppRoutes = () => {
         path="/dashboard/entrenador"
         element={
           <PrivateRoute allowedRoles={['Entrenador']}>
-            <DashboardEntrenador />
+            <DashboardLayout>
+              <DashboardEntrenador />
+            </DashboardLayout>
           </PrivateRoute>
         }
       />
@@ -37,7 +64,9 @@ const AppRoutes = () => {
         path="/dashboard/usuario"
         element={
           <PrivateRoute allowedRoles={['Usuario']}>
-            <DashboardUsuario />
+            <DashboardLayout>
+              <DashboardUsuario />
+            </DashboardLayout>
           </PrivateRoute>
         }
       />
