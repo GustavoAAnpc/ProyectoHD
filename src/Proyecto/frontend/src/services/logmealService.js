@@ -4,7 +4,7 @@
  * @returns {Array<string>} - Array con los nombres de los alimentos detectados
  */
 export async function detectarConLogMeal(imageFile) {
-  const API_KEY = "099dbe52ea4ccdb0b818798226c265efb7c2b1a4";
+  const API_KEY = "";
 
   const formData = new FormData();
   formData.append("image", imageFile);
